@@ -50,8 +50,12 @@ class Mass_Est:
     def Vroc (self, W_S) : 
         Vroc = np.sqrt(2/rho * W_S * np.sqrt(self.k/(3*CD0)))
         return Vroc
+    
+    def q_climb (self, Vroc) : 
+        q_climb = 0.5 * rho * Vroc ** 2 
+        return q_climb
 
-    def thrustLoadingClimb(self, Vroc, W_S, R_C) : 
+    def thrustLoadingClimb(self, Vroc, W_S, R_C, q) : 
         T_W_climb = R_C / Vroc + q/W_S * CD0 + self.k/q * W_S
         return T_W_climb
 
@@ -71,8 +75,8 @@ class Mass_Est:
         for i in self.W_S : 
             # calculating thrust to weight ratios 
             self.T_W_cruise.append(self.thrustLoadingCruise(i))  
-            self.T_W_climb.append(self.thrustLoadingClimb(self.Vroc(i),i, R_C))
-            self.T_W_service.append(self.thrustLoadingClimb(self.Vroc(i),i, R_C_service))
+            self.T_W_climb.append(self.thrustLoadingClimb(self.Vroc(i),i, R_C, self.q_climb(self.Vroc(i))))
+            self.T_W_service.append(self.thrustLoadingClimb(self.Vroc(i),i, R_C_service, self.q_climb(self.Vroc(i))))
             # calculating wing loading stall 
             W_S_stall_value = self.WingLoading_Vstall() 
             self.W_S_stall.append(W_S_stall_value) 
@@ -80,7 +84,7 @@ class Mass_Est:
         #Calculating Power loading 
         for i in range(len(self.W_S)) : 
             self.P_W_cruise.append(powerLoading(self.T_W_cruise[i], V_cruise))
-            self.P_W_climb.append(powerLoading(self.T_W_climb[i], self.Vroc(self.W_S[i]) )) 
+            self.P_W_climb.append(powerLoading(self.T_W_climb[i], self.Vroc(self.W_S[i]) )) #self.Vroc(self.W_S[i])
             self.P_W_service.append(powerLoading(self.T_W_service[i], self.Vroc(self.W_S[i]) )) 
 
         plt.plot(self.W_S, self.P_W_cruise, label = "Cruise P_W", color = "blue")
