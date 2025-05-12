@@ -37,7 +37,7 @@ def WingLoading_Vstall() :
     return W_S_stall 
 
 
-W_S = np.arange(10,300,1) # [N/m^2] variable 
+W_S = np.arange(10,131,1) # [N/m^2] variable 
 
 T_W_cruise = [] 
 T_W_climb = [] 
@@ -63,15 +63,25 @@ for i in range(len(W_S)) :
     P_W_service.append(powerLoading(T_W_service[i], Vroc(W_S[i]) )) 
 
 def plot_contraints() : 
-    plt.plot(W_S, P_W_cruise, label = "Cruise P_W")
-    plt.plot(W_S, P_W_climb, label = "Climb P_W")
-    plt.plot(W_S, P_W_service, label = "Serivice P_W")
+    plt.plot(W_S, P_W_cruise, label = "Cruise P_W", color = "blue")
+    plt.fill_between( W_S, P_W_cruise,  alpha = 0.3, color = "blue")
+
+    plt.plot(W_S, P_W_climb, label = "Climb P_W", color = "pink")
+    plt.fill_between(W_S, P_W_climb, alpha = 0.3, color = "pink")
+    
+    plt.plot(W_S, P_W_service, label = "Serivice P_W", color = "green")
+    plt.fill_between(W_S, P_W_service, alpha = 0.3, color = "green")
+    
     #plt.plot(W_S, W_S_stall, label = "Stall Speed W_S")
-    plt.vlines(WingLoading_Vstall(), 0,100, label= "Stall Speed W_S" )
+    plt.vlines(WingLoading_Vstall(), 0, 100, label= "Stall Speed W_S", color = "red" )
+    plt.fill_between(np.arange(WingLoading_Vstall(), W_S[-1],1) , np.arange(WingLoading_Vstall(), W_S[-1],1), alpha = 0.5, color = "red")
+    
     plt.xlabel ("Wing Loading [N/m^2]")
     plt.ylabel("Power Loading [W/kg]")
     plt.title ("Constraints Diagram")
     plt.ylim(0,100)
+
+    
     plt.legend()
 
     return plt.show() 
