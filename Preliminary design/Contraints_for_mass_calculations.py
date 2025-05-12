@@ -5,19 +5,19 @@ e = 0.7 #7 oswald efficiency factor  ESTIMATION
 AR = 10.03 # Aspect ratio of wing        ESTIMATION
 R_C = 3 # [m/s] rate of climb        ESTIMATION
 Vstall = 13.8 # stall speed [m/s]      ESTIMATION
-CLmax = 1.34  #                         ESTIMATION
+CLmax = 1.34  # 1.34                        ESTIMATION
 k =  1/ (np.pi * e * AR)
 
 # Constants 
 rho = 0.9013  # density at 3000m 
-V_cruise = 27.77  # [m/s] cruise velocity 100km/hr
+V_cruise = 100 / 3.6  # [m/s] cruise velocity 100km/hr
 q = 0.5 * rho * V_cruise **2 # dynamic pressure 
 CD0 = 0.040 + 0.2 # parasite drag + drag from rounded cylinder 
 n_p = 0.85 
 R_C_service = 0.5 #[m/s]
 
 def powerLoading(T_W, V): 
-    P_W = T_W * V / n_p 
+    P_W = T_W * (V / n_p)
     return P_W 
 
 class Mass_Est:
@@ -107,4 +107,3 @@ class Mass_Est:
 
 original_vals = Mass_Est(e=e, AR=AR, R_C=R_C, Vstall=Vstall, CLmax=CLmax)
 original_vals.plot()
-

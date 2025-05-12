@@ -46,4 +46,4 @@ def power_required_vtol(T: float, M_TO: float, eta_prop: float, rho: float, r_c:
     # Calculate induced axial climb velocity v_i
     v_i = v_h * (-r_c / (2 * v_h) + np.sqrt((r_c / (2 * v_h)) ** 2 + 1))
 
-    return (T * v_i) / FM
+    return (T * v_i) / FM, S_prop
