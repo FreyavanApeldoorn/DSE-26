@@ -6,7 +6,7 @@ R = 60000  # Range [m]
 R_C = 3  # rate of climb [m/s]
 
 
-class Batt_Mass:
+class BattMass:
 
     def __init__(
         self,
@@ -27,6 +27,7 @@ class Batt_Mass:
         h_start: float,
         P_Prop: float,
     ):
+
         self.t_hover = t_hover  # Duration of hover [s]
         self.t_loiter = t_loiter  # Duration of loiter (horizontal flying) [s]
         self.M_to = M_to  # Take-off Mass [kg]
@@ -53,7 +54,7 @@ class Batt_Mass:
             (self.t_hover * g)
             / (
                 self.E_spec
-                * self.Rotor_eff(self)
+                * self.Rotor_eff()
                 * self.Eta_electric
                 * self.Eta_bat
                 * self.f_usable
@@ -89,16 +90,16 @@ class Batt_Mass:
 
     def Batt_Mass_Total(self):
         Batt_Mass_Total_Max_Range = (
-            self.Rotor_eff(self)
-            + self.Batt_Mass_Hover(self)
-            + self.Batt_Mass_Climb(self)
-            + self.Batt_Mass_Range(self)
+            self.Rotor_eff()
+            + self.Batt_Mass_Hover()
+            + self.Batt_Mass_Climb()
+            + self.Batt_Mass_Range()
         )
         Batt_Mass_Total_Endurance = (
-            self.Rotor_eff(self)
-            + self.Batt_Mass_Hover(self)
-            + self.Batt_Mass_Climb(self)
-            + self.Batt_Mass_Endurance(self)
+            self.Rotor_eff()
+            + self.Batt_Mass_Hover()
+            + self.Batt_Mass_Climb()
+            + self.Batt_Mass_Endurance()
         )
         return Batt_Mass_Total_Max_Range, Batt_Mass_Total_Endurance
 

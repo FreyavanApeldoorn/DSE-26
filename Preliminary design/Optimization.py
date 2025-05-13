@@ -3,17 +3,18 @@ import numpy as np
 from Contraints_for_mass_calculations import powerLoading, Constraints
 from electric_propulsion_mass_sizing import PropMass
 from vtol_propulsion_sizing import VTOLProp
+from Battery_Mass_Calculations import BattMass
+
+# ~~~ Overall variables ~~~
+rho = 0.9013  # density at 3000m
+MTOW = 30 * 9.81
 
 # ~~~ Inputs Contraints ~~~
 V_cruise = 100 / 3.6  # [m/s] cruise velocity 100km/hr
 Vstall = 13.8  # stall speed [m/s]
 
 # ~~~ Inputs VTOLProp ~~~
-
-# ~~~ Inputs PropMass ~~~
 stot_s_w = 1.35  #
-rho = 0.9013  # density at 3000m
-r_c = 3  # m/s
 eta_prop = 0.85
 
 # ~~~Inputs Electric Prop mass ~~~
@@ -34,10 +35,21 @@ K_p = 0.0938
 
 # ~~~ Inputs BattMass ~~~
 t_hover = 4 * 60  # s
+t_loiter = 0
+E_spec = 604800  # Specific energy capacity [J/kg]
+Eta_bat = 0.95  # ??
+f_usable = 6  # Usable Battery Capacity [Ah]
+Eta_electric = 0.95  # Efficiency of electric system
+LD_max = 12  # max lift to drag ratio
+CL = 1  # lift coefficient
+CD = 0.04  # drag coefficient
+T = 380  # total thrust (weight) [N]
+h_end = 100  # Hieght drone climbs to [m]
+h_start = 0  # hieght drone starts at [m]
 
 
 # ~~~ Inputs TotMass ~~~
-MTOW = 30 * 9.81
+
 
 # ~~~ First iteration ~~~
 
@@ -52,9 +64,7 @@ P_max_cruise = MTOW / w_p
 
 VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, eta_prop)
 
-p_req_VTOL, S_prop = VTOL_prop_mod.power_required_vtol()
-t_w = VTOL_prop_mod.thrust_to_weight_vtol()
-print(t_w)
+p_req_VTOL, S_prop, DL = VTOL_prop_mod.power_required_vtol()
 D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
 
 prop_mass = PropMass(
@@ -95,3 +105,26 @@ print(
     propulsion_mass_cruise,
     propulsion_mass_VTOL,
 )
+
+batt_mass = BattMass(
+    t_hover,
+    t_loiter,
+    MTOW / 9.81,
+    E_spec,
+    Eta_bat,
+    f_usable,
+    Eta_electric,
+    T,
+    DL,
+    LD_max,
+    CL,
+    CD,
+    w_s,
+    h_start,
+    h_end,
+    p_req_VTOL,
+)
+
+battery_mass_range, battery_mass_endurance = batt_mass.Batt_Mass_Total()
+
+print(battery_mass_range, battery_mass_endurance)
