@@ -35,7 +35,7 @@ class AeroShield_Nest:
         #Alignment of UAVs
         self.UAV_aligned = UAV_aligned
         #Number of shelves
-        self.shelves_per_row = int(np.ceil((UAV_amount_x/ UAV_amount_x_shelve))) # Add one to get number of divider walls
+        self.shelves_per_row = int(np.ceil((UAV_amount_x/ UAV_amount_x_shelve))) # Add one to get number of divider walls, including the end walls
         #Drones per shelve
         self.UAVs_shelved = UAV_amount_x_shelve * UAV_amount_y
         #Total number of stacked rows
@@ -63,7 +63,7 @@ class AeroShield_Nest:
 
         #If UAVs are aligned with x-axis
         if self.UAV_aligned:
-            #Amount of drones in a row * length + margin combined with tracks for each shelve
+            #Amount of drones in a row * length + margin combined with tracks for each shelve ensuring seperate retractability
             nest_length = (UAV_span + UAV_margin) * self.UAV_amount_x +  self.shelves_per_row * 2 * shelve_margin #X-axis [m]
             #If double sided, add margin for the other side of the drawerdouble_sided:
             """Do we want some margin in between the drawer? not included rn"""
