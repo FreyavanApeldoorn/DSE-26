@@ -41,8 +41,8 @@ n_blades_vtol = 4
 K_p = 0.0938
 
 # ~~~ Inputs BattMass ~~~
-#https://maxamps.com/products/lipo-6000-6s-22-2v-battery-pack
-t_hover = 4*60      # s
+# https://maxamps.com/products/lipo-6000-6s-22-2v-battery-pack
+t_hover = 4 * 60  # s
 t_loiter = 0
 E_spec = 168  # Specific energy capacity [Wh/kg]
 Eta_bat = 0.95 # ??115
@@ -51,30 +51,41 @@ Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
 CL = 1  # lift coefficient
 CD = 0.04  # drag coefficient
-T = 30*9.81  # total thrust (weight) [N]
+T = 30 * 9.81  # total thrust (weight) [N]
 h_end = 100  # Hieght drone climbs to [m]
 h_start = 0  # hieght drone starts at [m]
 
 
 # ~~~ Inputs TotMass ~~~
 M_Payload = 5
+<<<<<<< HEAD:Preliminary design/Optimization.py
 MF_struct = 0.35   
 MF_avion = 0.05  
 MF_Subsyst = 0.07  
+=======
+M_struct = 0.35
+M_avion = 0.05
+M_Subsyst = 0.07
+M_payload = 5
+>>>>>>> 29ba3f343c1e87033b53168affe3e5ce3cd46310:PreliminaryDesign/Optimization.py
 
 # ~~~ First iteration ~~~
 constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_service)
 constraint_plot.plot()
 
 w_s = float(input("please input W/S: "))
-w_p = float(input("please input P/W: "))
+p_w = float(input("please input P/W: "))
 
 s = MTOW / w_s
-P_max_cruise = MTOW / w_p
+P_max_cruise = MTOW * p_w
 
-VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, eta_prop)
+VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, n_props_vtol)
 
-p_req_VTOL, S_prop, DL = VTOL_prop_mod.power_required_vtol()
+p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
+
+# Print powers
+print("Power required for VTOL: ", p_req_VTOL)
+print("Power required for cruise: ", P_max_cruise)
 D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
 
 prop_mass = PropMass(
@@ -122,6 +133,7 @@ batt_mass = BattMass(
     p_req_VTOL,
 )
 
+<<<<<<< HEAD:Preliminary design/Optimization.py
 MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
 
 #TOTAL MASS CALCULATIONS
@@ -137,3 +149,13 @@ print(
 
 M_TO = (M_Vtol_Prop + M_FW_Prop + M_Payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
 print(M_TO) 
+=======
+M_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
+
+# TOTAL MASS CALCULATIONS
+print(M_struct, M_avion, M_Subsyst, M_Batt, M_Vtol_Prop, M_FW_Prop, M_payload)
+
+M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload) / (
+    1 - (M_Batt + M_struct + M_Subsyst + M_avion)
+)
+>>>>>>> 29ba3f343c1e87033b53168affe3e5ce3cd46310:PreliminaryDesign/Optimization.py
