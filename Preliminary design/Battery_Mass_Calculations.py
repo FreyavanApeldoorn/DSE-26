@@ -12,8 +12,9 @@ R_C = 3           # rate of climb [m/s]
 class BattMass:
 
     def __init__(self, t_hover: float, t_loiter:float, M_to:float, E_spec:float, Eta_bat: float,
-                 f_usable:float, Eta_electric:float, T:float, DL:float, LD_max:float, CL:float, 
-                   CD:float, WS:float, h_end:float, h_start:float, P_Prop:float  ):         
+                f_usable:float, Eta_electric:float, T:float, DL:float, LD_max:float, CL:float, 
+                CD:float, WS:float, h_end:float, h_start:float, P_Prop:float  ):       
+          
         self.t_hover = t_hover             # Duration of hover [s]
         self.t_loiter = t_loiter           # Duration of loiter (horizontal flying) [s]
         self.M_to = M_to                   # Take-off Mass [kg]
