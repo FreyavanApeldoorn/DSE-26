@@ -34,7 +34,8 @@ n_blades_vtol = 4
 K_p = 0.0938
 
 # ~~~ Inputs BattMass ~~~
-t_hover = 4 * 60  # s
+#https://maxamps.com/products/lipo-6000-6s-22-2v-battery-pack
+t_hover = 4*60      # s
 t_loiter = 0
 E_spec = 604800  # Specific energy capacity [J/kg]
 Eta_bat = 0.95  # ??
