@@ -20,7 +20,7 @@ def powerLoading(T_W, V):
     P_W = T_W * V / n_p 
     return P_W 
 
-class Mass_Est:
+class Constraints:
     def __init__(self, e, AR, R_C, Vstall, CLmax):
         self.e = e
         self.AR = AR
