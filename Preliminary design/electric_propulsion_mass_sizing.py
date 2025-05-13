@@ -10,7 +10,7 @@ def calculate_motor_mass(P_max: float, U_max: float, F1: float, E1: float, E2: f
     E2 (float): Exponent for voltage [CONSULT TABLE 4]
 
     Returns:
-    float: Motor mass (kg)
+    float: Motor weight (N)
     """
 
     # Calculate motor weight to power ratio W_mot / P_max
@@ -66,3 +66,22 @@ def calculate_propeller_mass(
         * n_blades**0.391
         * ((D_prop * P_max) / (1000 * n_props)) ** 0.782
     )
+
+
+def calculate_propulsion_mass(f_install, n_mot, W_mot_P_max, P_mot, M_esc, M_prop):
+    """
+    Calculate the propulsion mass based on the given parameters.
+
+    Parameters:
+    f_install (float): Installation factor
+    n_mot (int): Number of motors
+    W_mot_P_max (float): Motor weight to power ratio (kg/W)
+    P_mot (float): Motor power (W)
+    M_esc (float): ESC mass (kg)
+    M_prop (float): Propeller mass (kg)
+
+    Returns:
+    float: Propulsion mass (kg)
+    """
+
+    return f_install * (n_mot * (W_mot_P_max * P_mot / 9.81 + M_esc) + n_mot + M_prop)
