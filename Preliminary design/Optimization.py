@@ -45,8 +45,8 @@ K_p = 0.0938
 t_hover = 4*60      # s
 t_loiter = 0
 E_spec = 168  # Specific energy capacity [Wh/kg]
-Eta_bat = 0.95  # ??115
-f_usable = 6  # Usable Battery Capacity [Ah]
+Eta_bat = 0.95 # ??115
+f_usable = 6000  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
 Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
 CL = 1  # lift coefficient
@@ -58,10 +58,9 @@ h_start = 0  # hieght drone starts at [m]
 
 # ~~~ Inputs TotMass ~~~
 M_Payload = 5
-M_struct = 0.35   
-M_avion = 0.05  
-M_Subsyst = 0.07  
-M_payload = 5
+MF_struct = 0.35   
+MF_avion = 0.05  
+MF_Subsyst = 0.07  
 
 # ~~~ First iteration ~~~
 constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_service)
@@ -118,42 +117,23 @@ batt_mass = BattMass(
     CL,
     CD,
     w_s,
-    h_start,
     h_end,
+    h_start,
     p_req_VTOL,
 )
 
-<<<<<<< HEAD
-battery_massF_range, battery_massF_endurance = batt_mass.Batt_Mass_Total()
-
-print(battery_massF_range, battery_massF_endurance)
-
-#TOTAL MASS CALCULATIONS 
-
-MF_struct = 0.35   
-MF_avion = 0.05  
-MF_Subsyst = 0.07  
-MF_Batt = battery_massF_range
-M_Vtol_Prop = propulsion_mass_VTOL
-M_FW_Prop = propulsion_mass_cruise
-M_payload = 5
-
-M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
-
-print("Total Mass of UAV: ", M_TO)
-=======
-M_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
+MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
 
 #TOTAL MASS CALCULATIONS
 print(
-    M_struct, 
-    M_avion,
-    M_Subsyst, 
-    M_Batt,
+    MF_struct, 
+    MF_avion,
+    MF_Subsyst, 
+    MF_Batt,
     M_Vtol_Prop,
     M_FW_Prop,
-    M_payload
+    M_Payload
     )
 
-M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(M_Batt + M_struct + M_Subsyst + M_avion))
->>>>>>> d3b0745e7bc0e5cf5801bc54dccd1ba9f1f0a5bb
+M_TO = (M_Vtol_Prop + M_FW_Prop + M_Payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
+print(M_TO) 
