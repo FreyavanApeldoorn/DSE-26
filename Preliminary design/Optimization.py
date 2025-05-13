@@ -62,9 +62,19 @@ w_p = float(input("please input P/W:"))
 s = MTOW / w_s
 P_max_cruise = MTOW / w_p
 
-VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, eta_prop)
+VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, n_props_vtol)
 
-p_req_VTOL, S_prop, DL = VTOL_prop_mod.power_required_vtol()
+p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
+print(
+    "Power required VTOL: ",
+    p_req_VTOL,
+    "\nPropeller area: ",
+    S_prop,
+    "\nDisc loading: ",
+    DL,
+    "\nThrust: ",
+    T,
+)
 D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
 
 prop_mass = PropMass(
