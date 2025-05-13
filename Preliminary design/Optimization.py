@@ -129,3 +129,17 @@ batt_mass = BattMass(
 battery_mass_range, battery_mass_endurance = batt_mass.Batt_Mass_Total()
 
 print(battery_mass_range, battery_mass_endurance)
+
+#TOTAL MASS CALCULATIONS 
+
+M_struct = 0.35 * 30  
+M_avion = 0.05 * 30 
+M_Subsyst = 0.07 * 30 
+M_Batt = battery_mass_range
+M_Vtol_Prop = propulsion_mass_VTOL
+M_FW_Prop = propulsion_mass_cruise
+M_payload = 5
+
+M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(M_Batt + M_struct + M_Subsyst + M_avion))
+
+print("Total Mass of UAV: ", M_TO)
