@@ -57,14 +57,26 @@ h_start = 0  # hieght drone starts at [m]
 
 
 # ~~~ Inputs TotMass ~~~
-M_Payload = 5
 M_struct = 0.35   
 M_avion = 0.05  
 M_Subsyst = 0.07  
 M_payload = 5
 
 # ~~~ First iteration ~~~
-constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_service)
+
+# Module 1
+
+constraint_plot = Constraints(Vstall, 
+    V_cruise, 
+    e, 
+    AR, 
+    CLmax, 
+    CD0, 
+    n_p, 
+    R_C_service
+    )
+
+
 constraint_plot.plot()
 
 w_s = float(input("please input W/S: "))
@@ -73,10 +85,18 @@ w_p = float(input("please input P/W: "))
 s = MTOW / w_s
 P_max_cruise = MTOW / w_p
 
-VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, eta_prop)
+# Module 2
+
+VTOL_prop_mod = VTOLProp(w_s, 
+    stot_s_w, 
+    MTOW, 
+    eta_prop
+    )
 
 p_req_VTOL, S_prop, DL = VTOL_prop_mod.power_required_vtol()
 D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
+
+# Module 3
 
 prop_mass = PropMass(
     P_max_cruise,
@@ -103,6 +123,7 @@ esc_mass_cruise, _, esc_mass_VTOL, _ = prop_mass.calculate_esc_mass()
 propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
 M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
 
+# Module 4
 
 batt_mass = BattMass(
     t_hover,
@@ -137,3 +158,4 @@ print(
     )
 
 M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(M_Batt + M_struct + M_Subsyst + M_avion))
+# ITERATION
