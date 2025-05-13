@@ -11,15 +11,25 @@ Vstall = 13.8 # stall speed [m/s]
 # ~~~ Inputs VTOLProp ~~~
 
 # ~~~ Inputs PropMass ~~~
-max_volt = 12 # max voltage
 stot_s_w = 1.35 #         
 rho = 0.9013  # density at 3000m 
 r_c = 3
 eta_prop = 0.85
 
+# ~~~Inputs Electric Prop mass ~~~
+U_max: 12
 F1 = 0.889
 E1 = -0.288
 E2 = 0.1588
+f_install_cruise = 1 # fix later
+f_install_vtol = 1
+n_mot_cruise = 1
+n_mot_vtol = 4
+K_material = 0.6
+n_props_cruise = 1
+n_props_vtol = 4
+n_blades_cruise = 4
+n_blades_vtol = 4
 
 # ~~~ Inputs BattMass ~~~
 
