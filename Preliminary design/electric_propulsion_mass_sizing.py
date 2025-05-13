@@ -96,9 +96,9 @@ class PropMass:
         W_mot_P_max_vtol = self.F1 * self.P_max_vtol**self.E1 * self.U_max**self.E2
 
         return (
-            W_mot_P_max_cruise * self.P_max_cruise / self.n_mot_cruise / g,
+            W_mot_P_max_cruise * (self.P_max_cruise / self.n_mot_cruise) / g,
             self.n_mot_cruise,
-            W_mot_P_max_vtol * self.P_max_vtol / self.n_mot_vtol / g,
+            W_mot_P_max_vtol * (self.P_max_vtol / self.n_mot_vtol) / g,
             self.n_mot_vtol,
         )
 
@@ -123,9 +123,9 @@ class PropMass:
         """
 
         return (
-            self.F1_esc * (self.P_max_cruise / self.n_mot_cruise) ** self.E1_esc,
+            self.F1_esc * (self.P_max_cruise) ** self.E1_esc,
             self.n_mot_cruise,
-            self.F1_esc * (self.P_max_vtol / self.n_mot_vtol) ** self.E1_esc,
+            self.F1_esc * (self.P_max_vtol) ** self.E1_esc,
             self.n_mot_vtol,
         )
 
