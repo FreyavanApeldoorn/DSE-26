@@ -18,7 +18,7 @@ stot_s_w = 1.35  #
 eta_prop = 0.85
 
 # ~~~Inputs Electric Prop mass ~~~
-U_max = 12
+U_max = 25.5
 F1 = 0.889
 E1 = -0.288
 E2 = 0.1588
@@ -50,10 +50,9 @@ h_start = 0  # hieght drone starts at [m]
 
 
 # ~~~ Inputs TotMass ~~~
-
+M_Payload = 5
 
 # ~~~ First iteration ~~~
-
 constraint_plot = Constraints(Vstall, V_cruise)
 constraint_plot.plot()
 
