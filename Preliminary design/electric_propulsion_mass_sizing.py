@@ -20,9 +20,8 @@ class PropMass:
         n_props_vtol: int,
         n_blades_cruise: int,
         n_blades_vtol: int,
-        D_prop_cruise: float,
         D_prop_vtol: float,
-        K_p: float,
+        K_p: float
     ):
         """
         Initialize the PropMass class with the given parameters.
@@ -68,8 +67,8 @@ class PropMass:
         self.n_props_vtol = n_props_vtol
         self.n_blades_cruise = n_blades_cruise
         self.n_blades_vtol = n_blades_vtol
-        self.D_prop_cruise = D_prop_cruise
         self.D_prop_vtol = D_prop_vtol
+        self.K_p = K_p
 
     def calculate_motor_mass(self):
         """
@@ -160,7 +159,7 @@ class PropMass:
             * self.K_prop
             * self.n_props_cruise
             * self.n_blades_cruise**0.391
-            * ((self.D_prop_cruise * self.P_max_cruise) / (1000 * self.n_props_cruise))
+            * ((self.calculate_cruise_propeller_diameter() * self.P_max_cruise) / (1000 * self.n_props_cruise))
             ** 0.782,
             self.n_props_cruise,
             6.514e-3

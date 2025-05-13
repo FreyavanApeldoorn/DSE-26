@@ -43,6 +43,7 @@ class VTOLProp:
 
         Returns:
         float: Power required (W)
+        float: Propeller area (m2)
         """
         T = self.MTOW * self.thrust_to_weight_vtol()
 
