@@ -57,17 +57,10 @@ h_start = 0  # hieght drone starts at [m]
 
 
 # ~~~ Inputs TotMass ~~~
-M_Payload = 5
-<<<<<<< HEAD:Preliminary design/Optimization.py
-MF_struct = 0.35   
-MF_avion = 0.05  
-MF_Subsyst = 0.07  
-=======
-M_struct = 0.35
-M_avion = 0.05
-M_Subsyst = 0.07
+MF_struct = 0.35
+MF_avion = 0.05
+MF_Subsyst = 0.07
 M_payload = 5
->>>>>>> 29ba3f343c1e87033b53168affe3e5ce3cd46310:PreliminaryDesign/Optimization.py
 
 # ~~~ First iteration ~~~
 constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_service)
@@ -133,7 +126,6 @@ batt_mass = BattMass(
     p_req_VTOL,
 )
 
-<<<<<<< HEAD:Preliminary design/Optimization.py
 MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
 
 #TOTAL MASS CALCULATIONS
@@ -144,18 +136,8 @@ print(
     MF_Batt,
     M_Vtol_Prop,
     M_FW_Prop,
-    M_Payload
+    M_payload
     )
 
-M_TO = (M_Vtol_Prop + M_FW_Prop + M_Payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
+M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
 print(M_TO) 
-=======
-M_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
-
-# TOTAL MASS CALCULATIONS
-print(M_struct, M_avion, M_Subsyst, M_Batt, M_Vtol_Prop, M_FW_Prop, M_payload)
-
-M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload) / (
-    1 - (M_Batt + M_struct + M_Subsyst + M_avion)
-)
->>>>>>> 29ba3f343c1e87033b53168affe3e5ce3cd46310:PreliminaryDesign/Optimization.py
