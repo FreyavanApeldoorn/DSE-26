@@ -5,27 +5,19 @@ e = 0.7 #7 oswald efficiency factor  ESTIMATION
 AR = 10.03 # Aspect ratio of wing        ESTIMATION
 R_C = 3 # [m/s] rate of climb        ESTIMATION
 Vstall = 13.8 # stall speed [m/s]      ESTIMATION
-CLmax = 1.34  # 1.34                        ESTIMATION
+CLmax = 1.34  #                         ESTIMATION
 k =  1/ (np.pi * e * AR)
 
 # Constants 
 rho = 0.9013  # density at 3000m 
-V_cruise = 100 / 3.6  # [m/s] cruise velocity 100km/hr
+V_cruise = 27.77  # [m/s] cruise velocity 100km/hr
 q = 0.5 * rho * V_cruise **2 # dynamic pressure 
 CD0 = 0.040 + 0.2 # parasite drag + drag from rounded cylinder 
 n_p = 0.85 
 R_C_service = 0.5 #[m/s]
 
 def powerLoading(T_W, V): 
-    '''
-    Translates Thrust over weight and velocity into power loading
-    
-    Parameters: 
-    T_W: thrust loading
-    V: Velocity
-    n_p: Propeller efficiency
-    '''
-    P_W = T_W * (V / n_p)
+    P_W = T_W * V / n_p 
     return P_W 
 
 class Mass_Est:
@@ -58,8 +50,12 @@ class Mass_Est:
     def Vroc (self, W_S) : 
         Vroc = np.sqrt(2/rho * W_S * np.sqrt(self.k/(3*CD0)))
         return Vroc
+    
+    def q_climb (self, Vroc) : 
+        q_climb = 0.5 * rho * Vroc ** 2 
+        return q_climb
 
-    def thrustLoadingClimb(self, Vroc, W_S, R_C) : 
+    def thrustLoadingClimb(self, Vroc, W_S, R_C, q) : 
         T_W_climb = R_C / Vroc + q/W_S * CD0 + self.k/q * W_S
         return T_W_climb
 
@@ -79,8 +75,8 @@ class Mass_Est:
         for i in self.W_S : 
             # calculating thrust to weight ratios 
             self.T_W_cruise.append(self.thrustLoadingCruise(i))  
-            self.T_W_climb.append(self.thrustLoadingClimb(self.Vroc(i),i, R_C))
-            self.T_W_service.append(self.thrustLoadingClimb(self.Vroc(i),i, R_C_service))
+            self.T_W_climb.append(self.thrustLoadingClimb(self.Vroc(i),i, R_C, self.q_climb(self.Vroc(i))))
+            self.T_W_service.append(self.thrustLoadingClimb(self.Vroc(i),i, R_C_service, self.q_climb(self.Vroc(i))))
             # calculating wing loading stall 
             W_S_stall_value = self.WingLoading_Vstall() 
             self.W_S_stall.append(W_S_stall_value) 
@@ -88,7 +84,7 @@ class Mass_Est:
         #Calculating Power loading 
         for i in range(len(self.W_S)) : 
             self.P_W_cruise.append(powerLoading(self.T_W_cruise[i], V_cruise))
-            self.P_W_climb.append(powerLoading(self.T_W_climb[i], self.Vroc(self.W_S[i]) )) 
+            self.P_W_climb.append(powerLoading(self.T_W_climb[i], self.Vroc(self.W_S[i]) )) #self.Vroc(self.W_S[i])
             self.P_W_service.append(powerLoading(self.T_W_service[i], self.Vroc(self.W_S[i]) )) 
 
         plt.plot(self.W_S, self.P_W_cruise, label = "Cruise P_W", color = "blue")
