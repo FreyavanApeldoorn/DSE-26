@@ -21,7 +21,7 @@ class PropMass:
         n_blades_cruise: int,
         n_blades_vtol: int,
         D_prop_vtol: float,
-        K_p: float
+        K_p: float,
     ):
         """
         Initialize the PropMass class with the given parameters.
@@ -159,7 +159,10 @@ class PropMass:
             * self.K_prop
             * self.n_props_cruise
             * self.n_blades_cruise**0.391
-            * ((self.calculate_cruise_propeller_diameter() * self.P_max_cruise) / (1000 * self.n_props_cruise))
+            * (
+                (self.calculate_cruise_propeller_diameter() * self.P_max_cruise)
+                / (1000 * self.n_props_cruise)
+            )
             ** 0.782,
             self.n_props_cruise,
             6.514e-3
