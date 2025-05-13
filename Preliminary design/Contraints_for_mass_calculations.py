@@ -17,6 +17,14 @@ n_p = 0.85
 R_C_service = 0.5 #[m/s]
 
 def powerLoading(T_W, V): 
+    '''
+    Translates Thrust over weight and velocity into power loading
+    
+    Parameters: 
+    T_W: thrust loading
+    V: Velocity
+    n_p: Propeller efficiency
+    '''
     P_W = T_W * (V / n_p)
     return P_W 
 
@@ -43,7 +51,7 @@ class Mass_Est:
     def k(self):
         return 1 / (np.pi * self.e * self.AR)
 
-    def thrustLoadingCruise(self, W_S) : 
+    def thrustLoadingCruise(self, W_S): 
         T_W_cruise = q * CD0 * 1/(W_S) + self.k * 1/q  * W_S 
         return T_W_cruise 
 
@@ -104,6 +112,3 @@ class Mass_Est:
         
         plt.legend()
         plt.show() 
-
-original_vals = Mass_Est(e=e, AR=AR, R_C=R_C, Vstall=Vstall, CLmax=CLmax)
-original_vals.plot()

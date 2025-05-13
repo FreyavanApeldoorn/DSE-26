@@ -4,16 +4,17 @@ from Contraints_for_mass_calculations import powerLoading, Mass_Est
 from electric_propulsion_mass_sizing import calculate_esc_mass, calculate_motor_mass, calculate_propeller_mass
 from vtol_propulsion_sizing import thrust_to_weight_vtol, power_required_vtol
 
-e = 0.7 #7 oswald efficiency factor  ESTIMATION 
-AR = 10.03 # Aspect ratio of wing        ESTIMATION
-r_c = 3 # [m/s] rate of climb        ESTIMATION
-Vstall = 13.8 # stall speed [m/s]      ESTIMATION
-CLmax = 1.34  # 1.34                        ESTIMATION
-volt = 12
+# ESTIMATIONS
+e = 0.7 #7 oswald efficiency factor  
+AR = 10.03 # Aspect ratio of wing        
+r_c = 3 # [m/s] rate of climb        
+Vstall = 13.8 # stall speed [m/s]      
+CLmax = 1.34  # 1.34                     
+max_volt = 50 # max voltage
 
 k =  1/ (np.pi * e * AR)
 
-stot_s_w = 1.35 #                   ESTIMATION
+stot_s_w = 1.35 #         
 
 n_props = 4
 
@@ -44,16 +45,10 @@ t = t_w * MTOW
 
 p_req, S_prop = power_required_vtol(t, MTOW, 0.7, rho, r_c)
 
-mot_mass = calculate_motor_mass(p, volt, F1, E1, E2)
+mot_mass = calculate_motor_mass(p, max_volt, F1, E1, E2)
 
 esc_mass = calculate_esc_mass(p)
 
 prop_mass_cruise = calculate_propeller_mass(0.6, 15, 1, 4, S_prop, p)
 
 print(mot_mass, esc_mass, prop_mass_cruise)
-
-
-
-
-
-
