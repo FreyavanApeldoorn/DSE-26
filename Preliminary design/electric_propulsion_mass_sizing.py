@@ -22,6 +22,7 @@ class PropMass:
         n_blades_vtol: int,
         D_prop_cruise: float,
         D_prop_vtol: float,
+        K_p: float,
     ):
         """
         Initialize the PropMass class with the given parameters.
@@ -46,6 +47,7 @@ class PropMass:
         n_blades_vtol (int): Number of blades per VTOL propeller
         D_prop_cruise (float): Cruise propeller diameter (m)
         D_prop_vtol (float): VTOL propeller diameter (m)
+        K_p (float): Constant for propeller diameter calculation [0.1072, 0.0995, 0.0938 for two-, three-, and four-blade propellers]
         """
 
         self.P_max_cruise = P_max_cruise
@@ -195,3 +197,20 @@ class PropMass:
             * (self.calculate_motor_mass()[2] + self.calculate_esc_mass()[2])
             + self.calculate_propeller_mass()[2]
         )
+
+    def calculate_cruise_propeller_diameter(self):
+        """
+        Calculate the cruise propeller diameter based on the given parameters.
+
+        Parameters:
+        P_max_cruise (float): Cruise maximum power (W)
+        n_props_cruise (int): Number of cruise propellers
+        n_blades_cruise (int): Number of blades per cruise propeller
+        K_material (float): Material constant (kg/m^3) [1.3 for wooden, 1 for plastic, 0.6 for composite]
+        K_prop (float): Propeller constant (kg/m^3) [15 reccomended for propellers with enginer power < 50 hp]
+
+        Returns:
+        float: Cruise propeller diameter (m)
+        """
+
+        return self.K_p * (self.P_max_cruise / self.n_props_cruise) ** (1 / 4)
