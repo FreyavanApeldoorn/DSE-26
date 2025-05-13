@@ -10,7 +10,7 @@ def calculate_motor_mass(P_max: float, U_max: float, F1: float, E1: float, E2: f
     E2 (float): Exponent for voltage [CONSULT TABLE 4]
 
     Returns:
-    float: Motor mass (kg)
+    float: Motor weight (N)
     """
 
     # Calculate motor weight to power ratio W_mot / P_max
