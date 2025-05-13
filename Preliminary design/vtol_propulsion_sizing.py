@@ -3,16 +3,15 @@ import numpy as np
 rho = 0.9013
 r_c = 3
 
+
 class VTOLProp:
 
     def __init__(self, w_s, stot_sw, MTOW, eta_prop):
         self.w_s = w_s
         self.stot_sw = stot_sw
-#        self.T = T
+        #        self.T = T
         self.MTOW = MTOW
         self.eta_prop = eta_prop
-
-
 
     def thrust_to_weight_vtol(self):
         """
@@ -29,7 +28,6 @@ class VTOLProp:
         """
         return 1.2 * (1 + (1 / self.w_s) * rho * r_c**2 * self.stot_sw)
 
-
     def power_required_vtol(self):
         """
         Calculate the power required for VTOL mode.
@@ -43,6 +41,7 @@ class VTOLProp:
 
         Returns:
         float: Power required (W)
+        float: Propeller area (m2)
         """
         T = self.MTOW * self.thrust_to_weight_vtol()
 
@@ -61,4 +60,4 @@ class VTOLProp:
         # Calculate induced axial climb velocity v_i
         v_i = v_h * (-r_c / (2 * v_h) + np.sqrt((r_c / (2 * v_h)) ** 2 + 1))
 
-        return (T * v_i) / FM, S_prop
+        return (T * v_i) / FM, S_prop, DL
