@@ -4,15 +4,13 @@ import numpy as np
 e = 0.7 #7 oswald efficiency factor  ESTIMATION 
 AR = 10.03 # Aspect ratio of wing        ESTIMATION
 r_c = 3 # [m/s] rate of climb        ESTIMATION
-Vstall = 13.8 # stall speed [m/s]      ESTIMATION
 CLmax = 1.34  #                         ESTIMATION
 k =  1/ (np.pi * e * AR)
 
 # Constants 
 rho = 0.9013  # density at 3000m 
-Vmax = 27.77  # [m/s] cruise velocity 100km/hr
 CD0 = 0.040 #+ 0.2 # parasite drag + drag from rounded cylinder 
-n_p = 0.85 
+n_p = 0.85 #Propeller Efficiency
 R_C_service = 0.5 #[m/s]
 k =  1/ (np.pi * e * AR)
 
