@@ -1,34 +1,61 @@
-# Battery Mass Calculations
+# Constants
 
-t = 0           # Duration of Mission Segment 
-t_hover = 0     # Duration of hover
-t_loiter = 0    # Duration of loiter (horizontal flying)
-P = 0           # Power Required
-M_to = 0        # Take-off Mass
-E_spec = 0      # Specific Energy Capacity
-Eta_bat = 0     # Battery Efficiency
-f_usable = 0    # Usable Battery Capacity
-g = 9.81        # Gravitational Acceleration
-Eta_electric = 0    # Efficiency of electric system
-T = 0           # Thrust
-DL = 0          # Disc Loading
-rho = 0         # Air Density
-R = 0           # Range
-LD_max = 0      # Maximum Lift-over-drag ratio
-CL = 0          # Coefficient of Lift
-CD = 0          # Coefficient of Drag
-WS = 0          # Wing Loading
+g = 9.81          # Gravitational acceleration [m/s^2]
+rho = 0.9013      # Air Density [kg/m^3]
+R = 60000         # Range [m]
+R_C = 3           # rate of climb [m/s]
 
 
 
-FM = 0.4742*T**(0.0793)          # Rotor Efficiency
 
-M_frac_battery = (t * P) / ( M_to * E_spec * Eta_bat * f_usable)
 
-M_frac_battery_hover = ((t_hover * g) / ( E_spec * FM * Eta_electric * Eta_bat * f_usable))*(DL/(2*rho))**0.5
+class Batt_Mass:
 
-M_frac_max_range = (R * g) / ( E_spec * Eta_electric * Eta_bat * f_usable * LD_max)
+    def __init__(self, t_hover: float, t_loiter:float, M_to:float, E_spec:float, Eta_bat: float,
+                 f_usable:float, Eta_electric:float, T:float, DL:float, LD_max:float, CL:float, 
+                   CD:float, WS:float, h_end:float, h_start:float, P_Prop:float  ):         
+        self.t_hover = t_hover             # Duration of hover [s]
+        self.t_loiter = t_loiter           # Duration of loiter (horizontal flying) [s]
+        self.M_to = M_to                   # Take-off Mass [kg]
+        self.E_spec = E_spec               # Specific Energy Capacity 
+        self.Eta_bat = Eta_bat             # Battery Efficiency
+        self.f_usable = f_usable           # Usable Battery Capacity
+        self.Eta_electric = Eta_electric   # Efficiency of electric system
+        self.T = T                         # Thrust
+        self.DL = DL                       # Disc Loading
+        self.LD_max = LD_max               # Maximum Lift-over-drag ratio
+        self.CL = CL                       # Coefficient of Lift
+        self.CD = CD                       # Coefficient of Drag
+        self.WS = WS                       # Wing Loading
+        self.h_end = h_end                 # h end 
+        self.h_start = h_start             # h start
+        self.P_Prop = P_Prop               # power of VTOL motors
 
-M_frac_max_endu = ((t_loiter * g) / ( E_spec * Eta_electric * Eta_bat * f_usable * ((CL**(3/2)) / CD)))*(2*WS/rho)**0.5
 
-# M_frac_total = Sum of battery fractions for all mission segments
+    def Rotor_eff(self): 
+        FM = 0.4742*self.T**(0.0793)          
+        return FM 
+
+    def Batt_Mass_Hover(self) : 
+        Batt_Mass_Hover = ((self.t_hover * g) / ( self.E_spec * self.Rotor_eff(self) * self.Eta_electric * self.Eta_bat * self.f_usable))*(self.DL/(2*rho))**0.5
+        return Batt_Mass_Hover
+
+    def Batt_Mass_Climb(self): #includes descent
+        t_climb = (self.h_end-self.h_start)/(R_C) *2
+        Batt_Mass_Climb = (t_climb * self.P_Prop) / ( self.M_to * self.E_spec * self.Eta_bat * self.f_usable)
+        return Batt_Mass_Climb
+    
+    def Batt_Mass_Range(self): 
+        Batt_Mass_Range = (R * g) / ( self.E_spec * self.Eta_electric * self.Eta_bat * self.f_usable * self.LD_max)
+        return Batt_Mass_Range
+
+    def Batt_Mass_Endurance(self): 
+        Batt_Mass_Endurance = ((self.t_loiter * g) / ( self.E_spec * self.Eta_electric * self.Eta_bat * self.f_usable * ((self.CL**(3/2)) / self.CD)))*(2*self.WS/rho)**0.5
+        return Batt_Mass_Endurance
+    
+    def Batt_Mass_Total(self): 
+        Batt_Mass_Total_Max_Range = self.Rotor_eff(self) + self.Batt_Mass_Hover(self) + self.Batt_Mass_Climb(self) + self.Batt_Mass_Range(self) 
+        Batt_Mass_Total_Endurance = self.Rotor_eff(self) + self.Batt_Mass_Hover(self) + self.Batt_Mass_Climb(self) + self.Batt_Mass_Endurance(self)
+        return Batt_Mass_Total_Max_Range, Batt_Mass_Total_Endurance
+
+#if __name__ == '__main__':
