@@ -62,4 +62,4 @@ class VTOLProp:
         # Calculate induced axial climb velocity v_i
         v_i = v_h * (-r_c / (2 * v_h) + np.sqrt((r_c / (2 * v_h)) ** 2 + 1))
 
-        return (T * v_i) / FM, S_prop
+        return (T * v_i) / FM, S_prop, DL
