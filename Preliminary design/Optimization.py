@@ -34,18 +34,18 @@ n_blades_vtol = 4
 K_p = 0.0938
 
 # ~~~ Inputs BattMass ~~~
-t_hover = 4*60 # s
+t_hover = 4*60      # s
 t_loiter = 0
-E_spec = 1 # fix
-Eta_bat = 1 # fix
-f_usable = 1 # fix
-Eta_electric = 1 # fix
-LD_max = 1 # fix
-CL = 1 # Fix
-CD = 1 # Fix
-T = 1 # Fix
-h_end = 0
-h_start = 0
+E_spec = 604800     # Specific energy capacity [J/kg]
+Eta_bat = 0.95      # ??
+f_usable = 6        # Usable Battery Capacity [Ah]
+Eta_electric = 0.95 # Efficiency of electric system
+LD_max = 12         # max lift to drag ratio
+CL = 1              # lift coefficient
+CD = 0.04           # drag coefficient 
+T =  380            # total thrust (weight) [N]
+h_end = 100         # Hieght drone climbs to [m]
+h_start = 0         # hieght drone starts at [m]
 
 
 # ~~~ Inputs TotMass ~~~
