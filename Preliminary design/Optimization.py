@@ -21,7 +21,6 @@ n_props = 4
 # Constants 
 rho = 0.9013  # density at 3000m 
 V_cruise = 100 / 3.6  # [m/s] cruise velocity 100km/hr
-q = 0.5 * rho * V_cruise **2 # dynamic pressure 
 CD0 = 0.040 + 0.2 # parasite drag + drag from rounded cylinder 
 n_p = 0.85 
 R_C_service = 0.5 #[m/s]
@@ -32,7 +31,7 @@ F1 = 0.889
 E1 = -0.288
 E2 = 0.1588
 
-initial_mass_est = Constraints(e, AR, r_c, Vstall, CLmax)
+initial_mass_est = Constraints(Vstall, V_cruise)
 initial_mass_est.plot()
 
 w_s = float(input('please input W/s:'))
