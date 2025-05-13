@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def thrust_to_weight_vtol(rho: float, w_s: float, r_c: float, stot_sw: float):
+def thrust_to_weight_vtol(rho: float, w_s: float, r_c: float, s_tot_s_w: float):
     """
     Calculate the thrust-to-weight ratio for a VTOL mode.
 
@@ -14,7 +14,7 @@ def thrust_to_weight_vtol(rho: float, w_s: float, r_c: float, stot_sw: float):
     Returns:
     float: Thrust-to-weight ratio
     """
-    return 1.2 * (1 + (1 / w_s) * rho * r_c**2 * stot_sw)
+    return 1.2 * (1 + (1 / w_s) * rho * r_c**2 * s_tot_s_w)
 
 
 def power_required_vtol(T: float, M_TO: float, eta_prop: float, rho: float, r_c: float):
@@ -29,6 +29,7 @@ def power_required_vtol(T: float, M_TO: float, eta_prop: float, rho: float, r_c:
     r_c (float): VTOL rate of climb (m/s)
 
     Returns:
+    S_prop (float): Propeller disc area (m^2)
     float: Power required (W)
     """
     # Calculate the FM based on the thrust value, based on statistical relationship [FOR T = 0 - 100 N, EXTRAPOLATING OUTSIDE].
@@ -46,4 +47,4 @@ def power_required_vtol(T: float, M_TO: float, eta_prop: float, rho: float, r_c:
     # Calculate induced axial climb velocity v_i
     v_i = v_h * (-r_c / (2 * v_h) + np.sqrt((r_c / (2 * v_h)) ** 2 + 1))
 
-    return (T * v_i) / FM
+    return S_prop, (T * v_i) / FM
