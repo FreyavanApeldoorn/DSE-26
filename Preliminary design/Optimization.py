@@ -131,9 +131,9 @@ print(battery_mass_range, battery_mass_endurance)
 
 #TOTAL MASS CALCULATIONS 
 
-M_struct = 0.35 * 30  
-M_avion = 0.05 * 30 
-M_Subsyst = 0.07 * 30 
+M_struct = 0.35   
+M_avion = 0.05  
+M_Subsyst = 0.07  
 M_Batt = battery_mass_range
 M_Vtol_Prop = propulsion_mass_VTOL
 M_FW_Prop = propulsion_mass_cruise
