@@ -12,7 +12,6 @@ rho = 0.9013  # density at 3000m
 CD0 = 0.040  # + 0.2 # parasite drag + drag from rounded cylinder
 n_p = 0.85  # Propeller Efficiency
 R_C_service = 0.5  # [m/s]
-k = 1 / (np.pi * e * AR)
 
 
 def powerLoading(T_W, V):
