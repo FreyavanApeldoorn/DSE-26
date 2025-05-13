@@ -12,7 +12,7 @@ k =  1/ (np.pi * e * AR)
 rho = 0.9013  # density at 3000m 
 V_cruise = 27.77  # [m/s] cruise velocity 100km/hr
 q = 0.5 * rho * V_cruise **2 # dynamic pressure 
-CD0 = 0.040 + 0.2 # parasite drag + drag from rounded cylinder 
+CD0 = 0.040 #+ 0.2 # parasite drag + drag from rounded cylinder 
 n_p = 0.85 
 R_C_service = 0.5 #[m/s]
 
@@ -29,7 +29,7 @@ class Constraints:
         self.CLmax = CLmax
         # self.k =  1/ (np.pi * e * AR)
 
-        self.W_S = np.arange(10,300,1) # [N/m^2] variable 
+        self.W_S = np.arange(0,130,1) # [N/m^2] variable 
 
         self.T_W_cruise = [] 
         self.T_W_climb = [] 
@@ -101,7 +101,7 @@ class Constraints:
         plt.fill_between(np.arange(self.WingLoading_Vstall(), self.W_S[-1],1) , np.arange(self.WingLoading_Vstall(), self.W_S[-1],1), alpha = 0.5, color = "red")
         
         plt.xlabel ("Wing Loading [N/m^2]")
-        plt.ylabel("Power Loading [W/kg]")
+        plt.ylabel("Power Loading [N/W]")
         plt.title ("Constraints Diagram")
         plt.ylim(0,100)
 
