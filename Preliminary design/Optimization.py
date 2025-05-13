@@ -37,14 +37,14 @@ K_p = 0.0938
 #https://maxamps.com/products/lipo-6000-6s-22-2v-battery-pack
 t_hover = 4*60      # s
 t_loiter = 0
-E_spec = 604800  # Specific energy capacity [J/kg]
-Eta_bat = 0.95  # ??
+E_spec = 168  # Specific energy capacity [Wh/kg]
+Eta_bat = 0.95  # ??115
 f_usable = 6  # Usable Battery Capacity [Ah]
 Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
 CL = 1  # lift coefficient
 CD = 0.04  # drag coefficient
-T = 380  # total thrust (weight) [N]
+T = 30*9.81  # total thrust (weight) [N]
 h_end = 100  # Hieght drone climbs to [m]
 h_start = 0  # hieght drone starts at [m]
 
@@ -125,20 +125,20 @@ batt_mass = BattMass(
     p_req_VTOL,
 )
 
-battery_mass_range, battery_mass_endurance = batt_mass.Batt_Mass_Total()
+battery_massF_range, battery_massF_endurance = batt_mass.Batt_Mass_Total()
 
-print(battery_mass_range, battery_mass_endurance)
+print(battery_massF_range, battery_massF_endurance)
 
 #TOTAL MASS CALCULATIONS 
 
-M_struct = 0.35   
-M_avion = 0.05  
-M_Subsyst = 0.07  
-M_Batt = battery_mass_range
+MF_struct = 0.35   
+MF_avion = 0.05  
+MF_Subsyst = 0.07  
+MF_Batt = battery_massF_range
 M_Vtol_Prop = propulsion_mass_VTOL
 M_FW_Prop = propulsion_mass_cruise
 M_payload = 5
 
-M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(M_Batt + M_struct + M_Subsyst + M_avion))
+M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
 
 print("Total Mass of UAV: ", M_TO)

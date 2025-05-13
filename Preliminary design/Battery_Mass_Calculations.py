@@ -5,6 +5,7 @@ rho = 0.9013  # Air Density [kg/m^3]
 R = 60000  # Range [m]
 R_C = 3  # rate of climb [m/s]
 
+#Calculates the battery mass fraction
 
 class BattMass:
 
@@ -89,19 +90,19 @@ class BattMass:
         return Batt_Mass_Endurance
 
     def Batt_Mass_Total(self):
-        Batt_Mass_Total_Max_Range = (
+        Batt_Mass_Total_Max_Range_Fraction = (
             self.Rotor_eff()
             + self.Batt_Mass_Hover()
             + self.Batt_Mass_Climb()
             + self.Batt_Mass_Range()
         )
-        Batt_Mass_Total_Endurance = (
+        Batt_Mass_Total_Endurance_Fraction = (
             self.Rotor_eff()
             + self.Batt_Mass_Hover()
             + self.Batt_Mass_Climb()
             + self.Batt_Mass_Endurance()
         )
-        return Batt_Mass_Total_Max_Range, Batt_Mass_Total_Endurance
+        return Batt_Mass_Total_Max_Range_Fraction, Batt_Mass_Total_Endurance_Fraction
 
 
 # if __name__ == '__main__':
