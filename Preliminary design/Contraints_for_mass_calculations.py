@@ -20,7 +20,7 @@ def powerLoading(T_W, V):
     P_W = T_W * V / n_p 
     return P_W 
 
-class Mass_Est:
+class Constraints:
     def __init__(self, e, AR, R_C, Vstall, CLmax):
         self.e = e
         self.AR = AR
@@ -43,7 +43,7 @@ class Mass_Est:
     def k(self):
         return 1 / (np.pi * self.e * self.AR)
 
-    def thrustLoadingCruise(self, W_S) : 
+    def thrustLoadingCruise(self, W_S): 
         T_W_cruise = q * CD0 * 1/(W_S) + self.k * 1/q  * W_S 
         return T_W_cruise 
 
@@ -108,8 +108,3 @@ class Mass_Est:
         
         plt.legend()
         plt.show() 
-
-original_vals = Mass_Est(e=e, AR=AR, R_C=R_C, Vstall=Vstall, CLmax=CLmax)
-original_vals.plot()
-original_vals.CLmax = 1.5
-original_vals.plot()
