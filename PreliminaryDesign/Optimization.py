@@ -41,8 +41,8 @@ n_blades_vtol = 4
 K_p = 0.0938
 
 # ~~~ Inputs BattMass ~~~
-#https://maxamps.com/products/lipo-6000-6s-22-2v-battery-pack
-t_hover = 4*60      # s
+# https://maxamps.com/products/lipo-6000-6s-22-2v-battery-pack
+t_hover = 4 * 60  # s
 t_loiter = 0
 E_spec = 168  # Specific energy capacity [Wh/kg]
 Eta_bat = 0.95  # ??115
@@ -51,16 +51,16 @@ Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
 CL = 1  # lift coefficient
 CD = 0.04  # drag coefficient
-T = 30*9.81  # total thrust (weight) [N]
+T = 30 * 9.81  # total thrust (weight) [N]
 h_end = 100  # Hieght drone climbs to [m]
 h_start = 0  # hieght drone starts at [m]
 
 
 # ~~~ Inputs TotMass ~~~
 M_Payload = 5
-M_struct = 0.35   
-M_avion = 0.05  
-M_Subsyst = 0.07  
+M_struct = 0.35
+M_avion = 0.05
+M_Subsyst = 0.07
 M_payload = 5
 
 # ~~~ First iteration ~~~
@@ -68,24 +68,18 @@ constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_serv
 constraint_plot.plot()
 
 w_s = float(input("please input W/S: "))
-w_p = float(input("please input P/W: "))
+p_w = float(input("please input P/W: "))
 
 s = MTOW / w_s
-P_max_cruise = MTOW / w_p
+P_max_cruise = MTOW * p_w
 
 VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, n_props_vtol)
 
 p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
-print(
-    "Power required VTOL: ",
-    p_req_VTOL,
-    "\nPropeller area: ",
-    S_prop,
-    "\nDisc loading: ",
-    DL,
-    "\nThrust: ",
-    T,
-)
+
+# Print powers
+print("Power required for VTOL: ", p_req_VTOL)
+print("Power required for cruise: ", P_max_cruise)
 D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
 
 prop_mass = PropMass(
@@ -133,37 +127,11 @@ batt_mass = BattMass(
     p_req_VTOL,
 )
 
-<<<<<<< HEAD
-battery_massF_range, battery_massF_endurance = batt_mass.Batt_Mass_Total()
-
-print(battery_massF_range, battery_massF_endurance)
-
-#TOTAL MASS CALCULATIONS 
-
-MF_struct = 0.35   
-MF_avion = 0.05  
-MF_Subsyst = 0.07  
-MF_Batt = battery_massF_range
-M_Vtol_Prop = propulsion_mass_VTOL
-M_FW_Prop = propulsion_mass_cruise
-M_payload = 5
-
-M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
-
-print("Total Mass of UAV: ", M_TO)
-=======
 M_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
 
-#TOTAL MASS CALCULATIONS
-print(
-    M_struct, 
-    M_avion,
-    M_Subsyst, 
-    M_Batt,
-    M_Vtol_Prop,
-    M_FW_Prop,
-    M_payload
-    )
+# TOTAL MASS CALCULATIONS
+print(M_struct, M_avion, M_Subsyst, M_Batt, M_Vtol_Prop, M_FW_Prop, M_payload)
 
-M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(M_Batt + M_struct + M_Subsyst + M_avion))
->>>>>>> d3b0745e7bc0e5cf5801bc54dccd1ba9f1f0a5bb
+M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload) / (
+    1 - (M_Batt + M_struct + M_Subsyst + M_avion)
+)
