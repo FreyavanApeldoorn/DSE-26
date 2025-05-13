@@ -84,7 +84,9 @@ class Constraints:
             P_W_climb.append(
                 powerLoading(T_W_climb[i], self.Vroc(W_S[i]), self.n_p)
             )  # self.Vroc(self.W_S[i])
-            P_W_service.append(powerLoading(T_W_service[i], self.Vroc(W_S[i]), self.n_p))
+            P_W_service.append(
+                powerLoading(T_W_service[i], self.Vroc(W_S[i]), self.n_p)
+            )
 
         plt.plot(W_S, P_W_cruise, label="Cruise P_W", color="blue")
         plt.fill_between(W_S, P_W_cruise, alpha=0.3, color="blue")
