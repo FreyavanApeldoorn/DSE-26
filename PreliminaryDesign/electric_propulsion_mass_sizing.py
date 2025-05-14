@@ -93,7 +93,9 @@ class PropMass:
 
         # Calculate motor weight to power ratio W_mot / P_max
         W_mot_P_max_cruise = (
-            self.F1 * (self.P_max_cruise / 1000) ** self.E1 * self.U_max**self.E2
+            self.F1
+            * (self.P_max_cruise / self.n_props_cruise) ** self.E1
+            * self.U_max**self.E2
         )
         W_mot_P_max_vtol = (
             self.F1 * (self.P_max_vtol / 1000) ** self.E1 * self.U_max**self.E2
@@ -105,9 +107,9 @@ class PropMass:
         # )
 
         return (
-            W_mot_P_max_cruise * (self.P_max_cruise / 1000 / self.n_mot_cruise) / g,
+            W_mot_P_max_cruise * (self.P_max_cruise / 1000 / self.n_mot_cruise),
             self.n_mot_cruise,
-            W_mot_P_max_vtol * (self.P_max_vtol / 1000 / self.n_mot_vtol) / g,
+            W_mot_P_max_vtol * (self.P_max_vtol / 1000 / self.n_mot_vtol),
             self.n_mot_vtol,
         )
 
@@ -132,15 +134,15 @@ class PropMass:
         """
 
         return (
-            self.F1_esc * (self.P_max_cruise) ** self.E1_esc,
+            self.F1_esc * (self.P_max_cruise / self.n_mot_cruise) ** self.E1_esc,
             self.n_mot_cruise,
-            self.F1_esc * (self.P_max_vtol) ** self.E1_esc,
+            self.F1_esc * (self.P_max_vtol / self.n_mot_vtol) ** self.E1_esc,
             self.n_mot_vtol,
         )
 
     def calculate_propeller_mass(self):
         """
-        Calculate the total propeller mass based on the given parameters.
+        Calculate the individual propeller mass based on the given parameters.
         Assumes that the propeller material is the same for both modes, but number of blades and diameter can differ for both modes.
 
         Parameters:
@@ -166,7 +168,6 @@ class PropMass:
             6.514e-3
             * self.K_material
             * self.K_prop
-            * self.n_props_cruise
             * self.n_blades_cruise**0.391
             * (
                 (self.calculate_cruise_propeller_diameter() * self.P_max_cruise)
@@ -177,7 +178,6 @@ class PropMass:
             6.514e-3
             * self.K_material
             * self.K_prop
-            * self.n_props_vtol
             * self.n_blades_vtol**0.391
             * ((self.D_prop_vtol * self.P_max_vtol) / (1000 * self.n_props_vtol))
             ** 0.782,
@@ -202,11 +202,11 @@ class PropMass:
         return self.f_install_cruise * (
             self.n_mot_cruise
             * (self.calculate_motor_mass()[0] + self.calculate_esc_mass()[0])
-            + self.calculate_propeller_mass()[0]
+            + self.calculate_propeller_mass()[0] * self.n_props_cruise
         ), self.f_install_vtol * (
             self.n_mot_vtol
             * (self.calculate_motor_mass()[2] + self.calculate_esc_mass()[2])
-            + self.calculate_propeller_mass()[2]
+            + self.calculate_propeller_mass()[2] * self.n_props_vtol
         )
 
     def calculate_cruise_propeller_diameter(self):

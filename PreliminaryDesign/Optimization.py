@@ -24,7 +24,7 @@ AR = 10.03  # Aspect ratio of wing        ESTIMATION
 
 # ~~~ Inputs VTOLProp ~~~
 stot_s_w = 1.35  #
-eta_prop = 0.85
+eta_prop = 0.83
 
 # ~~~Inputs Electric Prop mass ~~~
 U_max = 25.5
@@ -47,11 +47,11 @@ K_p = 0.0938
 t_hover = 4 * 60  # s
 t_loiter = 0
 E_spec = 168  # Specific energy capacity [Wh/kg]
-Eta_bat = 0.95 # ??115
+Eta_bat = 0.95  # ??115
 f_usable = 6000  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
 Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
-CL = 1  # lift coefficient
+CL = 0.846  # lift coefficient
 CD = 0.04  # drag coefficient
 T = 30 * 9.81  # total thrust (weight) [N]
 h_end = 100  # Hieght drone climbs to [m]
@@ -68,15 +68,7 @@ M_payload = 5
 
 # Module 1
 
-constraint_plot = Constraints(Vstall, 
-    V_cruise, 
-    e, 
-    AR, 
-    CLmax, 
-    CD0, 
-    n_p, 
-    R_C_service
-    )
+constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_service)
 
 
 constraint_plot.plot()
@@ -89,11 +81,7 @@ P_max_cruise = MTOW * p_w
 
 # Module 2
 
-VTOL_prop_mod = VTOLProp(w_s, 
-    stot_s_w, 
-    MTOW, 
-    eta_prop
-    )
+VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, eta_prop)
 
 p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
 
@@ -129,7 +117,16 @@ esc_mass_cruise, _, esc_mass_VTOL, _ = prop_mass.calculate_esc_mass()
 propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
 M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
 
-# Module 4
+# Summarize propulsion masses
+print("Motor Mass Cruise: ", motor_mass_cruise)
+print("Motor Mass VTOL: ", motor_mass_VTOL)
+print("ESC Mass Cruise: ", esc_mass_cruise)
+print("ESC Mass VTOL: ", esc_mass_VTOL)
+print("Propeller Mass Cruise: ", propeller_mass_cruise)
+print("Propeller Mass VTOL: ", propeller_mass_VTOL)
+print("Propulsion Mass Forward: ", M_FW_Prop)
+print("Propulsion Mass VTOL: ", M_Vtol_Prop)
+
 
 batt_mass = BattMass(
     t_hover,
