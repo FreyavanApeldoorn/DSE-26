@@ -66,7 +66,7 @@ class BattMass:
         return Batt_Mass_Hover
 
     def Batt_Mass_Climb(self):
-        t_climb = (self.h_end - self.h_start) / (R_C) *2
+        t_climb = (self.h_end - self.h_start) / (R_C) *4
         Batt_Mass_Climb = (t_climb * self.P_Prop) / (
             self.M_to * self.E_spec * self.Eta_bat * self.f_usable
         )

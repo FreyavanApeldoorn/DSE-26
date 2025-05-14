@@ -49,7 +49,7 @@ class Constraints:
         W_S_stall = 0.5 * self.Vstall**2 * rho * self.CLmax
         return W_S_stall
 
-    def plot(self):
+    def plot(self, opt = False):
 
         W_S = np.arange(0, 400, 1)  # [N/m^2] variable
 
@@ -87,6 +87,9 @@ class Constraints:
             P_W_service.append(
                 powerLoading(T_W_service[i], self.Vroc(W_S[i]), self.n_p)
             )
+
+        if opt: 
+            return W_S, P_W_cruise, P_W_climb, P_W_service, W_S_stall
 
         plt.plot(W_S, P_W_cruise, label="Cruise P_W", color="blue")
         plt.fill_between(W_S, P_W_cruise, alpha=0.3, color="blue")

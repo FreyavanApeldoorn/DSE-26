@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import minimize
 
 from Contraints_for_mass_calculations import powerLoading, Constraints
 from electric_propulsion_mass_sizing import PropMass
@@ -10,7 +11,6 @@ rho = 0.9013  # density at 3000m
 MTOW = 30 * 9.81
 
 amount_of_iterations = 10
-
 # ~~~ Inputs Contraints ~~~
 V_cruise = 100 / 3.6  # [m/s] cruise velocity 100km/hr
 Vstall = 13.8  # stall speed [m/s]
@@ -206,6 +206,67 @@ count, M_TO, M_Batt, p_req_VTOL, P_max_cruise, T_W, D_prop_VTOL, s = iteration(M
 print(f'Number of iterations: {count} \n Final Dimensions: \n Maximum TO mass: {M_TO} \n Battery mass: {M_Batt} \n required VTOL power: {p_req_VTOL} \n required cruise power: {P_max_cruise} \n (T/W)vTOL: {T_W} \n D_prop_VTOL: {D_prop_VTOL} \n wing area: {s}')
 
 # Optimization
+
+W_S, P_W_cruise, P_W_climb, P_W_service, W_S_stall = constraint_plot.plot(True)
+all_masses = []
+
+for i in range(len(W_S)):
+    w_s = W_S[i]
+    if w_s < W_S_stall[0] and w_s > 10:
+        p_w = max([P_W_cruise[i], P_W_climb[i], P_W_service[i]])
+        s = 30 * 9.81 / w_s
+        P_max_cruise = 30 * 9.81 * p_w
+
+        VTOL_prop_mod = VTOLProp(w_s, stot_s_w, 30 * 9.81, eta_prop)
+
+        p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
+        D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
+
+        prop_mass = PropMass(
+            P_max_cruise,
+            p_req_VTOL,
+            U_max,
+            F1,
+            E1,
+            E2,
+            f_install_cruise,
+            f_install_vtol,
+            n_mot_cruise,
+            n_mot_vtol,
+            K_material,
+            n_props_cruise,
+            n_props_vtol,
+            n_blades_cruise,
+            n_blades_vtol,
+            D_prop_VTOL,
+            K_p,
+        )
+
+        batt_mass = BattMass(
+            t_hover,
+            t_loiter,
+            30,
+            E_spec,
+            Eta_bat,
+            f_usable,
+            Eta_electric,
+            T,
+            DL,
+            LD_max,
+            CL,
+            CD,
+            w_s,
+            h_end,
+            h_start,
+            p_req_VTOL,
+            n_props_vtol
+        )
+
+        _, M_TO, _, _, _, _, _, _ = iteration(30, w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass)
+        all_masses.append([M_TO, w_s, p_w])
+
+min_mass_entry = min(all_masses, key=lambda x: x[0])
+print(min_mass_entry)
 
 
 
