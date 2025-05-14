@@ -265,7 +265,12 @@ class MissionProfile:
         return total_time, total_energy, times, energies, powers
     
 
-    def 
+    def aerogel_deployment_speed(self):
+        """
+        Calculate the speed of the aerogel deployment
+        """
+
+        pass
 
     
 
