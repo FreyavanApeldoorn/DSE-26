@@ -107,6 +107,16 @@ esc_mass_cruise, _, esc_mass_VTOL, _ = prop_mass.calculate_esc_mass()
 propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
 M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
 
+# Summarize propulsion masses
+print("Motor Mass Cruise: ", motor_mass_cruise)
+print("Motor Mass VTOL: ", motor_mass_VTOL)
+print("ESC Mass Cruise: ", esc_mass_cruise)
+print("ESC Mass VTOL: ", esc_mass_VTOL)
+print("Propeller Mass Cruise: ", propeller_mass_cruise)
+print("Propeller Mass VTOL: ", propeller_mass_VTOL)
+print("Propulsion Mass Forward: ", M_FW_Prop)
+print("Propulsion Mass VTOL: ", M_Vtol_Prop)
+
 
 batt_mass = BattMass(
     t_hover,
