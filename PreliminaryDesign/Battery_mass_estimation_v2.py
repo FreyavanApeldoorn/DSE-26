@@ -1,3 +1,5 @@
+
+
 # Step 1: Define input parameters
 inputs = {
     "E_required_Wh": 1499,       # Energy required for the mission in Wh
@@ -12,8 +14,18 @@ def calculate_battery_mass(inputs):
     eta_battery = inputs["eta_battery"]
 
     E_battery = E_required_Wh / (eta_battery * DOD_fraction)
-    battery_mass = (E_battery + 0.0422) / 138.18 #statistical relation based on research paper for battery sizing
+    
+    #Use formula from research paper to determine battery mass
+    a = 4.04
+    b = 139
+    c = 0.0155
+    
+    discriminant = b**2 - 4 * a * (c - E_battery)
 
-    return battery_mass
+    if discriminant < 0:
+        raise ValueError("No real solution for the given energy input.")
+
+    M_battery = (-b + (discriminant)**(1/2)) / (2 * a)
+    return M_battery
 
 print("Battery mass (kg):", calculate_battery_mass(inputs))
