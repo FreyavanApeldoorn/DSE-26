@@ -55,6 +55,9 @@ inputs = {
 
 # ~~~ Iteration Loop ~~~
 def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, batt_mass: BattMass):
+    '''
+    Given a set w_s and p_w, iterate until the MTOW stabilizes
+    '''
     count = 0
     MTOW = M_TO * 9.81
     while True:
@@ -91,6 +94,10 @@ def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, batt
             MTOW = M_TO * 9.81
 
 def mass_sizing(inputs: dict[str, float | int]):
+
+    '''
+    Performs initial sizing based on the given inputs
+    '''
 
     # ~~~ Optimization Loop ~~~
 
