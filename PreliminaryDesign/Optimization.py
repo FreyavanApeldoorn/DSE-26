@@ -22,7 +22,7 @@ AR = 10.03  # Aspect ratio of wing        ESTIMATION
 
 # ~~~ Inputs VTOLProp ~~~
 stot_s_w = 1.35  #
-eta_prop = 0.85
+eta_prop = 0.83
 
 # ~~~Inputs Electric Prop mass ~~~
 U_max = 25.5
@@ -49,7 +49,7 @@ Eta_bat = 0.95 # ??115
 f_usable = 6000  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
 Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
-CL = 1  # lift coefficient
+CL = 0.846  # lift coefficient
 CD = 0.04  # drag coefficient
 T = 30 * 9.81  # total thrust (weight) [N]
 h_end = 100  # Hieght drone climbs to [m]
