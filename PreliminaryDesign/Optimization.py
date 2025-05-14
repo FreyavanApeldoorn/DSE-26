@@ -176,6 +176,8 @@ def mass_sizing(inputs: dict[str, float | int]):
     s = inputs["MTOW"] / w_s
     P_max_cruise = inputs["MTOW"] * p_w
 
+    print(best_config)
+
     VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["eta_prop"])
     p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
     D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
@@ -225,17 +227,13 @@ def mass_sizing(inputs: dict[str, float | int]):
         inputs["n_props_vtol"]
     )
 
-    MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
+    count, M_TO, M_Batt, p_req_VTOL, P_max_cruise, t_w, D_prop_VTOL, s = iteration(30, w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass)
 
-    M_TO = (M_Vtol_Prop + M_FW_Prop + inputs["M_payload"]) / (
-        1 - (MF_Batt + inputs["MF_struct"] + inputs["MF_Subsyst"] + inputs["MF_avion"])
-    )
-    inputs["MTOW"] = M_TO * 9.81
+    print((s*inputs['AR'])**0.5)
 
-    return inputs['MTOW'] / 9.81
+    return M_TO
 
 print(mass_sizing(inputs))
-
 
 
     
