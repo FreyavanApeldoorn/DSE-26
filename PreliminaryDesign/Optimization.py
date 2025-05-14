@@ -45,13 +45,22 @@ K_p = 0.0938
 t_hover = 4 * 60  # s
 t_loiter = 30*60
 E_spec = 168  # Specific energy capacity [Wh/kg]
+<<<<<<< HEAD
 Eta_bat = 0.95 # ??115
 f_usable = 4993  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
+=======
+Eta_bat = 0.95  # ??115
+f_usable = 6000  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
+>>>>>>> ec663de2b2489b03cd94450072ea6afa0c1958a6
 Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
 CL = 0.846  # lift coefficient
 CD = 0.04  # drag coefficient
+<<<<<<< HEAD
 h_end = 150  # Hieght drone climbs to [m]
+=======
+h_end = 100  # Hieght drone climbs to [m]
+>>>>>>> ec663de2b2489b03cd94450072ea6afa0c1958a6
 h_start = 0  # hieght drone starts at [m]
 
 
@@ -147,6 +156,7 @@ batt_mass = BattMass(
 
 MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
 
+<<<<<<< HEAD
 #TOTAL MASS CALCULATIONS
 
 M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
@@ -199,3 +209,12 @@ print(f'Number of iterations: {count} \n Final Dimensions: \n Maximum TO mass: {
 
 
 
+=======
+# TOTAL MASS CALCULATIONS
+print(MF_struct, MF_avion, MF_Subsyst, MF_Batt, M_Vtol_Prop, M_FW_Prop, M_payload)
+
+M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload) / (
+    1 - (MF_Batt + MF_struct + MF_Subsyst + MF_avion)
+)
+print(M_TO)
+>>>>>>> ec663de2b2489b03cd94450072ea6afa0c1958a6
