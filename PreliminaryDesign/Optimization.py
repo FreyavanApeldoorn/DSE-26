@@ -45,13 +45,12 @@ K_p = 0.0938
 t_hover = 4 * 60  # s
 t_loiter = 0
 E_spec = 168  # Specific energy capacity [Wh/kg]
-Eta_bat = 0.95 # ??115
+Eta_bat = 0.95  # ??115
 f_usable = 6000  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
 Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
 CL = 0.846  # lift coefficient
 CD = 0.04  # drag coefficient
-T = 30 * 9.81  # total thrust (weight) [N]
 h_end = 100  # Hieght drone climbs to [m]
 h_start = 0  # hieght drone starts at [m]
 
@@ -66,15 +65,7 @@ M_payload = 5
 
 # Module 1
 
-constraint_plot = Constraints(Vstall, 
-    V_cruise, 
-    e, 
-    AR, 
-    CLmax, 
-    CD0, 
-    n_p, 
-    R_C_service
-    )
+constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_service)
 
 
 constraint_plot.plot()
@@ -87,11 +78,7 @@ P_max_cruise = MTOW * p_w
 
 # Module 2
 
-VTOL_prop_mod = VTOLProp(w_s, 
-    stot_s_w, 
-    MTOW, 
-    eta_prop
-    )
+VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, eta_prop)
 
 p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
 
@@ -150,16 +137,10 @@ batt_mass = BattMass(
 
 MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
 
-#TOTAL MASS CALCULATIONS
-print(
-    MF_struct, 
-    MF_avion,
-    MF_Subsyst, 
-    MF_Batt,
-    M_Vtol_Prop,
-    M_FW_Prop,
-    M_payload
-    )
+# TOTAL MASS CALCULATIONS
+print(MF_struct, MF_avion, MF_Subsyst, MF_Batt, M_Vtol_Prop, M_FW_Prop, M_payload)
 
-M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
-print(M_TO) 
+M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload) / (
+    1 - (MF_Batt + MF_struct + MF_Subsyst + MF_avion)
+)
+print(M_TO)
