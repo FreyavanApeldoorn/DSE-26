@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Contraints_for_mass_calculations import Constraints, powerLoading
-from vtol_propulsion_sizing import VTOLProp
-from electric_propulsion_mass_sizing import PropMass
-from Battery_Mass_Calculations import BattMass
+from PreliminaryDesign.Classes.Contraints_for_mass_calculations import Constraints, powerLoading
+from PreliminaryDesign.Classes.vtol_propulsion_sizing import VTOLProp
+from PreliminaryDesign.Classes.electric_propulsion_mass_sizing import PropMass
+from PreliminaryDesign.Classes.Battery_Mass_Calculations import BattMass
 from Optimization import _mass_loop  # your cached sizing loop
 
 # ─── Constants ─────────────────────────────────────────────────────────
