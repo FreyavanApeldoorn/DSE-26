@@ -11,7 +11,7 @@ inputs = {
     "rho": 0.9013,
     "MTOW": 30 * 9.81,
     "V_cruise": 100 / 3.6,
-    "Vstall": 13.8,
+    "Vstall": 13.8, #13.8
     "CD0": 0.040,
     "n_p": 0.85,
     "R_C_service": 0.5,
@@ -72,9 +72,6 @@ def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, batt
         prop_mass.P_max_vtol = p_req_VTOL
         prop_mass.D_prop_vtol = D_prop_VTOL
 
-        motor_mass_cruise, _, motor_mass_VTOL, _ = prop_mass.calculate_motor_mass()
-        esc_mass_cruise, _, esc_mass_VTOL, _ = prop_mass.calculate_esc_mass()
-        propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
         M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
 
         batt_mass.M_to = M_TO
@@ -202,11 +199,6 @@ def mass_sizing(inputs: dict[str, float | int]):
         inputs["K_p"]
     )
 
-    motor_mass_cruise, _, motor_mass_VTOL, _ = prop_mass.calculate_motor_mass()
-    esc_mass_cruise, _, esc_mass_VTOL, _ = prop_mass.calculate_esc_mass()
-    propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
-    M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
-
     batt_mass = BattMass(
         inputs["t_hover"],
         inputs["t_loiter"],
@@ -234,9 +226,3 @@ def mass_sizing(inputs: dict[str, float | int]):
     return M_TO
 
 print(mass_sizing(inputs))
-
-
-    
-
-
-
