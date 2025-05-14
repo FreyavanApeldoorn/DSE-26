@@ -51,7 +51,7 @@ class Constraints:
 
     def plot(self, opt = False):
 
-        W_S = np.arange(0, 400, 1)  # [N/m^2] variable
+        W_S = np.arange(0, 600, 1)  # [N/m^2] variable
 
         T_W_cruise = []
         T_W_climb = []
@@ -115,7 +115,7 @@ class Constraints:
         plt.ylabel("Power Loading [N/W]")
         plt.title("Constraints Diagram")
         plt.ylim(0, 25)
-        plt.xlim(20, 200)
+        plt.xlim(20, int(W_S_stall[0]) + 40)
 
         plt.legend()
         plt.show()

@@ -13,14 +13,14 @@ MTOW = 30 * 9.81
 amount_of_iterations = 10
 # ~~~ Inputs Contraints ~~~
 V_cruise = 100 / 3.6  # [m/s] cruise velocity 100km/hr
-Vstall = 13.8  # stall speed [m/s]
+Vstall = 13.8  # stall speed [m/s] 13.8
 
 CD0 = 0.040  # + 0.2 # parasite drag + drag from rounded cylinder
 n_p = 0.85  # Propeller Efficiency
 R_C_service = 0.5  # [m/s]
 CLmax = 1.34  
 e = 0.7  # 7 oswald efficiency factor
-AR = 10.03  # Aspect ratio of wing
+AR = 10.3  # Aspect ratio of wing 10.3
 
 # ~~~ Inputs VTOLProp ~~~
 stot_s_w = 1.35  #
@@ -203,7 +203,7 @@ def iteration(M_TO: float, w_s: float, p_w: float, VTOL_prop_mod: VTOLProp, prop
 
 count, M_TO, M_Batt, p_req_VTOL, P_max_cruise, T_W, D_prop_VTOL, s = iteration(M_TO, w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass)
 
-print(f'Number of iterations: {count} \n Final Dimensions: \n Maximum TO mass: {M_TO} \n Battery mass: {M_Batt} \n required VTOL power: {p_req_VTOL} \n required cruise power: {P_max_cruise} \n (T/W)vTOL: {T_W} \n D_prop_VTOL: {D_prop_VTOL} \n wing area: {s}')
+print(f'Number of iterations: {count} \n Final Dimensions: \n Maximum TO mass: {M_TO} \n Battery mass: {M_Batt} \n required VTOL power: {p_req_VTOL} \n required cruise power: {P_max_cruise} \n (T/W)vTOL: {T_W} \n D_prop_VTOL: {D_prop_VTOL} \n wing area: {s} \n span: {(AR*s)**0.5}')
 
 # Optimization
 
