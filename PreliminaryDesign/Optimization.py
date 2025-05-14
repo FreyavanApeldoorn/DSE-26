@@ -6,21 +6,19 @@ from vtol_propulsion_sizing import VTOLProp
 from Battery_Mass_Calculations import BattMass
 
 # ~~~ Overall variables ~~~
-rho = 0.9013  # density at 3000m
-MTOW = 30 * 9.81
-
-amount_of_iterations = 10
+rho = 1.225  # density at 3000m
+MTOW = 3.568 * 9.81
 
 # ~~~ Inputs Contraints ~~~
-V_cruise = 100 / 3.6  # [m/s] cruise velocity 100km/hr
-Vstall = 13.8  # stall speed [m/s]
+V_cruise = 25  # [m/s] cruise velocity 
+Vstall = 12.5  # stall speed [m/s]
 
 CD0 = 0.040  # + 0.2 # parasite drag + drag from rounded cylinder
-n_p = 0.85  # Propeller Efficiency
+n_p = 0.83  # Propeller Efficiency
 R_C_service = 0.5  # [m/s]
 CLmax = 1.34  #                         ESTIMATION
 e = 0.7  # 7 oswald efficiency factor  ESTIMATION
-AR = 10.03  # Aspect ratio of wing        ESTIMATION
+AR = 8.809  # Aspect ratio of wing        ESTIMATION
 
 # ~~~ Inputs VTOLProp ~~~
 stot_s_w = 1.35  #
@@ -45,24 +43,23 @@ K_p = 0.0938
 # ~~~ Inputs BattMass ~~~
 # https://maxamps.com/products/lipo-6000-6s-22-2v-battery-pack
 t_hover = 4 * 60  # s
-t_loiter = 0
+t_loiter = 30*60
 E_spec = 168  # Specific energy capacity [Wh/kg]
-Eta_bat = 0.95  # ??115
-f_usable = 6000  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
+Eta_bat = 0.95 # ??115
+f_usable = 4993  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
 Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
 CL = 0.846  # lift coefficient
 CD = 0.04  # drag coefficient
-T = 30 * 9.81  # total thrust (weight) [N]
-h_end = 100  # Hieght drone climbs to [m]
+h_end = 150  # Hieght drone climbs to [m]
 h_start = 0  # hieght drone starts at [m]
 
 
 # ~~~ Inputs TotMass ~~~
-MF_struct = 0.35
+MF_struct = 0.40
 MF_avion = 0.05
-MF_Subsyst = 0.07
-M_payload = 5
+MF_Subsyst = 0.15
+M_payload = 0.3  #[kg]
 
 # ~~~ First iteration ~~~
 
@@ -145,6 +142,7 @@ batt_mass = BattMass(
     h_end,
     h_start,
     p_req_VTOL,
+    n_props_vtol
 )
 
 MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()

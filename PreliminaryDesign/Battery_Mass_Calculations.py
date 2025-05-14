@@ -2,7 +2,7 @@
 
 g = 9.81  # Gravitational acceleration [m/s^2]
 rho = 0.9013  # Air Density [kg/m^3]
-R = 60000  # Range [m]
+R = 2000  # Range [m]
 R_C = 3  # rate of climb [m/s]
 
 #Calculates the battery mass fraction
@@ -27,6 +27,7 @@ class BattMass:
         h_end: float,
         h_start: float,
         P_Prop: float,
+        n_props_vtol: int, 
     ):
 
         self.t_hover = t_hover  # Duration of hover [s]
@@ -45,9 +46,10 @@ class BattMass:
         self.h_end = h_end  # h end
         self.h_start = h_start  # h start
         self.P_Prop = P_Prop  # power of VTOL motors
+        self.n_props_vtol = n_props_vtol
 
     def Rotor_eff(self):
-        FM = 0.4742 * self.T ** (0.0793)
+        FM = 0.4742 * self.T/self.n_props_vtol ** (0.0793)
         return FM
 
     def Batt_Mass_Hover(self):
@@ -64,7 +66,7 @@ class BattMass:
         return Batt_Mass_Hover
 
     def Batt_Mass_Climb(self):
-        t_climb = (self.h_end - self.h_start) / (R_C) *2
+        t_climb = (self.h_end - self.h_start) / (R_C) *4
         Batt_Mass_Climb = (t_climb * self.P_Prop) / (
             self.M_to * self.E_spec * self.Eta_bat * self.f_usable
         )
