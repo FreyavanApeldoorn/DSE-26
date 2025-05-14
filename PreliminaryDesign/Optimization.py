@@ -9,6 +9,8 @@ from Battery_Mass_Calculations import BattMass
 rho = 0.9013  # density at 3000m
 MTOW = 30 * 9.81
 
+amount_of_iterations = 10
+
 # ~~~ Inputs Contraints ~~~
 V_cruise = 100 / 3.6  # [m/s] cruise velocity 100km/hr
 Vstall = 13.8  # stall speed [m/s]
@@ -96,8 +98,8 @@ VTOL_prop_mod = VTOLProp(w_s,
 p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
 
 # Print powers
-print("Power required for VTOL: ", p_req_VTOL)
-print("Power required for cruise: ", P_max_cruise)
+# print("Power required for VTOL: ", p_req_VTOL)
+# print("Power required for cruise: ", P_max_cruise)
 D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
 
 # Module 3
@@ -151,15 +153,54 @@ batt_mass = BattMass(
 MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
 
 #TOTAL MASS CALCULATIONS
-print(
-    MF_struct, 
-    MF_avion,
-    MF_Subsyst, 
-    MF_Batt,
-    M_Vtol_Prop,
-    M_FW_Prop,
-    M_payload
-    )
 
 M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
-print(M_TO) 
+MTOW = M_TO * 9.81
+
+count = 0
+
+# ITERATION
+while True:
+    count += 1
+
+    s = MTOW / w_s
+    P_max_cruise = MTOW * p_w
+
+    # Module 2
+
+    VTOL_prop_mod.MTOW = MTOW
+    p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
+    D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
+
+    # Module 3
+
+    prop_mass.P_max_vtol = p_req_VTOL
+    prop_mass.D_prop_vtol = D_prop_VTOL
+
+    motor_mass_cruise, _, motor_mass_VTOL, _ = prop_mass.calculate_motor_mass()
+    esc_mass_cruise, _, esc_mass_VTOL, _ = prop_mass.calculate_esc_mass()
+    propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
+    M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
+
+    # Module 4
+
+    batt_mass.M_TO = M_TO / 9.81
+    batt_mass.DL = DL
+    batt_mass.T = T
+
+    MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
+
+    # Total calculation
+
+    if abs((M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion)) - M_TO) / M_TO < 0.001: 
+        break
+    else:
+        M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
+        MTOW = M_TO*9.81
+
+print(f'Number of iterations: {count} \n Final Dimensions: \n Maximum TO mass: {M_TO} \n Battery mass: {MF_Batt*M_TO} \n required VTOL power: {p_req_VTOL} \n (T/W)vTOL: {T/MTOW} \n D_prop_VTOL: {D_prop_VTOL} \n wing area: {s}')
+
+
+
+
+
