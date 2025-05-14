@@ -63,7 +63,20 @@ MF_Subsyst = 0.07
 M_payload = 5
 
 # ~~~ First iteration ~~~
-constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_service)
+
+# Module 1
+
+constraint_plot = Constraints(Vstall, 
+    V_cruise, 
+    e, 
+    AR, 
+    CLmax, 
+    CD0, 
+    n_p, 
+    R_C_service
+    )
+
+
 constraint_plot.plot()
 
 w_s = float(input("please input W/S: "))
@@ -72,7 +85,13 @@ p_w = float(input("please input P/W: "))
 s = MTOW / w_s
 P_max_cruise = MTOW * p_w
 
-VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, n_props_vtol)
+# Module 2
+
+VTOL_prop_mod = VTOLProp(w_s, 
+    stot_s_w, 
+    MTOW, 
+    eta_prop
+    )
 
 p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
 
@@ -80,6 +99,8 @@ p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
 print("Power required for VTOL: ", p_req_VTOL)
 print("Power required for cruise: ", P_max_cruise)
 D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
+
+# Module 3
 
 prop_mass = PropMass(
     P_max_cruise,
@@ -106,6 +127,7 @@ esc_mass_cruise, _, esc_mass_VTOL, _ = prop_mass.calculate_esc_mass()
 propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
 M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
 
+# Module 4
 
 batt_mass = BattMass(
     t_hover,
