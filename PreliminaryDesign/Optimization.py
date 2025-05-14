@@ -6,175 +6,65 @@ from electric_propulsion_mass_sizing import PropMass
 from vtol_propulsion_sizing import VTOLProp
 from Battery_Mass_Calculations import BattMass
 
-# ~~~ Overall variables ~~~
-rho = 0.9013  # density at 3000m
-MTOW = 30 * 9.81
+# ~~~ Inputs Dictionary ~~~
+inputs = {
+    "rho": 0.9013,
+    "MTOW": 30 * 9.81,
+    "V_cruise": 100 / 3.6,
+    "Vstall": 13.8,
+    "CD0": 0.040,
+    "n_p": 0.85,
+    "R_C_service": 0.5,
+    "CLmax": 1.34,
+    "e": 0.7,
+    "AR": 10.3,
+    "stot_s_w": 1.35,
+    "eta_prop": 0.83,
+    "U_max": 25.5,
+    "F1": 0.889,
+    "E1": -0.288,
+    "E2": 0.1588,
+    "f_install_cruise": 1,
+    "f_install_vtol": 1,
+    "n_mot_cruise": 1,
+    "n_mot_vtol": 4,
+    "K_material": 0.6,
+    "n_props_cruise": 1,
+    "n_props_vtol": 4,
+    "n_blades_cruise": 4,
+    "n_blades_vtol": 4,
+    "K_p": 0.0938,
+    "t_hover": 4 * 60,
+    "t_loiter": 0,
+    "E_spec": 168,
+    "Eta_bat": 0.95,
+    "f_usable": 6000,
+    "Eta_electric": 0.95,
+    "LD_max": 12,
+    "CL": 0.846,
+    "CD": 0.04,
+    "T": 30 * 9.81,
+    "h_end": 100,
+    "h_start": 0,
+    "MF_struct": 0.35,
+    "MF_avion": 0.05,
+    "MF_Subsyst": 0.07,
+    "M_payload": 5,
+    "amount_of_iterations": 10
+}
 
-amount_of_iterations = 10
-# ~~~ Inputs Contraints ~~~
-V_cruise = 100 / 3.6  # [m/s] cruise velocity 100km/hr
-Vstall = 13.8  # stall speed [m/s] 13.8
-
-CD0 = 0.040  # + 0.2 # parasite drag + drag from rounded cylinder
-n_p = 0.85  # Propeller Efficiency
-R_C_service = 0.5  # [m/s]
-CLmax = 1.34  
-e = 0.7  # 7 oswald efficiency factor
-AR = 10.3  # Aspect ratio of wing 10.3
-
-# ~~~ Inputs VTOLProp ~~~
-stot_s_w = 1.35  #
-eta_prop = 0.83
-
-# ~~~Inputs Electric Prop mass ~~~
-U_max = 25.5
-F1 = 0.889
-E1 = -0.288
-E2 = 0.1588
-f_install_cruise = 1  # fix later
-f_install_vtol = 1  # fix later
-n_mot_cruise = 1
-n_mot_vtol = 4
-K_material = 0.6
-n_props_cruise = 1
-n_props_vtol = 4
-n_blades_cruise = 4
-n_blades_vtol = 4
-K_p = 0.0938
-
-# ~~~ Inputs BattMass ~~~
-# https://maxamps.com/products/lipo-6000-6s-22-2v-battery-pack
-t_hover = 4 * 60  # s
-t_loiter = 0
-E_spec = 168  # Specific energy capacity [Wh/kg]
-Eta_bat = 0.95  # ??115
-f_usable = 6000  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
-Eta_electric = 0.95  # Efficiency of electric system
-LD_max = 12  # max lift to drag ratio
-CL = 0.846  # lift coefficient
-CD = 0.04  # drag coefficient
-T = 30 * 9.81  # total thrust (weight) [N]
-h_end = 100  # Hieght drone climbs to [m]
-h_start = 0  # hieght drone starts at [m]
-
-
-# ~~~ Inputs TotMass ~~~
-MF_struct = 0.35
-MF_avion = 0.05
-MF_Subsyst = 0.07
-M_payload = 5
-
-# ~~~ First iteration ~~~
-
-# Module 1
-
-constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_service)
-
-
-constraint_plot.plot()
-
-w_s = float(input("please input W/S: "))
-p_w = float(input("please input P/W: "))
-
-s = MTOW / w_s
-P_max_cruise = MTOW * p_w
-
-# Module 2
-
-VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, eta_prop)
-
-p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
-
-# Print powers
-# print("Power required for VTOL: ", p_req_VTOL)
-# print("Power required for cruise: ", P_max_cruise)
-D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
-
-# Module 3
-
-prop_mass = PropMass(
-    P_max_cruise,
-    p_req_VTOL,
-    U_max,
-    F1,
-    E1,
-    E2,
-    f_install_cruise,
-    f_install_vtol,
-    n_mot_cruise,
-    n_mot_vtol,
-    K_material,
-    n_props_cruise,
-    n_props_vtol,
-    n_blades_cruise,
-    n_blades_vtol,
-    D_prop_VTOL,
-    K_p,
-)
-
-motor_mass_cruise, _, motor_mass_VTOL, _ = prop_mass.calculate_motor_mass()
-esc_mass_cruise, _, esc_mass_VTOL, _ = prop_mass.calculate_esc_mass()
-propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
-M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
-
-# Summarize propulsion masses
-# print("Motor Mass Cruise: ", motor_mass_cruise)
-# print("Motor Mass VTOL: ", motor_mass_VTOL)
-# print("ESC Mass Cruise: ", esc_mass_cruise)
-# print("ESC Mass VTOL: ", esc_mass_VTOL)
-# print("Propeller Mass Cruise: ", propeller_mass_cruise)
-# print("Propeller Mass VTOL: ", propeller_mass_VTOL)
-# print("Propulsion Mass Forward: ", M_FW_Prop)
-# print("Propulsion Mass VTOL: ", M_Vtol_Prop)
-
-
-batt_mass = BattMass(
-    t_hover,
-    t_loiter,
-    MTOW / 9.81,
-    E_spec,
-    Eta_bat,
-    f_usable,
-    Eta_electric,
-    T,
-    DL,
-    LD_max,
-    CL,
-    CD,
-    w_s,
-    h_end,
-    h_start,
-    p_req_VTOL,
-    n_props_vtol
-)
-
-MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
-
-#TOTAL MASS CALCULATIONS
-
-M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
-MTOW = M_TO * 9.81
-
-# ITERATION
-
-def iteration(M_TO: float, w_s: float, p_w: float, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, batt_mass: BattMass):
-    '''
-    Iterates the mass calculations
-    '''
+# ~~~ Iteration Loop ~~~
+def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, batt_mass: BattMass):
     count = 0
-    MTOW = 9.81*M_TO
+    MTOW = M_TO * 9.81
     while True:
         count += 1
         s = MTOW / w_s
         P_max_cruise = MTOW * p_w
 
-        # Module 2
-
         VTOL_prop_mod.MTOW = MTOW
         p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
         D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
-
-        # Module 3
 
         prop_mass.P_max_vtol = p_req_VTOL
         prop_mass.D_prop_vtol = D_prop_VTOL
@@ -184,89 +74,164 @@ def iteration(M_TO: float, w_s: float, p_w: float, VTOL_prop_mod: VTOLProp, prop
         propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
         M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
 
-        # Module 4
-
         batt_mass.M_to = M_TO
         batt_mass.DL = DL
         batt_mass.T = T
 
         MF_Batt, _ = batt_mass.Batt_Mass_Total()
 
-        # Total calculation
+        new_M_TO = (M_Vtol_Prop + M_FW_Prop + inputs["M_payload"]) / (
+            1 - (MF_Batt + inputs["MF_struct"] + inputs["MF_Subsyst"] + inputs["MF_avion"])
+        )
 
-        if abs((M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion)) - M_TO) / M_TO < 0.001: 
-            return count, M_TO, MF_Batt*M_TO, p_req_VTOL, P_max_cruise, T/MTOW, D_prop_VTOL, s
+        if abs(new_M_TO - M_TO) / M_TO < 0.001:
+            return count, M_TO, MF_Batt * M_TO, p_req_VTOL, P_max_cruise, T / MTOW, D_prop_VTOL, s
         else:
-            M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload )/ (1-(MF_Batt + MF_struct + MF_Subsyst + MF_avion))
-            MTOW = M_TO*9.81
+            M_TO = new_M_TO
+            MTOW = M_TO * 9.81
+
+def mass_sizing(inputs: dict[str, float | int]):
+
+    # ~~~ Optimization Loop ~~~
+
+    constraint_plot = Constraints(
+    inputs["Vstall"],
+    inputs["V_cruise"],
+    inputs["e"],
+    inputs["AR"],
+    inputs["CLmax"],
+    inputs["CD0"],
+    inputs["n_p"],
+    inputs["R_C_service"]
+    )
+
+    W_S, P_W_cruise, P_W_climb, P_W_service, W_S_stall = constraint_plot.plot(True)
+    all_masses = []
+
+    for i in range(len(W_S)):
+        w_s = W_S[i]
+        if w_s < W_S_stall[0] and w_s > 10:
+            p_w = max([P_W_cruise[i], P_W_climb[i], P_W_service[i]])
+            s = 30 * 9.81 / w_s
+            P_max_cruise = 30 * 9.81 * p_w
+
+            VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], 30 * 9.81, inputs["eta_prop"])
+            p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
+            D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
+
+            prop_mass = PropMass(
+                P_max_cruise,
+                p_req_VTOL,
+                inputs["U_max"],
+                inputs["F1"],
+                inputs["E1"],
+                inputs["E2"],
+                inputs["f_install_cruise"],
+                inputs["f_install_vtol"],
+                inputs["n_mot_cruise"],
+                inputs["n_mot_vtol"],
+                inputs["K_material"],
+                inputs["n_props_cruise"],
+                inputs["n_props_vtol"],
+                inputs["n_blades_cruise"],
+                inputs["n_blades_vtol"],
+                D_prop_VTOL,
+                inputs["K_p"]
+            )
+
+            batt_mass = BattMass(
+                inputs["t_hover"],
+                inputs["t_loiter"],
+                30,
+                inputs["E_spec"],
+                inputs["Eta_bat"],
+                inputs["f_usable"],
+                inputs["Eta_electric"],
+                T,
+                DL,
+                inputs["LD_max"],
+                inputs["CL"],
+                inputs["CD"],
+                w_s,
+                inputs["h_end"],
+                inputs["h_start"],
+                p_req_VTOL,
+                inputs["n_props_vtol"]
+            )
+
+            _, M_TO, _, _, _, _, _, _ = iteration(30, w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass)
+            all_masses.append([M_TO, w_s, p_w])
+
+    # Get final parameters
+    best_config = min(all_masses, key=lambda x: x[0])
+    w_s = best_config[1]
+    p_w = best_config[2]
+    s = inputs["MTOW"] / w_s
+    P_max_cruise = inputs["MTOW"] * p_w
+
+    VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["eta_prop"])
+    p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
+    D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
+
+    prop_mass = PropMass(
+        P_max_cruise,
+        p_req_VTOL,
+        inputs["U_max"],
+        inputs["F1"],
+        inputs["E1"],
+        inputs["E2"],
+        inputs["f_install_cruise"],
+        inputs["f_install_vtol"],
+        inputs["n_mot_cruise"],
+        inputs["n_mot_vtol"],
+        inputs["K_material"],
+        inputs["n_props_cruise"],
+        inputs["n_props_vtol"],
+        inputs["n_blades_cruise"],
+        inputs["n_blades_vtol"],
+        D_prop_VTOL,
+        inputs["K_p"]
+    )
+
+    motor_mass_cruise, _, motor_mass_VTOL, _ = prop_mass.calculate_motor_mass()
+    esc_mass_cruise, _, esc_mass_VTOL, _ = prop_mass.calculate_esc_mass()
+    propeller_mass_cruise, _, propeller_mass_VTOL, _ = prop_mass.calculate_propeller_mass()
+    M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
+
+    batt_mass = BattMass(
+        inputs["t_hover"],
+        inputs["t_loiter"],
+        inputs["MTOW"] / 9.81,
+        inputs["E_spec"],
+        inputs["Eta_bat"],
+        inputs["f_usable"],
+        inputs["Eta_electric"],
+        T,
+        DL,
+        inputs["LD_max"],
+        inputs["CL"],
+        inputs["CD"],
+        w_s,
+        inputs["h_end"],
+        inputs["h_start"],
+        p_req_VTOL,
+        inputs["n_props_vtol"]
+    )
+
+    MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
+
+    M_TO = (M_Vtol_Prop + M_FW_Prop + inputs["M_payload"]) / (
+        1 - (MF_Batt + inputs["MF_struct"] + inputs["MF_Subsyst"] + inputs["MF_avion"])
+    )
+    inputs["MTOW"] = M_TO * 9.81
+
+    return inputs['MTOW'] / 9.81
+
+print(mass_sizing(inputs))
 
 
-count, M_TO, M_Batt, p_req_VTOL, P_max_cruise, T_W, D_prop_VTOL, s = iteration(M_TO, w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass)
 
-print(f'Number of iterations: {count} \n Final Dimensions: \n Maximum TO mass: {M_TO} \n Battery mass: {M_Batt} \n required VTOL power: {p_req_VTOL} \n required cruise power: {P_max_cruise} \n (T/W)vTOL: {T_W} \n D_prop_VTOL: {D_prop_VTOL} \n wing area: {s} \n span: {(AR*s)**0.5}')
-
-# Optimization
-
-W_S, P_W_cruise, P_W_climb, P_W_service, W_S_stall = constraint_plot.plot(True)
-all_masses = []
-
-for i in range(len(W_S)):
-    w_s = W_S[i]
-    if w_s < W_S_stall[0] and w_s > 10:
-        p_w = max([P_W_cruise[i], P_W_climb[i], P_W_service[i]])
-        s = 30 * 9.81 / w_s
-        P_max_cruise = 30 * 9.81 * p_w
-
-        VTOL_prop_mod = VTOLProp(w_s, stot_s_w, 30 * 9.81, eta_prop)
-
-        p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
-        D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
-
-        prop_mass = PropMass(
-            P_max_cruise,
-            p_req_VTOL,
-            U_max,
-            F1,
-            E1,
-            E2,
-            f_install_cruise,
-            f_install_vtol,
-            n_mot_cruise,
-            n_mot_vtol,
-            K_material,
-            n_props_cruise,
-            n_props_vtol,
-            n_blades_cruise,
-            n_blades_vtol,
-            D_prop_VTOL,
-            K_p,
-        )
-
-        batt_mass = BattMass(
-            t_hover,
-            t_loiter,
-            30,
-            E_spec,
-            Eta_bat,
-            f_usable,
-            Eta_electric,
-            T,
-            DL,
-            LD_max,
-            CL,
-            CD,
-            w_s,
-            h_end,
-            h_start,
-            p_req_VTOL,
-            n_props_vtol
-        )
-
-        _, M_TO, _, _, _, _, _, _ = iteration(30, w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass)
-        all_masses.append([M_TO, w_s, p_w])
-
-min_mass_entry = min(all_masses, key=lambda x: x[0])
-print(min_mass_entry)
+    
 
 
 

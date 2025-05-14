@@ -320,7 +320,7 @@ class MissionProfile:
 
 
 mission_definition = []   # Define the mission profile here
-mission_parameters = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 3, "V_cruise": 70/3.6, "V_descent": 3}   
+mission_parameters = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise": 120/3.6, "V_descent": 3}   
 time_estimates = {"t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60}
 power_requirements = {"P_load": 300, "P_a_VTOL": 4500, "P_r_FW": 1500, "P_a_transition": 6000, "P_r": 3500, "P_deploy": 4000}
 
