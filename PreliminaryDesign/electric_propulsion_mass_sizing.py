@@ -98,13 +98,10 @@ class PropMass:
             * self.U_max**self.E2
         )
         W_mot_P_max_vtol = (
-            self.F1 * (self.P_max_vtol / 1000) ** self.E1 * self.U_max**self.E2
+            self.F1
+            * (self.P_max_vtol / self.n_props_vtol) ** self.E1
+            * self.U_max**self.E2
         )
-
-        # print(
-        #     f"Motor weight to power ratio for cruise: {W_mot_P_max_cruise} N/W",
-        #     f"Motor weight to power ratio for VTOL: {W_mot_P_max_vtol} N/W",
-        # )
 
         return (
             W_mot_P_max_cruise * (self.P_max_cruise / 1000 / self.n_mot_cruise),
