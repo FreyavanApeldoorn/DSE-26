@@ -11,10 +11,10 @@ import numpy as np
 from scipy.optimize import minimize, Bounds
 from functools import lru_cache  # small speed-up
 
-from Contraints_for_mass_calculations import Constraints, powerLoading
-from vtol_propulsion_sizing import VTOLProp
-from electric_propulsion_mass_sizing import PropMass
-from Battery_Mass_Calculations import BattMass
+from PreliminaryDesign.Classes.Contraints_for_mass_calculations import Constraints, powerLoading
+from PreliminaryDesign.Classes.vtol_propulsion_sizing import VTOLProp
+from PreliminaryDesign.Classes.electric_propulsion_mass_sizing import PropMass
+from PreliminaryDesign.Classes.Battery_Mass_Calculations import BattMass
 
 # --------------------------------------------------------------------- #
 # 1. Global constants & fixed inputs                                   #
