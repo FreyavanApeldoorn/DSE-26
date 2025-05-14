@@ -22,7 +22,7 @@ AR = 10.03  # Aspect ratio of wing        ESTIMATION
 
 # ~~~ Inputs VTOLProp ~~~
 stot_s_w = 1.35  #
-eta_prop = 0.85
+eta_prop = 0.83
 
 # ~~~Inputs Electric Prop mass ~~~
 U_max = 25.5
@@ -46,10 +46,10 @@ t_hover = 4 * 60  # s
 t_loiter = 0
 E_spec = 168  # Specific energy capacity [Wh/kg]
 Eta_bat = 0.95  # ??115
-f_usable = 6  # Usable Battery Capacity [Ah]
+f_usable = 6000  # Usable Battery Capacity [mAh] ?? is it suppose to be mAh
 Eta_electric = 0.95  # Efficiency of electric system
 LD_max = 12  # max lift to drag ratio
-CL = 1  # lift coefficient
+CL = 0.846  # lift coefficient
 CD = 0.04  # drag coefficient
 T = 30 * 9.81  # total thrust (weight) [N]
 h_end = 100  # Hieght drone climbs to [m]
@@ -57,14 +57,18 @@ h_start = 0  # hieght drone starts at [m]
 
 
 # ~~~ Inputs TotMass ~~~
-M_Payload = 5
-M_struct = 0.35
-M_avion = 0.05
-M_Subsyst = 0.07
+MF_struct = 0.35
+MF_avion = 0.05
+MF_Subsyst = 0.07
 M_payload = 5
 
 # ~~~ First iteration ~~~
+
+# Module 1
+
 constraint_plot = Constraints(Vstall, V_cruise, e, AR, CLmax, CD0, n_p, R_C_service)
+
+
 constraint_plot.plot()
 
 w_s = float(input("please input W/S: "))
@@ -73,7 +77,9 @@ p_w = float(input("please input P/W: "))
 s = MTOW / w_s
 P_max_cruise = MTOW * p_w
 
-VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, n_props_vtol)
+# Module 2
+
+VTOL_prop_mod = VTOLProp(w_s, stot_s_w, MTOW, eta_prop)
 
 p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
 
@@ -81,6 +87,8 @@ p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
 print("Power required for VTOL: ", p_req_VTOL)
 print("Power required for cruise: ", P_max_cruise)
 D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
+
+# Module 3
 
 prop_mass = PropMass(
     P_max_cruise,
@@ -132,16 +140,17 @@ batt_mass = BattMass(
     CL,
     CD,
     w_s,
-    h_start,
     h_end,
+    h_start,
     p_req_VTOL,
 )
 
-M_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
+MF_Batt, battery_mass_endurance = batt_mass.Batt_Mass_Total()
 
 # TOTAL MASS CALCULATIONS
-print(M_struct, M_avion, M_Subsyst, M_Batt, M_Vtol_Prop, M_FW_Prop, M_payload)
+print(MF_struct, MF_avion, MF_Subsyst, MF_Batt, M_Vtol_Prop, M_FW_Prop, M_payload)
 
 M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload) / (
-    1 - (M_Batt + M_struct + M_Subsyst + M_avion)
+    1 - (MF_Batt + MF_struct + MF_Subsyst + MF_avion)
 )
+print(M_TO)
