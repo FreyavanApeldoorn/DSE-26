@@ -9,10 +9,10 @@ from functools import lru_cache
 from typing import Tuple
 from scipy.optimize import minimize, Bounds
 
-from Contraints_for_mass_calculations import Constraints, powerLoading
-from vtol_propulsion_sizing import VTOLProp
-from electric_propulsion_mass_sizing import PropMass
-from Battery_Mass_Calculations import BattMass
+from Classes.Contraints_for_mass_calculations import Constraints, powerLoading
+from Classes.vtol_propulsion_sizing import VTOLProp
+from Classes.electric_propulsion_mass_sizing import PropMass
+from Classes.Battery_Mass_Calculations import BattMass
 
 # ─────────────────────────────────────────────────────────────────────────
 # 1.  Global defaults (these may be overwritten by `inputs`)              |
