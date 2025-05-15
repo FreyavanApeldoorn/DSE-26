@@ -181,29 +181,41 @@ inputs.update(mass_estimation_parameters)
 # ==========================================
 
 tolerance = 1
-max_iterations = 1000
+max_iterations = 200
 relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter']
 
+doesnt_converge = set()
 def intergation_optimization(tolerance, max_iterations, inputs):
-    for _ in range(max_iterations):
+    hist = {
+        'P_r_VTOL': [],
+        'P_r_FW': []
+    }
+    for i in range(max_iterations):
         print('Successful loop')
+
         mission = MissionProfile(inputs)
         outputs = mission.mission_profile().copy()
         outputs = mass_sizing(outputs)
 
         if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs if isinstance(outputs[key], float) or isinstance(outputs[key], np.float64)):
             print('Converged')
-            return outputs
+            return outputs, hist
         
-        for key in outputs:
-            if abs(outputs[key] - inputs[key]) < tolerance:
-                print(key)
+        if i > max_iterations-3:       
+            for key in outputs:
+                if isinstance(outputs[key], float) or isinstance(outputs[key],  np.float64):
+                    if abs(outputs[key] - inputs[key]) > tolerance:
+                        doesnt_converge.add(key)
+            print(inputs['P_r_VTOL'], inputs['P_r_FW'])
+
+        hist["P_r_VTOL"].append(outputs["P_r_VTOL"]) 
+        hist['P_r_FW'].append(outputs["P_r_FW"])
 
         inputs = outputs
     print('result did not stabilize at max iteration')
-    return outputs
+    return outputs, hist
 
-final_output = intergation_optimization(tolerance, max_iterations, inputs)
+final_output, hist = intergation_optimization(tolerance, max_iterations, inputs)
 
 constraint_plot = Constraints(
     final_output["V_stall"],
@@ -220,3 +232,6 @@ constraint_plot.plot()
 
 for i in relevant:
     print(i, final_output[i])
+
+print(hist)
+
