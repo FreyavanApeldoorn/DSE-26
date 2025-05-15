@@ -110,11 +110,13 @@ fw_parameters = {
     "CL_cruise": 0.846, 
     "CL_max": 1.34, 
     "LD_max": 12,               # maximum lift-to-drag ratio
+    "t_w": 0,                   # Thrust-to-weight ratio (initialized to 0)
     "CD_cruise": 0.05, 
     "CD0": 0.040, 
     "V_stall": 13.8, 
     "S_wing": 2.5, 
     "AR": 10.3, 
+    "b_wing": 0,                # span (initialized to 0)
     "e": 0.7,
     "n_propellers_cruise": 1,        # number of cruise propellers
     "n_blades_cruise": 4,       # number of blades per cruise propeller
@@ -142,9 +144,9 @@ inputs.update(vtol_parameters)
 # Mass parameters:
 mass_parameters = {
     "MTOW": 30 * 9.81,
-    "M_to": 30, 
+    "M_to": 30,             # take off mass in kg
     "M_payload": 5, 
-    "M_battery": 10, 
+    "M_battery": 10,        # battery mass in kg
     "M_FW": 5, 
     "M_VTOL": 5,
     "MF_struct": 0.35,          # mass fraction for structure
