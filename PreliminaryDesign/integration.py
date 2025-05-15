@@ -198,5 +198,9 @@ def intergation_optimization(tolerance, max_iterations, inputs):
     print('result did not stabilize at max iteration')
     return outputs
 
+relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter']
 
-intergation_optimization(tolerance, max_iterations, inputs)
+final_output = intergation_optimization(tolerance, max_iterations, inputs)
+
+for i in relevant:
+    print(i, final_output[i])
