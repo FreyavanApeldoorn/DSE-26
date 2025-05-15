@@ -179,8 +179,8 @@ inputs.update(mass_estimation_parameters)
 # Iteration loop 
 # ==========================================
 
-tolerance = 0.001
-max_iterations = 100
+tolerance = 1
+max_iterations = 1000
 
 def intergation_optimization(tolerance, max_iterations, inputs):
     for _ in range(max_iterations):
