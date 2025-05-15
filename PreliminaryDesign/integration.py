@@ -1,4 +1,5 @@
-
+from mission_profile import MissionProfile
+from Optimization import mass_sizing
 
 inputs = {
     "rho": 0.9013,              # kg/m^3, density of air at sea level
@@ -59,15 +60,52 @@ mission_parameters = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise
 time_estimates = {"t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60}
 
 power_parameters = {"P_load": 100, "P_a_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
-battery
 
-fw_parameters = {"C_L_cruise:" 0.6, "C_L_max": 1.5, "C_D_cruise": 0.05, "S_wing": 2.5, "AR": 6, "e": 0.8}
+fw_parameters = {"C_L_cruise": 0.6, "C_L_max": 1.5, "C_D_cruise": 0.05, "S_wing": 2.5, "AR": 6, "e": 0.8}
 vtol_parameters = {"number_propellers": 4, "number_motors": 4, "propeller_diameter": 0.5, "propeller_pitch": 0.2, "propeller_efficiency": 0.8}
 
 
-mass_parameters = {"M_to", 30, "M_payload": 5, "M_battery": 10, "M_FW": 5, "M_VTOL": 5}
+mass_parameters = {"M_to": 30, "M_payload": 5, "M_battery": 10, "M_FW": 5, "M_VTOL": 5}
 material_parameters = {}
 
+tolerance = 0.001
+max_iterations = 100
+
+def intergation_optimization(tolerance, max_iterations, inputs):
+    for _ in range(max_iterations):
+        mission = MissionProfile(inputs)
+
+        outputs = mission.mission_profile()
+
+        outputs = mass_sizing(outputs)
+
+        if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs):
+            return outputs
+
+        inputs = outputs
+    print('result did not stabilize at max iteration')
+    return outputs
+
+
+print(intergation_optimization(tolerance, max_iterations, inputs))
+
+
+
+
+
+
+
+# initial_parameters = {}
+# all_parameters = {}
+
+
+
+
+# all_parameters = {
+
+
+
+# }
 
 
 
@@ -76,57 +114,38 @@ material_parameters = {}
 
 
 
-initial_parameters = {}
-all_parameters = {}
 
 
+# tol_reached = False
 
-
-all_parameters = {
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-tol_reached = False
-
-while tol_reached == False and count < 100:
+# while tol_reached == False and count < 100:
     
 
-    #all initializing inputs
+#     #all initializing inputs
 
-    all_parameters = mission_definition(all_parameters)
+#     all_parameters = mission_definition(all_parameters)
     
 
-    all_parameters = mass_sizing(all_parameters)
-    """
-    Outputs:
-    - 
-    """
+#     all_parameters = mass_sizing(all_parameters)
+#     """
+#     Outputs:
+#     - 
+#     """
 
 
-    all_parameters = deployment_sizing(all_parameters)
+#     all_parameters = deployment_sizing(all_parameters)
 
 
-    all_parameters = wing_sizing(all_parameters)
+#     all_parameters = wing_sizing(all_parameters)
 
 
 
 
-    all_parameters = control_stability_sizing(all_parameters)
+#     all_parameters = control_stability_sizing(all_parameters)
 
 
-    if all( for i in all_parameters):
-        tol_reached = True
+#     if all( for i in all_parameters):
+#         tol_reached = True
 
 
     

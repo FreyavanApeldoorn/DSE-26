@@ -1,10 +1,10 @@
 import numpy as np
 from scipy.optimize import minimize
 
-from PreliminaryDesign.Classes.Contraints_for_mass_calculations import powerLoading, Constraints
-from PreliminaryDesign.Classes.electric_propulsion_mass_sizing import PropMass
-from PreliminaryDesign.Classes.vtol_propulsion_sizing import VTOLProp
-from PreliminaryDesign.Classes.Battery_Mass_Calculations import BattMass
+from Classes.Contraints_for_mass_calculations import powerLoading, Constraints
+from Classes.electric_propulsion_mass_sizing import PropMass
+from Classes.vtol_propulsion_sizing import VTOLProp
+from Classes.Battery_Mass_Calculations import BattMass
 
 # ~~~ Iteration Loop ~~~
 def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, batt_mass: BattMass, M_payload, MF_struct, MF_Subsyst, MF_avion):

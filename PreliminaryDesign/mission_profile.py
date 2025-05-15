@@ -92,11 +92,11 @@ class MissionProfile:
 
     Parameters
     ----------
-    mission_parameters: dict
+    inputs: dict
         Dictionary containing the mission parameters
-    time_estimates: dict
+    inputs: dict
         Dictionary containing the time estimates for each phase of the mission
-    power_requirements: dict
+    inputs: dict
         Dictionary containing the power requirements for each phase of the mission
 
     Attributes
@@ -139,25 +139,26 @@ class MissionProfile:
 
     """
 
-    def __init__(self, mission_parameters: dict, time_estimates: dict, power_requirements: dict) -> None:         
-        self.h_cruise = mission_parameters["h_cruise"]
-        self.R_max = mission_parameters["R_max"]
-        self.V_climb_v = mission_parameters["V_climb_v"]
-        self.V_cruise = mission_parameters["V_cruise"]
-        self.V_descent = mission_parameters["V_descent"]
+    def __init__(self, inputs: dict) -> None:    
+        self.inputs = inputs     
+        self.h_cruise = inputs["h_cruise"]
+        self.R_max = inputs["R_max"]
+        self.V_climb_v = inputs["V_climb_v"]
+        self.V_cruise = inputs["V_cruise"]
+        self.V_descent = inputs["V_descent"]
 
-        self.t_load = time_estimates["t_load"]
-        self.t_transition = time_estimates["t_transition"]
-        self.t_scan = time_estimates["t_scan"]
-        self.t_deploy = time_estimates["t_deploy"]
-        self.t_recharge = time_estimates["t_recharge"]
+        self.t_load = inputs["t_load"]
+        self.t_transition = inputs["t_transition"]
+        self.t_scan = inputs["t_scan"]
+        self.t_deploy = inputs["t_deploy"]
+        self.t_recharge = inputs["t_recharge"]
 
-        self.P_load = power_requirements["P_load"]
-        self.P_a_VTOL = power_requirements["P_a_VTOL"]
-        self.P_r_FW = power_requirements["P_r_FW"]
-        self.P_a_transition = power_requirements["P_a_transition"]
-        self.P_r = power_requirements["P_r"]
-        self.P_deploy = power_requirements["P_deploy"]
+        self.P_load = inputs["P_load"]
+        self.P_a_VTOL = inputs["P_a_VTOL"]
+        self.P_r_FW = inputs["P_r_FW"]
+        self.P_a_transition = inputs["P_a_transition"]
+        self.P_r = inputs["P_r"]
+        self.P_deploy = inputs["P_deploy"]
         
 
 
@@ -262,7 +263,13 @@ class MissionProfile:
         energies = times * powers
         total_energy = np.sum(energies)
 
-        return total_time, total_energy, times, energies, powers
+        self.inputs['total_mission_time'] = total_time
+        self.inputs['total_mission_energy'] = total_energy
+        self.inputs['mission_times_array'] = times
+        self.inputs['mission_energies_array'] = energies
+        self.inputs['mission_powers_array'] = powers
+
+        return self.inputs
     
 
     def aerogel_deployment_speed(self):
@@ -319,19 +326,20 @@ class MissionProfile:
 # Example usage
 
 
-mission_definition = []   # Define the mission profile here
-mission_parameters = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise": 120/3.6, "V_descent": 3}   
-time_estimates = {"t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60}
-power_requirements = {"P_load": 100, "P_a_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
+if __name__ == '__main__':
+    mission_definition = []   # Define the mission profile here
+    inputs = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise": 120/3.6, "V_descent": 3}   
+    inputs = {"t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60}
+    inputs = {"P_load": 100, "P_a_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
 
 
-mission = MissionProfile(mission_parameters, time_estimates, power_requirements)
+    mission = MissionProfile(inputs, inputs, inputs)
 
 
-total_time, total_energy, times, energies, powers = mission.mission_profile()
+    total_time, total_energy, times, energies, powers = mission.mission_profile()
 
-print("Total mission time: ", total_time/60, "minutes")
-print("Total energy required: ", total_energy/3600, "Wh")
+    print("Total mission time: ", total_time/60, "minutes")
+    print("Total energy required: ", total_energy/3600, "Wh")
 
-mission.plot_energy_consumption()
-mission.plot_power_consumption()
+    mission.plot_energy_consumption()
+    mission.plot_power_consumption()
