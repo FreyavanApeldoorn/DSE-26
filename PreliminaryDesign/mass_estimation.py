@@ -52,14 +52,14 @@ def mass_sizing(inputs: dict[str, float | int]):
     # ~~~ Optimization Loop ~~~
 
     constraint_plot = Constraints(
-    inputs["Vstall"],
+    inputs["V_stall"],
     inputs["V_cruise"],
     inputs["e"],
     inputs["AR"],
-    inputs["CLmax"],
+    inputs["CL_max"],
     inputs["CD0"],
-    inputs["n_p"],
-    inputs["R_C_service"]
+    inputs["propeller_efficiency"],
+    inputs["RC_service"]
     )
 
     W_S, P_W_cruise, P_W_climb, P_W_service, W_S_stall = constraint_plot.plot(True)
@@ -126,7 +126,7 @@ def mass_sizing(inputs: dict[str, float | int]):
     s = inputs["MTOW"] / w_s
     P_max_cruise = inputs["MTOW"] * p_w
 
-    # print(best_config)
+    print(best_config)
 
     VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["eta_prop"])
     p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
@@ -176,14 +176,4 @@ def mass_sizing(inputs: dict[str, float | int]):
 
     b = (s*inputs['AR'])**0.5
 
-    inputs['MTOW'] = M_TO*9.81
-    inputs['M_TO'] = M_TO
-    inputs['M_Battery'] = M_Batt
-    inputs['p_req_VTOL'] = p_req_VTOL
-    inputs['P_max_cruise'] = P_max_cruise
-    inputs['t_w'] = t_w
-    inputs['D_prop_VTOL'] = D_prop_VTOL
-    inputs['s'] = s
-    inputs['b'] = b
-
-    return inputs
+    return M_TO, M_Batt, p_req_VTOL, P_max_cruise, t_w, D_prop_VTOL, s, b

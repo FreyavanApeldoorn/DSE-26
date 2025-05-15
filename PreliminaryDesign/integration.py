@@ -5,16 +5,16 @@ import numpy as np
 
 
 inputs = {
-    "rho": 0.9013,              # kg/m^3, density of air at sea level
-    "MTOW": 30 * 9.81,          # N, maximum take-off weight   #CHANGED
-    "V_cruise": 100 / 3.6,      # m/s, cruise speed
-    "Vstall": 13.8,             # m/s, stall speed
-    "CD0": 0.040,               # drag coefficient at zero lift
-    "n_p": 0.85,                # propeller efficiency
-    "R_C_service": 0.5,         # service ceiling ratio
-    "CLmax": 1.34,              # maximum lift coefficient
-    "e": 0.7,                   # Oswald's efficiency factor
-    "AR": 10.3,                 # aspect ratio
+    #"rho_min": 0.9013,              # kg/m^3, density of air at service ceiling
+    #"MTOW": 30 * 9.81,          # N, maximum take-off weight 
+    #"V_cruise": 100 / 3.6,      # m/s, cruise speed
+    #"V_stall": 13.8,             # m/s, stall speed
+    #"CD0": 0.040,               # drag coefficient at zero lift
+    #"n_p": 0.85,                # propeller efficiency
+    #"R_C_service": 0.5,         # service ceiling ratio
+    #"CL_max": 1.34,             # maximum lift coefficient
+    #"e": 0.7,                   # Oswald's efficiency factor
+    #"AR": 10.3,                 # aspect ratio
     "stot_s_w": 1.35,           # wing loading ratio
     "eta_prop": 0.83,           # propeller efficiency
     "U_max": 25.5,              # maximum voltage
@@ -54,11 +54,20 @@ inputs = {
 # ================================
 
 
-constants = { }
+constants = {}
 
 mission_definition = []   # Define the mission profile here
 
-mission_parameters = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise": 120/3.6, "V_descent": 3}   
+mission_parameters = {"h_cruise": 120, 
+                      "rho_min": 0.9013, 
+                      "rho_max": 1.225, 
+                      "RC_service": 0.5,
+                      "h_service": 3000,
+                      "R_max": 30000, 
+                      "V_climb_v": 6, 
+                      "V_cruise": 120/3.6, 
+                      "V_descent": 3
+                      }   
 inputs.update(mission_parameters)
 
 
@@ -68,13 +77,31 @@ inputs.update(time_estimates)
 power_parameters = {"P_load": 100, "P_r_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
 inputs.update(power_parameters)
 
-fw_parameters = {"C_L_cruise": 0.6, "C_L_max": 1.5, "C_D_cruise": 0.05, "S_wing": 2.5, "AR": 6, "e": 0.8}
+fw_parameters = {"CL_cruise": 0.6, 
+                 "CL_max": 1.5, 
+                 "CD_cruise": 0.05, 
+                 "CD0": 0.040, 
+                 "V_stall": 13.8, 
+                 "S_wing": 2.5, 
+                 "AR": 10.3, 
+                 "e": 0.7}
 inputs.update(fw_parameters)
 
-vtol_parameters = {"number_propellers": 4, "number_motors": 4, "propeller_diameter": 0.5, "propeller_pitch": 0.2, "propeller_efficiency": 0.8}
+vtol_parameters = {"number_propellers": 4, 
+                   "number_motors": 4, 
+                   "propeller_diameter": 0.5, 
+                   "propeller_pitch": 0.2, 
+                   "propeller_efficiency": 0.8
+                   }
 inputs.update(vtol_parameters)
 
-mass_parameters = {"M_to": 30, "M_payload": 5, "M_battery": 10, "M_FW": 5, "M_VTOL": 5}
+mass_parameters = {"MTOW": 30 * 9.81,
+                   "M_to": 30, 
+                   "M_payload": 5, 
+                   "M_battery": 10, 
+                   "M_FW": 5, 
+                   "M_VTOL": 5
+                   }
 inputs.update(mass_parameters)
 
 
@@ -84,8 +111,6 @@ inputs.update(mass_parameters)
 
 tolerance = 0.001
 max_iterations = 100
-
-relevant = ['MTOW', 'V_cruise']
 
 def intergation_optimization(tolerance, max_iterations, inputs):
     for _ in range(max_iterations):
