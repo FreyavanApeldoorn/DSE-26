@@ -206,7 +206,6 @@ def intergation_optimization(tolerance, max_iterations, inputs):
                 if isinstance(outputs[key], float) or isinstance(outputs[key],  np.float64):
                     if abs(outputs[key] - inputs[key]) > tolerance:
                         doesnt_converge.add(key)
-            print(inputs['P_r_VTOL'], inputs['P_r_FW'])
 
         hist["P_r_VTOL"].append(outputs["P_r_VTOL"]) 
         hist['P_r_FW'].append(outputs["P_r_FW"])
@@ -233,5 +232,5 @@ constraint_plot.plot()
 for i in relevant:
     print(i, final_output[i])
 
-print(hist)
+print(doesnt_converge)
 
