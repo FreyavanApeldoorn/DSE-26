@@ -125,9 +125,6 @@ def mass_sizing(inputs: dict[str, float | int]):
     p_w = best_config[2]
     s = inputs["MTOW"] / w_s
     P_max_cruise = inputs["MTOW"] * p_w
-
-    print(best_config)
-
     VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["eta_prop"])
     p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
     D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
@@ -176,4 +173,14 @@ def mass_sizing(inputs: dict[str, float | int]):
 
     b = (s*inputs['AR'])**0.5
 
-    return M_TO, M_Batt, p_req_VTOL, P_max_cruise, t_w, D_prop_VTOL, s, b
+    inputs['M_to'] = M_TO
+    inputs['MTOW'] = M_TO*9.81
+    inputs['M_battery'] = M_Batt
+    inputs['p_req_VTOL'] = p_req_VTOL
+    inputs['P_max_cruise'] = P_max_cruise
+    inputs['t_w'] = t_w
+    inputs['D_prop_VTOL'] = D_prop_VTOL
+    inputs['s'] = s
+    inputs['b'] = b
+
+    return inputs
