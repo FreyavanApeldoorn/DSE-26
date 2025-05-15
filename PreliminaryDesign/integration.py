@@ -80,7 +80,7 @@ time_estimates = {
     "t_transition": 30, 
     "t_scan": 60, 
     "t_deploy": 5*60, 
-    "t_recharge": 5*60
+    "t_recharge": 5*60,
     "t_hover": 4 * 60,          # hover time in seconds
     "t_loiter": 0,              # loiter time in seconds
     }
@@ -158,6 +158,7 @@ inputs.update(mass_parameters)
 structural_parameters = {
     "K_material": 0.6,          # material constant (kg/m^3)
 }
+inputs.update(structural_parameters)
 
 
 mass_estimation_parameters = {

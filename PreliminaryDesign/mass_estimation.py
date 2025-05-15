@@ -58,7 +58,7 @@ def mass_sizing(inputs: dict[str, float | int]):
     inputs["AR"],
     inputs["CL_max"],
     inputs["CD0"],
-    inputs["propeller_efficiency"],
+    inputs["propeller_efficiency_cruise"],
     inputs["RC_service"]
     )
 
@@ -72,7 +72,7 @@ def mass_sizing(inputs: dict[str, float | int]):
             s = 30 * 9.81 / w_s
             P_max_cruise = 30 * 9.81 * p_w
 
-            VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], 30 * 9.81, inputs["eta_prop"])
+            VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], 30 * 9.81, inputs["propeller_efficiency_vtol"])
             p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
             D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
 
@@ -88,8 +88,8 @@ def mass_sizing(inputs: dict[str, float | int]):
                 inputs["n_mot_cruise"],
                 inputs["n_mot_vtol"],
                 inputs["K_material"],
-                inputs["n_props_cruise"],
-                inputs["n_props_vtol"],
+                inputs["n_propellers_cruise"],
+                inputs["n_propellers_vtol"],
                 inputs["n_blades_cruise"],
                 inputs["n_blades_vtol"],
                 D_prop_VTOL,
@@ -107,13 +107,13 @@ def mass_sizing(inputs: dict[str, float | int]):
                 T,
                 DL,
                 inputs["LD_max"],
-                inputs["CL"],
-                inputs["CD"],
+                inputs["CL_cruise"],
+                inputs["CD_cruise"],
                 w_s,
-                inputs["h_end"],
-                inputs["h_start"],
+                inputs["h_cruise"],
+                inputs["h_ground"],
                 p_req_VTOL,
-                inputs["n_props_vtol"]
+                inputs["n_propellers_vtol"]
             )
 
             _, M_TO, _, _, _, _, _, _ = iteration(30, w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass, inputs['M_payload'], inputs['MF_struct'], inputs['MF_Subsyst'], inputs['MF_avion'])
@@ -125,7 +125,7 @@ def mass_sizing(inputs: dict[str, float | int]):
     p_w = best_config[2]
     s = inputs["MTOW"] / w_s
     P_max_cruise = inputs["MTOW"] * p_w
-    VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["eta_prop"])
+    VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["propeller_efficiency_vtol"])
     p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
     D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
 
@@ -141,8 +141,8 @@ def mass_sizing(inputs: dict[str, float | int]):
         inputs["n_mot_cruise"],
         inputs["n_mot_vtol"],
         inputs["K_material"],
-        inputs["n_props_cruise"],
-        inputs["n_props_vtol"],
+        inputs["n_propellers_cruise"],
+        inputs["n_propellers_vtol"],
         inputs["n_blades_cruise"],
         inputs["n_blades_vtol"],
         D_prop_VTOL,
@@ -160,13 +160,13 @@ def mass_sizing(inputs: dict[str, float | int]):
         T,
         DL,
         inputs["LD_max"],
-        inputs["CL"],
-        inputs["CD"],
+        inputs["CL_cruise"],
+        inputs["CD_cruise"],
         w_s,
-        inputs["h_end"],
-        inputs["h_start"],
+        inputs["h_cruise"],
+        inputs["h_ground"],
         p_req_VTOL,
-        inputs["n_props_vtol"]
+        inputs["n_propellers_vtol"]
     )
 
     count, M_TO, M_Batt, p_req_VTOL, P_max_cruise, t_w, D_prop_VTOL, s = iteration(30, w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass, inputs['M_payload'], inputs['MF_struct'], inputs['MF_Subsyst'], inputs['MF_avion'])
