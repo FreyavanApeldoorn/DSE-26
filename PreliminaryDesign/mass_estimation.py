@@ -7,7 +7,7 @@ from Classes.vtol_propulsion_sizing import VTOLProp
 from Classes.Battery_Mass_Calculations import BattMass
 
 # ~~~ Iteration Loop ~~~
-def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, batt_mass: BattMass, M_payload, MF_struct, MF_Subsyst, MF_avion):
+def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, M_batt: float, M_payload, MF_struct, MF_Subsyst, MF_avion):
     '''
     Given a set w_s and p_w, iterate until the MTOW stabilizes
     '''
@@ -27,18 +27,12 @@ def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, batt
 
         M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
 
-        batt_mass.M_to = M_TO
-        batt_mass.DL = DL
-        batt_mass.T = T
-
-        MF_Batt, _ = batt_mass.Batt_Mass_Total()
-
-        new_M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload) / (
-            1 - (MF_Batt + MF_struct + MF_Subsyst + MF_avion)
+        new_M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload + M_batt) / (
+            1 - (MF_struct + MF_Subsyst + MF_avion)
         )
 
         if abs(new_M_TO - M_TO) / M_TO < 0.001:
-            return count, M_TO, MF_Batt * M_TO, p_req_VTOL, P_max_cruise, T / MTOW, D_prop_VTOL, s
+            return count, M_TO, M_batt, p_req_VTOL, P_max_cruise, T / MTOW, D_prop_VTOL, s
         else:
             M_TO = new_M_TO
             MTOW = M_TO * 9.81
@@ -96,27 +90,7 @@ def mass_sizing(inputs: dict[str, float | int]):
                 inputs["K_p"]
             )
 
-            batt_mass = BattMass(
-                inputs["t_hover"],
-                inputs["t_loiter"],
-                inputs['M_to'],
-                inputs["E_spec"],
-                inputs["Eta_bat"],
-                inputs["f_usable"],
-                inputs["Eta_electric"],
-                T,
-                DL,
-                inputs["LD_max"],
-                inputs["CL_cruise"],
-                inputs["CD_cruise"],
-                w_s,
-                inputs["h_cruise"],
-                inputs["h_ground"],
-                p_req_VTOL,
-                inputs["n_propellers_vtol"]
-            )
-
-            _, M_TO, _, _, _, _, _, _ = iteration(inputs['M_to'], w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass, inputs['M_payload'], inputs['MF_struct'], inputs['MF_Subsyst'], inputs['MF_avion'])
+            _, M_TO, _, _, _, _, _, _ = iteration(inputs['M_to'], w_s, p_w, VTOL_prop_mod, prop_mass, inputs["M_battery"], inputs['M_payload'], inputs['MF_struct'], inputs['MF_Subsyst'], inputs['MF_avion'])
             all_masses.append([M_TO, w_s, p_w])
 
     # Get final parameters
