@@ -68,7 +68,7 @@ mission_parameters = {
     "rho_max": 1.225, 
     "RC_service": 0.5,
     "h_service": 3000,
-    "R_max": 30000, 
+    "R_max": 30000, #30000
     "V_climb_v": 6, 
     "V_cruise": 120/3.6, 
     "V_descent": 3
@@ -114,9 +114,9 @@ fw_parameters = {
     "t_w": 0,                   # Thrust-to-weight ratio (initialized to 0)
     "CD_cruise": 0.05, 
     "CD0": 0.040, 
-    "V_stall": 13.8, 
+    "V_stall": 13.8,             # m/s, stall speed
     "S_wing": 2.5, 
-    "AR": 10.3, 
+    "AR": 7, #10.3
     "b_wing": 0,                # span (initialized to 0)
     "e": 0.7,
     "n_propellers_cruise": 1,        # number of cruise propellers
@@ -185,7 +185,7 @@ max_iterations = 200
 relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter']
 
 doesnt_converge = set()
-def intergation_optimization(tolerance, max_iterations, inputs):
+def integration_optimization(tolerance, max_iterations, inputs):
     hist = {
         'P_r_VTOL': [],
         'P_r_FW': []
@@ -214,7 +214,7 @@ def intergation_optimization(tolerance, max_iterations, inputs):
     print('result did not stabilize at max iteration')
     return outputs, hist
 
-final_output, hist = intergation_optimization(tolerance, max_iterations, inputs)
+final_output, hist = integration_optimization(tolerance, max_iterations, inputs)
 
 constraint_plot = Constraints(
     final_output["V_stall"],
