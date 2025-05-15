@@ -69,10 +69,10 @@ def mass_sizing(inputs: dict[str, float | int]):
         w_s = W_S[i]
         if w_s < W_S_stall[0] and w_s > 10:
             p_w = max([P_W_cruise[i], P_W_climb[i], P_W_service[i]])
-            s = 30 * 9.81 / w_s
-            P_max_cruise = 30 * 9.81 * p_w
+            s = inputs['M_to'] * 9.81 / w_s
+            P_max_cruise = inputs['M_to'] * 9.81 * p_w
 
-            VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], 30 * 9.81, inputs["propeller_efficiency_vtol"])
+            VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs['M_to'] * 9.81, inputs["n_propellers_vtol"])
             p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
             D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
 
@@ -99,7 +99,7 @@ def mass_sizing(inputs: dict[str, float | int]):
             batt_mass = BattMass(
                 inputs["t_hover"],
                 inputs["t_loiter"],
-                30,
+                inputs['M_to'],
                 inputs["E_spec"],
                 inputs["Eta_bat"],
                 inputs["f_usable"],
@@ -116,7 +116,7 @@ def mass_sizing(inputs: dict[str, float | int]):
                 inputs["n_propellers_vtol"]
             )
 
-            _, M_TO, _, _, _, _, _, _ = iteration(30, w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass, inputs['M_payload'], inputs['MF_struct'], inputs['MF_Subsyst'], inputs['MF_avion'])
+            _, M_TO, _, _, _, _, _, _ = iteration(inputs['M_to'], w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass, inputs['M_payload'], inputs['MF_struct'], inputs['MF_Subsyst'], inputs['MF_avion'])
             all_masses.append([M_TO, w_s, p_w])
 
     # Get final parameters
@@ -125,7 +125,7 @@ def mass_sizing(inputs: dict[str, float | int]):
     p_w = best_config[2]
     s = inputs["MTOW"] / w_s
     P_max_cruise = inputs["MTOW"] * p_w
-    VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["propeller_efficiency_vtol"])
+    VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["n_propellers_vtol"])
     p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
     D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
 
