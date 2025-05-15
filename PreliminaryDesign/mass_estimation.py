@@ -143,7 +143,7 @@ def mass_sizing(inputs: dict[str, float | int]):
         inputs["n_propellers_vtol"]
     )
 
-    count, M_TO, M_Batt, p_req_VTOL, P_max_cruise, t_w, D_prop_VTOL, s = iteration(inputs['MTOW'], w_s, p_w, VTOL_prop_mod, prop_mass, batt_mass, inputs['M_payload'], inputs['MF_struct'], inputs['MF_Subsyst'], inputs['MF_avion'])
+    count, M_TO, M_Batt, p_req_VTOL, P_max_cruise, t_w, D_prop_VTOL, s = iteration(inputs['MTOW'], w_s, p_w, VTOL_prop_mod, prop_mass, inputs['M_battery'], inputs['M_payload'], inputs['MF_struct'], inputs['MF_Subsyst'], inputs['MF_avion'])
 
     b = (s*inputs['AR'])**0.5
 

@@ -207,12 +207,12 @@ def integration_optimization(tolerance, max_iterations, inputs):
 
         # Calculate the mass of the battery
         battery_mass = calculate_battery_mass(
-            E_required_Wh=inputs["total_mission_energy"],
-            DOD_fraction=inputs["DOD_fraction"],
-            eta_battery=inputs["eta_battery"]
+            E_required_Wh=inputs['total_mission_energy'],
+            DOD_fraction=inputs['DOD_fraction'],
+            eta_battery=inputs['eta_battery']
         )
        
-        inputs["M_battery"] = battery_mass
+        inputs['M_battery'] = battery_mass
 
         outputs = mass_sizing(outputs)
         
