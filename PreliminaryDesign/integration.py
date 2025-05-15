@@ -181,85 +181,19 @@ max_iterations = 100
 
 def intergation_optimization(tolerance, max_iterations, inputs):
     for _ in range(max_iterations):
+        print('Successful loop')
         mission = MissionProfile(inputs)
-
-        outputs = mission.mission_profile()
-
+        outputs = mission.mission_profile().copy()
         outputs = mass_sizing(outputs)
 
-        print(outputs)
-
-        if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs if isinstance(outputs[key], float)):
+        if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs if isinstance(outputs[key], float) or isinstance(outputs[key], np.float64)):
+            print('Converged')
             return outputs
-
+        
+        
         inputs = outputs
     print('result did not stabilize at max iteration')
     return outputs
 
 
-print(intergation_optimization(tolerance, max_iterations, inputs)['MTOW'] / 9.81)
-
-
-
-
-
-
-
-# initial_parameters = {}
-# all_parameters = {}
-
-
-
-
-# all_parameters = {
-
-
-
-# }
-
-
-
-
-
-
-
-
-
-
-# tol_reached = False
-
-# while tol_reached == False and count < 100:
-    
-
-#     #all initializing inputs
-
-#     all_parameters = mission_definition(all_parameters)
-    
-
-#     all_parameters = mass_sizing(all_parameters)
-#     """
-#     Outputs:
-#     - 
-#     """
-
-
-#     all_parameters = deployment_sizing(all_parameters)
-
-
-#     all_parameters = wing_sizing(all_parameters)
-
-
-
-
-#     all_parameters = control_stability_sizing(all_parameters)
-
-
-#     if all( for i in all_parameters):
-#         tol_reached = True
-
-
-    
-    
-
-
-
+intergation_optimization(tolerance, max_iterations, inputs)
