@@ -1,9 +1,11 @@
 from mission_profile import MissionProfile
 from Optimization import mass_sizing
 
+
+
 inputs = {
     "rho": 0.9013,              # kg/m^3, density of air at sea level
-    "MTOW": 30 * 9.81,          # N, maximum take-off weight
+    "M_to": 30 * 9.81,          # N, maximum take-off weight   #CHANGED
     "V_cruise": 100 / 3.6,      # m/s, cruise speed
     "Vstall": 13.8,             # m/s, stall speed
     "CD0": 0.040,               # drag coefficient at zero lift
@@ -26,47 +28,58 @@ inputs = {
     "n_props_cruise": 1,        # number of cruise propellers
     "n_props_vtol": 4,          # number of VTOL propellers
     "n_blades_cruise": 4,       # number of blades per cruise propeller
-    "n_blades_vtol": 4,
-    "K_p": 0.0938,
-    "t_hover": 4 * 60,
-    "t_loiter": 0,
-    "E_spec": 168,
-    "Eta_bat": 0.95,
-    "f_usable": 6000,
-    "Eta_electric": 0.95,
-    "LD_max": 12,
-    "CL": 0.846,
-    "CD": 0.04,
-    "T": 30 * 9.81,
-    "h_end": 100,
-    "h_start": 0,
-    "MF_struct": 0.35,
-    "MF_avion": 0.05,
-    "MF_Subsyst": 0.07,
-    "M_payload": 5,
-    "amount_of_iterations": 10
+    "n_blades_vtol": 4,         # number of blades per VTOL propeller
+    "K_p": 0.0938,              # propeller constant (kg/W^E1 * V^E2)
+    "t_hover": 4 * 60,          # hover time in seconds
+    "t_loiter": 0,              # loiter time in seconds
+    "E_spec": 168,              # specific energy of the battery (Wh/kg)
+    "Eta_bat": 0.95,            # battery efficiency
+    "f_usable": 6000,           # usable battery capacity (Wh)
+    "Eta_electric": 0.95,       # electric system efficiency
+    "LD_max": 12,               # maximum lift-to-drag ratio
+    "CL": 0.846,                # lift coefficient
+    "CD": 0.04,                 # drag coefficient
+    "T": 30 * 9.81,             # thrust in N
+    "h_end": 100,               # end altitude in m
+    "h_start": 0,               # start altitude in m
+    "MF_struct": 0.35,          # mass fraction for structure
+    "MF_avion": 0.05,           # mass fraction for avionics
+    "MF_Subsyst": 0.07,         # mass fraction for subsystems
+    "M_payload": 5,             # payload mass in kg
+    "amount_of_iterations": 10  # number of iterations for convergence
 }
 
 
 # ================================
 
 
-
-
-
+constants = { }
 
 mission_definition = []   # Define the mission profile here
-mission_parameters = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise": 120/3.6, "V_descent": 3}   
-time_estimates = {"t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60}
 
-power_parameters = {"P_load": 100, "P_a_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
+mission_parameters = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise": 120/3.6, "V_descent": 3}   
+inputs.update(mission_parameters)
+
+
+time_estimates = {"t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60}
+inputs.update(time_estimates)
+
+power_parameters = {"P_load": 100, "P_r_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
+inputs.update(power_parameters)
 
 fw_parameters = {"C_L_cruise": 0.6, "C_L_max": 1.5, "C_D_cruise": 0.05, "S_wing": 2.5, "AR": 6, "e": 0.8}
-vtol_parameters = {"number_propellers": 4, "number_motors": 4, "propeller_diameter": 0.5, "propeller_pitch": 0.2, "propeller_efficiency": 0.8}
+inputs.update(fw_parameters)
 
+vtol_parameters = {"number_propellers": 4, "number_motors": 4, "propeller_diameter": 0.5, "propeller_pitch": 0.2, "propeller_efficiency": 0.8}
+inputs.update(vtol_parameters)
 
 mass_parameters = {"M_to": 30, "M_payload": 5, "M_battery": 10, "M_FW": 5, "M_VTOL": 5}
-material_parameters = {}
+inputs.update(mass_parameters)
+
+
+
+
+
 
 tolerance = 0.001
 max_iterations = 100
