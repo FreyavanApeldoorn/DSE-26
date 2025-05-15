@@ -176,11 +176,11 @@ def mass_sizing(inputs: dict[str, float | int]):
     inputs['M_to'] = M_TO
     inputs['MTOW'] = M_TO*9.81
     inputs['M_battery'] = M_Batt
-    inputs['p_req_VTOL'] = p_req_VTOL
-    inputs['P_max_cruise'] = P_max_cruise
+    inputs['P_r_VTOL'] = p_req_VTOL
+    inputs['P_r_FW'] = P_max_cruise
     inputs['t_w'] = t_w
-    inputs['D_prop_VTOL'] = D_prop_VTOL
-    inputs['s'] = s
-    inputs['b'] = b
+    inputs['propeller_diameter'] = D_prop_VTOL
+    inputs['S_wing'] = s
+    inputs['b_wing'] = b
 
     return inputs
