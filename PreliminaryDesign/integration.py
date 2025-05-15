@@ -1,6 +1,7 @@
 from mission_profile import MissionProfile
 from mass_estimation import mass_sizing
 from Classes.Contraints_for_mass_calculations import Constraints
+from Battery_mass_estimation_v2 import calculate_battery_mass
 import numpy as np
 
 
@@ -175,6 +176,14 @@ mass_estimation_parameters = {
     }
 inputs.update(mass_estimation_parameters)
 
+battery_parameters = {
+    
+    "DOD_fraction": 0.8,         # Fraction of battery capacity that can be used (Depth of Discharge)
+    "eta_battery": 0.95,         # Battery discharge efficiency
+    }
+inputs.update(battery_parameters)
+
+
 
 
 # Iteration loop 
@@ -195,7 +204,18 @@ def intergation_optimization(tolerance, max_iterations, inputs):
 
         mission = MissionProfile(inputs)
         outputs = mission.mission_profile().copy()
+
+        # Calculate the mass of the battery
+        battery_mass = calculate_battery_mass(
+            E_required_Wh=inputs["total_mission_energy"],
+            DOD_fraction=inputs["DOD_fraction"],
+            eta_battery=inputs["eta_battery"]
+        )
+       
+        inputs["M_battery"] = battery_mass
+
         outputs = mass_sizing(outputs)
+        
 
         if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs if isinstance(outputs[key], float) or isinstance(outputs[key], np.float64)):
             print('Converged')
