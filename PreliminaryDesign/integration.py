@@ -1,5 +1,6 @@
 from mission_profile import MissionProfile
 from mass_estimation import mass_sizing
+from Classes.Contraints_for_mass_calculations import Constraints
 import numpy as np
 
 
@@ -181,6 +182,7 @@ inputs.update(mass_estimation_parameters)
 
 tolerance = 1
 max_iterations = 1000
+relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter']
 
 def intergation_optimization(tolerance, max_iterations, inputs):
     for _ in range(max_iterations):
@@ -193,14 +195,28 @@ def intergation_optimization(tolerance, max_iterations, inputs):
             print('Converged')
             return outputs
         
-        
+        for key in outputs:
+            if abs(outputs[key] - inputs[key]) < tolerance:
+                print(key)
+
         inputs = outputs
     print('result did not stabilize at max iteration')
     return outputs
 
-relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter']
-
 final_output = intergation_optimization(tolerance, max_iterations, inputs)
+
+constraint_plot = Constraints(
+    final_output["V_stall"],
+    final_output["V_cruise"],
+    final_output["e"],
+    final_output["AR"],
+    final_output["CL_max"],
+    final_output["CD0"],
+    final_output["propeller_efficiency_cruise"],
+    final_output["RC_service"]
+    )
+
+constraint_plot.plot()
 
 for i in relevant:
     print(i, final_output[i])
