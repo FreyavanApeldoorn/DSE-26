@@ -5,7 +5,7 @@ from PreliminaryDesign.Classes.Contraints_for_mass_calculations import Constrain
 from PreliminaryDesign.Classes.vtol_propulsion_sizing import VTOLProp
 from PreliminaryDesign.Classes.electric_propulsion_mass_sizing import PropMass
 from PreliminaryDesign.Classes.Battery_Mass_Calculations import BattMass
-from Optimization import _mass_loop  # your cached sizing loop
+from PreliminaryDesign.mass_estimation import _mass_loop  # your cached sizing loop
 
 # ─── Constants ─────────────────────────────────────────────────────────
 g = 9.81

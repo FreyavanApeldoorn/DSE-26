@@ -1,5 +1,5 @@
 from mission_profile import MissionProfile
-from Optimization import mass_sizing
+from mass_estimation import mass_sizing
 
 inputs = {
     "rho": 0.9013,              # kg/m^3, density of air at sea level
