@@ -1,11 +1,12 @@
 from mission_profile import MissionProfile
 from mass_estimation import mass_sizing
+import numpy as np
 
 
 
 inputs = {
     "rho": 0.9013,              # kg/m^3, density of air at sea level
-    "M_to": 30 * 9.81,          # N, maximum take-off weight   #CHANGED
+    "MTOW": 30 * 9.81,          # N, maximum take-off weight   #CHANGED
     "V_cruise": 100 / 3.6,      # m/s, cruise speed
     "Vstall": 13.8,             # m/s, stall speed
     "CD0": 0.040,               # drag coefficient at zero lift
@@ -84,6 +85,8 @@ inputs.update(mass_parameters)
 tolerance = 0.001
 max_iterations = 100
 
+relevant = ['MTOW', 'V_cruise']
+
 def intergation_optimization(tolerance, max_iterations, inputs):
     for _ in range(max_iterations):
         mission = MissionProfile(inputs)
@@ -92,7 +95,9 @@ def intergation_optimization(tolerance, max_iterations, inputs):
 
         outputs = mass_sizing(outputs)
 
-        if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs):
+        print(outputs)
+
+        if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs if isinstance(outputs[key], float)):
             return outputs
 
         inputs = outputs
@@ -100,7 +105,7 @@ def intergation_optimization(tolerance, max_iterations, inputs):
     return outputs
 
 
-print(intergation_optimization(tolerance, max_iterations, inputs))
+print(intergation_optimization(tolerance, max_iterations, inputs)['MTOW'] / 9.81)
 
 
 

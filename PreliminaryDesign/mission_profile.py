@@ -39,13 +39,13 @@ def power_load(P_load=1000):
     return P_load
 
 
-def power_ascent(P_a_VTOL):
+def power_ascent(P_r_VTOL):
 
     """
-    P_a_VTOL: power available (assuming full power) (Vanessa)
+    P_r_VTOL: power available (assuming full power) (Vanessa)
     """
 
-    return P_a_VTOL
+    return P_r_VTOL
 
 
 def power_transition(P_a_transition):
@@ -62,9 +62,9 @@ def power_cruise(P_a_FW):
     return P_a_FW
 
 
-def power_descent(P_r, P_a_VTOL):
+def power_descent(P_r, P_r_VTOL):
 
-    P_descent = P_r - (P_a_VTOL - P_r)   # giving the same ROC as in ascent
+    P_descent = P_r - (P_r_VTOL - P_r)   # giving the same ROC as in ascent
 
     return P_descent
 
@@ -79,7 +79,7 @@ def power_deploy(P_deploy=1000):
 
 
 
-# P_load, P_a_VTOL, P_a_FW, P_a_transition, P_r (hover), P_deploy
+# P_load, P_r_VTOL, P_a_FW, P_a_transition, P_r (hover), P_deploy
 
 
 
@@ -123,7 +123,7 @@ class MissionProfile:
         Time to recharge the UAV in seconds
     P_load: float
         Power to load the UAV in watts
-    P_a_VTOL: float
+    P_r_VTOL: float
         Power available for VTOL in watts
     P_r_FW: float
         Power required for FW in watts
@@ -154,7 +154,7 @@ class MissionProfile:
         self.t_recharge = inputs["t_recharge"]
 
         self.P_load = inputs["P_load"]
-        self.P_a_VTOL = inputs["P_a_VTOL"]
+        self.P_r_VTOL = inputs["P_r_VTOL"]
         self.P_r_FW = inputs["P_r_FW"]
         self.P_a_transition = inputs["P_a_transition"]
         self.P_r = inputs["P_r"]
@@ -256,7 +256,7 @@ class MissionProfile:
         times = np.array(times)
         total_time = np.sum(times)
 
-        powers = [self.P_load, self.P_a_VTOL, self.P_a_transition, self.P_r_FW, self.P_a_transition, self.P_r, self.P_r, self.P_deploy, self.P_a_VTOL, self.P_a_transition, self.P_r_FW, self.P_a_transition, self.P_r, self.P_load]
+        powers = [self.P_load, self.P_r_VTOL, self.P_a_transition, self.P_r_FW, self.P_a_transition, self.P_r, self.P_r, self.P_deploy, self.P_r_VTOL, self.P_a_transition, self.P_r_FW, self.P_a_transition, self.P_r, self.P_load]
         powers = np.array(powers)
         total_power = np.sum(powers)
 
@@ -330,7 +330,7 @@ if __name__ == '__main__':
     mission_definition = []   # Define the mission profile here
     inputs = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise": 120/3.6, "V_descent": 3}   
     inputs = {"t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60}
-    inputs = {"P_load": 100, "P_a_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
+    inputs = {"P_load": 100, "P_r_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
 
 
     mission = MissionProfile(inputs, inputs, inputs)
