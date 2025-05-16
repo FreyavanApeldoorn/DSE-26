@@ -1,6 +1,7 @@
 from mission_profile import MissionProfile
 from mass_estimation import mass_sizing
 from Classes.Contraints_for_mass_calculations import Constraints
+from Battery_mass_estimation_v2 import calculate_battery_mass
 import numpy as np
 
 
@@ -68,7 +69,7 @@ mission_parameters = {
     "rho_max": 1.225, 
     "RC_service": 0.5,
     "h_service": 3000,
-    "R_max": 30000, 
+    "R_max": 30000, #30000
     "V_climb_v": 6, 
     "V_cruise": 120/3.6, 
     "V_descent": 3
@@ -114,9 +115,9 @@ fw_parameters = {
     "t_w": 0,                   # Thrust-to-weight ratio (initialized to 0)
     "CD_cruise": 0.05, 
     "CD0": 0.040, 
-    "V_stall": 13.8, 
+    "V_stall": 13.8,             # m/s, stall speed
     "S_wing": 2.5, 
-    "AR": 10.3, 
+    "AR": 7, #10.3
     "b_wing": 0,                # span (initialized to 0)
     "e": 0.7,
     "n_propellers_cruise": 1,        # number of cruise propellers
@@ -175,6 +176,14 @@ mass_estimation_parameters = {
     }
 inputs.update(mass_estimation_parameters)
 
+battery_parameters = {
+    
+    "DOD_fraction": 0.8,         # Fraction of battery capacity that can be used (Depth of Discharge)
+    "eta_battery": 0.95,         # Battery discharge efficiency
+    }
+inputs.update(battery_parameters)
+
+
 
 
 # Iteration loop 
@@ -185,7 +194,7 @@ max_iterations = 200
 relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter']
 
 doesnt_converge = set()
-def intergation_optimization(tolerance, max_iterations, inputs):
+def integration_optimization(tolerance, max_iterations, inputs):
     hist = {
         'P_r_VTOL': [],
         'P_r_FW': []
@@ -195,7 +204,18 @@ def intergation_optimization(tolerance, max_iterations, inputs):
 
         mission = MissionProfile(inputs)
         outputs = mission.mission_profile().copy()
+
+        # Calculate the mass of the battery
+        battery_mass = calculate_battery_mass(
+            E_required_Wh=inputs['total_mission_energy'],
+            DOD_fraction=inputs['DOD_fraction'],
+            eta_battery=inputs['eta_battery']
+        )
+       
+        inputs['M_battery'] = battery_mass
+
         outputs = mass_sizing(outputs)
+        
 
         if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs if isinstance(outputs[key], float) or isinstance(outputs[key], np.float64)):
             print('Converged')
@@ -206,7 +226,6 @@ def intergation_optimization(tolerance, max_iterations, inputs):
                 if isinstance(outputs[key], float) or isinstance(outputs[key],  np.float64):
                     if abs(outputs[key] - inputs[key]) > tolerance:
                         doesnt_converge.add(key)
-            print(inputs['P_r_VTOL'], inputs['P_r_FW'])
 
         hist["P_r_VTOL"].append(outputs["P_r_VTOL"]) 
         hist['P_r_FW'].append(outputs["P_r_FW"])
@@ -215,7 +234,7 @@ def intergation_optimization(tolerance, max_iterations, inputs):
     print('result did not stabilize at max iteration')
     return outputs, hist
 
-final_output, hist = intergation_optimization(tolerance, max_iterations, inputs)
+final_output, hist = integration_optimization(tolerance, max_iterations, inputs)
 
 constraint_plot = Constraints(
     final_output["V_stall"],
@@ -233,5 +252,5 @@ constraint_plot.plot()
 for i in relevant:
     print(i, final_output[i])
 
-print(hist)
+print(doesnt_converge)
 

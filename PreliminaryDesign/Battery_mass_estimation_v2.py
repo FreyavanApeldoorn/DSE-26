@@ -8,10 +8,8 @@ inputs = {
 }
 
 # Calculate battery mass
-def calculate_battery_mass(inputs):
-    E_required_Wh = inputs["E_required_Wh"]
-    DOD_fraction = inputs["DOD_fraction"]
-    eta_battery = inputs["eta_battery"]
+def calculate_battery_mass(E_required_Wh, DOD_fraction, eta_battery):
+    
 
     E_battery = E_required_Wh / (eta_battery * DOD_fraction)
     
@@ -28,4 +26,3 @@ def calculate_battery_mass(inputs):
     M_battery = (-b + (discriminant)**(1/2)) / (2 * a)
     return M_battery
 
-print("Battery mass (kg):", calculate_battery_mass(inputs))
