@@ -160,5 +160,6 @@ def mass_sizing(inputs: dict[str, float | int]) -> dict[str, float | int]:
     inputs['propeller_diameter'] = D_prop_VTOL
     inputs['S_wing'] = s
     inputs['b_wing'] = b
+    inputs['w_s'] = w_s
 
     return inputs

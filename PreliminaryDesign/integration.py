@@ -183,7 +183,7 @@ battery_parameters = {
     }
 inputs.update(battery_parameters)
 
-
+V_range = np.arange(40, 70, 2)
 
 
 # Iteration loop 
@@ -203,13 +203,7 @@ def integration_optimization(tolerance: float, max_iterations: int, inputs: dict
     max_iterations (int): The maximum number of iterations to perform.
     inputs (dict): A dictionary containing the input parameters for the calculations.
     '''
-    hist = {
-        'P_r_VTOL': [],
-        'P_r_FW': []
-    }
     for i in range(max_iterations):
-        print('Successful loop')
-
         mission = MissionProfile(inputs)
         outputs = mission.mission_profile().copy()
         
@@ -230,7 +224,7 @@ def integration_optimization(tolerance: float, max_iterations: int, inputs: dict
 
         if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs if isinstance(outputs[key], float) or isinstance(outputs[key], np.float64)):
             print('Converged')
-            return outputs, hist
+            return outputs
         
         if i > max_iterations-3:       
             for key in outputs:
@@ -238,29 +232,26 @@ def integration_optimization(tolerance: float, max_iterations: int, inputs: dict
                     if abs(outputs[key] - inputs[key]) > tolerance:
                         doesnt_converge.add(key)
 
-        hist["P_r_VTOL"].append(outputs["P_r_VTOL"]) 
-        hist['P_r_FW'].append(outputs["P_r_FW"])
-
         inputs = outputs
     print('result did not stabilize at max iteration')
-    return outputs, hist
+    return outputs
 
-final_output, hist = integration_optimization(tolerance, max_iterations, inputs)
+# print(integration_optimization(1, 100, inputs))
 
-constraint_plot = Constraints(
-    final_output["V_stall"],
-    final_output["V_cruise"],
-    final_output["e"],
-    final_output["AR"],
-    final_output["CL_max"],
-    final_output["CD0"],
-    final_output["propeller_efficiency_cruise"],
-    final_output["RC_service"]
-    )
+def speed_optimisation(inputs, V_range, max_to):
+    all_outputs = []
+    for V in V_range:
+        print('Calculating for V=', V)
+        inputs['V_cruise'] = V
+        inputs['V_stall'] = 0.5 * V
 
-constraint_plot.plot()
+        outputs = integration_optimization(0.01, 100, inputs)
+        if outputs['M_to'] < max_to:
+            all_outputs.append(outputs)
 
-for i in relevant:
-    print(i, final_output[i])
+    if all_outputs:
+        return all_outputs[-1]
+    else:
+        return 'No viable outputs'
 
-print(doesnt_converge)
+print(speed_optimisation(inputs, V_range, 30))
