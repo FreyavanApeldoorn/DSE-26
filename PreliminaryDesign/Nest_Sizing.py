@@ -84,3 +84,24 @@ class AeroShield_Nest:
 
         nest_volume = nest_length * nest_width * nest_height #[m^3]
         return (nest_volume, nest_length, nest_width, nest_height)
+    
+
+
+
+class Nest_Generator:
+
+    """Class for nest sizing."""
+
+    def __init__():
+        pass
+
+    def volume():
+        pass
+
+    def deployment_time():
+        pass
+
+
+
+    def size_nest():
+        pass

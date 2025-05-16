@@ -194,7 +194,15 @@ max_iterations = 200
 relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter', 'M_battery']
 
 doesnt_converge = set()
-def integration_optimization(tolerance, max_iterations, inputs):
+def integration_optimization(tolerance: float, max_iterations: int, inputs: dict[str, float | int]) -> tuple[dict[str, float | int], dict[str, list[float]]]:
+    '''
+    Combines the mass estimation, battery calculation and mission profile calculations and iterates until convergence or max iterations.
+
+    Parameters:
+    tolerance (float): The tolerance for convergence.   
+    max_iterations (int): The maximum number of iterations to perform.
+    inputs (dict): A dictionary containing the input parameters for the calculations.
+    '''
     hist = {
         'P_r_VTOL': [],
         'P_r_FW': []
@@ -256,4 +264,3 @@ for i in relevant:
     print(i, final_output[i])
 
 print(doesnt_converge)
-
