@@ -115,7 +115,7 @@ fw_parameters = {
     "t_w": 0,                   # Thrust-to-weight ratio (initialized to 0)
     "CD_cruise": 0.05, 
     "CD0": 0.040, 
-    "V_stall": 13.8,             # m/s, stall speed
+    "V_stall": 19,             # m/s, stall speed
     "S_wing": 2.5, 
     "AR": 7, #10.3
     "b_wing": 0,                # span (initialized to 0)
@@ -194,7 +194,15 @@ max_iterations = 200
 relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter']
 
 doesnt_converge = set()
-def integration_optimization(tolerance, max_iterations, inputs):
+def integration_optimization(tolerance: float, max_iterations: int, inputs: dict[str, float | int]) -> tuple[dict[str, float | int], dict[str, list[float]]]:
+    '''
+    Combines the mass estimation, battery calculation and mission profile calculations and iterates until convergence or max iterations.
+
+    Parameters:
+    tolerance (float): The tolerance for convergence.   
+    max_iterations (int): The maximum number of iterations to perform.
+    inputs (dict): A dictionary containing the input parameters for the calculations.
+    '''
     hist = {
         'P_r_VTOL': [],
         'P_r_FW': []
@@ -253,4 +261,3 @@ for i in relevant:
     print(i, final_output[i])
 
 print(doesnt_converge)
-
