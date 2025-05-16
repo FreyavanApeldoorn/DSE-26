@@ -115,7 +115,7 @@ fw_parameters = {
     "t_w": 0,                   # Thrust-to-weight ratio (initialized to 0)
     "CD_cruise": 0.05, 
     "CD0": 0.040, 
-    "V_stall": 13.8,             # m/s, stall speed
+    "V_stall": 19,             # m/s, stall speed
     "S_wing": 2.5, 
     "AR": 7, #10.3
     "b_wing": 0,                # span (initialized to 0)
@@ -148,9 +148,9 @@ mass_parameters = {
     "MTOW": 30 * 9.81,
     "M_to": 30,             # take off mass in kg
     "M_payload": 5, 
-    "M_battery": 10,        # battery mass in kg
-    "M_FW": 5, 
-    "M_VTOL": 5,
+    "M_battery": 0,        # initiialise to 0, will be calculated later
+    #"M_FW": 5, 
+    #"M_VTOL": 5,
     "MF_struct": 0.35,          # mass fraction for structure
     "MF_avion": 0.05,           # mass fraction for avionics
     "MF_Subsyst": 0.07         # mass fraction for subsystems
@@ -191,7 +191,7 @@ inputs.update(battery_parameters)
 
 tolerance = 1
 max_iterations = 200
-relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter']
+relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter', 'M_battery']
 
 doesnt_converge = set()
 def integration_optimization(tolerance, max_iterations, inputs):
@@ -204,15 +204,18 @@ def integration_optimization(tolerance, max_iterations, inputs):
 
         mission = MissionProfile(inputs)
         outputs = mission.mission_profile().copy()
+        
 
         # Calculate the mass of the battery
         battery_mass = calculate_battery_mass(
             E_required_Wh=inputs['total_mission_energy'],
             DOD_fraction=inputs['DOD_fraction'],
-            eta_battery=inputs['eta_battery']
+            eta_battery=inputs['eta_battery'],
+            M_to=inputs['M_to'] 
         )
+        
        
-        inputs['M_battery'] = battery_mass
+        outputs['M_battery'] = battery_mass
 
         outputs = mass_sizing(outputs)
         

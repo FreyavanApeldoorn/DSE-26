@@ -26,10 +26,12 @@ def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, M_ba
         prop_mass.D_prop_vtol = D_prop_VTOL
 
         M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
+        
 
         new_M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload + M_batt) / (
             1 - (MF_struct + MF_Subsyst + MF_avion)
         )
+        #print(f"M_Vtol_Prop: {M_Vtol_Prop}, M_FW_Prop: {M_FW_Prop}, M_batt: {M_batt}, M_payload: {M_payload}, M_TO: {new_M_TO}")
 
         if abs(new_M_TO - M_TO) / M_TO < 0.001:
             return count, M_TO, M_batt, p_req_VTOL, P_max_cruise, T / MTOW, D_prop_VTOL, s
@@ -102,6 +104,7 @@ def mass_sizing(inputs: dict[str, float | int]):
     VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["n_propellers_vtol"])
     p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
     D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
+    
 
     prop_mass = PropMass(
         P_max_cruise,
