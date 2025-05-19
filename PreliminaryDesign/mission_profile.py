@@ -242,6 +242,34 @@ class SizeUAV:
 
 
 class SizeSwarm:
+    """
+    A class to model and size a swarm of drones for wildfire and oil spill containment missions,
+    focusing on aerogel deployment for creating fire breaks.
+    Attributes:
+        verbose (bool): If True, enables verbose output for debugging.
+        inputs (dict): Dictionary containing all input parameters for the mission.
+        fire_break_width (float): Required width of the fire break to be created.
+        R_max (float): Maximum allowed radius or range constraint for the mission.
+        n_drones (int): Number of drones in the swarm.
+        n_nests (int): Number of nests or deployment bases.
+        aerogel_length (float): Length of aerogel deployed by each drone per mission.
+        aerogel_width (float): Width of the aerogel strip.
+        aerogel_thickness (float): Thickness of the aerogel strip.
+        uav_mission_time (float): Total mission time for one drone.
+        uav_mission_energy (float): Total mission energy consumed by one drone.
+        deployment_accuracy (float): Deployment accuracy margin to account for placement errors.
+        n_layers (float): Number of aerogel layers required to cover the fire break width.
+    Methods:
+        required_layers():
+            Calculates the number of aerogel layers required to cover the fire break width,
+            accounting for deployment accuracy. Raises ValueError if effective width is non-positive.
+        mission_performance():
+            Computes the swarm's deployment rate (meters/second) and total energy consumption
+            for the mission, considering all drones and required layers.
+        update_parameters():
+            Updates the input dictionary with calculated swarm deployment rate and energy,
+            and returns the updated dictionary.
+    """
 
     def __init__(self, inputs, verbose=False):
 
@@ -272,7 +300,22 @@ class SizeSwarm:
         # Deployment parameters:
         self.deployment_accuracy = inputs["deployment_accuracy"]
 
+
     def required_layers(self):
+        """
+        Calculates and returns the number of aerogel layers required to cover the fire break perimeter,
+        accounting for deployment accuracy.
+        The method computes the effective width of each aerogel layer by subtracting the deployment
+        accuracy from the nominal aerogel width. It then determines how many such layers are needed to
+        span the total fire break width. If the effective width is not positive, a ValueError is raised.
+        Returns:
+            float: The number of layers required to cover the fire break perimeter.
+        Raises:
+            ValueError: If the effective aerogel width is not positive.
+        Side Effects:
+            Sets self.n_layers to the calculated number of layers.
+            If self.verbose is True, prints the number of layers required.
+        """
 
         # Increase width to account for deployment accuracy
         effective_width = self.aerogel_width - self.deployment_accuracy
@@ -287,7 +330,23 @@ class SizeSwarm:
 
         return n_layers
 
+
     def mission_performance(self):
+        """
+        Calculates and returns the swarm deployment rate and total energy consumption for the mission.
+        This method computes:
+            - The total deployed aerogel length for the mission, considering the number of drones and required layers.
+            - The deployment rate, defined as the total deployed aerogel length divided by the mission time.
+            - The total energy consumption for all drones and layers during the mission.
+        Updates:
+            self.inputs["swarm_deployment_rate"]: The deployment rate (meters/second).
+            self.inputs["swarm_energy"]: The total energy consumed (units as per uav_mission_energy).
+        Returns:
+            tuple:
+                deployment_rate (float): The rate at which aerogel is deployed by the swarm (meters/second).
+                total_energy (float): The total energy consumed by the swarm during the mission.
+        """
+
         self.n_layers = self.required_layers()
 
         # The total deployed aerogel length per mission
@@ -307,6 +366,15 @@ class SizeSwarm:
         return deployment_rate, total_energy
 
     def update_parameters(self):
+        """
+        Updates the input parameters with the latest swarm deployment rate and total energy.
+        This method calls `mission_performance()` to retrieve the current deployment rate and total energy
+        required for the mission. It then updates the `inputs` dictionary with these values under the keys
+        'swarm_deployment_rate' and 'swarm_energy', respectively.
+        Returns:
+            dict: The updated inputs dictionary containing the new deployment rate and energy values.
+        """
+
         deployment_rate, total_energy = self.mission_performance()
         self.inputs["swarm_deployment_rate"] = deployment_rate
         self.inputs["swarm_energy"] = total_energy
