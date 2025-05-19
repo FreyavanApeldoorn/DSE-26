@@ -7,7 +7,7 @@ from Classes.vtol_propulsion_sizing import VTOLProp
 from Classes.Battery_Mass_Calculations import BattMass
 
 # ~~~ Iteration Loop ~~~
-def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, M_batt: float, M_payload, MF_struct, MF_Subsyst, MF_avion):
+def iteration(M_TO: float, w_s: float, p_w: float, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, M_batt: float, M_payload: float, MF_struct: float, MF_Subsyst: float, MF_avion: float) -> tuple[int, float, float, float, float, float, float, float]:
     '''
     Given a set w_s and p_w, iterate until the MTOW stabilizes
     '''
@@ -26,10 +26,12 @@ def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, M_ba
         prop_mass.D_prop_vtol = D_prop_VTOL
 
         M_FW_Prop, M_Vtol_Prop = prop_mass.calculate_propulsion_mass()
+        
 
         new_M_TO = (M_Vtol_Prop + M_FW_Prop + M_payload + M_batt) / (
             1 - (MF_struct + MF_Subsyst + MF_avion)
         )
+        #print(f"M_Vtol_Prop: {M_Vtol_Prop}, M_FW_Prop: {M_FW_Prop}, M_batt: {M_batt}, M_payload: {M_payload}, M_TO: {new_M_TO}")
 
         if abs(new_M_TO - M_TO) / M_TO < 0.001:
             return count, M_TO, M_batt, p_req_VTOL, P_max_cruise, T / MTOW, D_prop_VTOL, s
@@ -37,10 +39,11 @@ def iteration(M_TO, w_s, p_w, VTOL_prop_mod: VTOLProp, prop_mass: PropMass, M_ba
             M_TO = new_M_TO
             MTOW = M_TO * 9.81
 
-def mass_sizing(inputs: dict[str, float | int]):
+def mass_sizing(inputs: dict[str, float | int]) -> dict[str, float | int]:
 
     '''
-    Performs initial sizing based on the given inputs
+    Performs initial sizing based on the given inputs and returns the updated inputs.
+    The function iterates over a range of wing loadings and power loadings to find the optimal configuration for the aircraft.
     '''
 
     # ~~~ Optimization Loop ~~~
@@ -93,7 +96,7 @@ def mass_sizing(inputs: dict[str, float | int]):
             _, M_TO, _, _, _, _, _, _ = iteration(inputs['M_to'], w_s, p_w, VTOL_prop_mod, prop_mass, inputs["M_battery"], inputs['M_payload'], inputs['MF_struct'], inputs['MF_Subsyst'], inputs['MF_avion'])
             all_masses.append([M_TO, w_s, p_w])
 
-    # Get final parameters
+    # ~~~ Get final parameters ~~~
     best_config = min(all_masses, key=lambda x: x[0])
     w_s = best_config[1]
     p_w = best_config[2]
@@ -102,6 +105,7 @@ def mass_sizing(inputs: dict[str, float | int]):
     VTOL_prop_mod = VTOLProp(w_s, inputs["stot_s_w"], inputs["MTOW"], inputs["n_propellers_vtol"])
     p_req_VTOL, S_prop, DL, T = VTOL_prop_mod.power_required_vtol()
     D_prop_VTOL = 2 * (S_prop / np.pi) ** 0.5
+    
 
     prop_mass = PropMass(
         P_max_cruise,
@@ -156,5 +160,6 @@ def mass_sizing(inputs: dict[str, float | int]):
     inputs['propeller_diameter'] = D_prop_VTOL
     inputs['S_wing'] = s
     inputs['b_wing'] = b
+    inputs['w_s'] = w_s
 
     return inputs
