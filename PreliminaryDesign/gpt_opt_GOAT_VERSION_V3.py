@@ -6,10 +6,10 @@ import numpy as np
 from functools import lru_cache
 from scipy.optimize import minimize, Bounds
 
-from Contraints_for_mass_calculations import Constraints, powerLoading
-from vtol_propulsion_sizing import VTOLProp
-from electric_propulsion_mass_sizing import PropMass
-from Battery_Mass_Calculations import BattMass
+from Classes.Contraints_for_mass_calculations import Constraints, powerLoading
+from Classes.vtol_propulsion_sizing import VTOLProp
+from Classes.electric_propulsion_mass_sizing import PropMass
+from Classes.Battery_Mass_Calculations import BattMass
 
 # ──────────────── Defaults (override via optimise()) ─────────────────── #
 DEFAULTS = dict(
@@ -23,7 +23,7 @@ DEFAULTS = dict(
     prop_eff=0.85,
     R_C=3.0,
     # Geometric limits & config
-    span_max=3.0,
+    span_max=3.1,
     STOT_S_W=1.35,
     n_props_vtol=4,
     n_props_cruise=1,
@@ -160,14 +160,14 @@ def _constraint_functions(cfg):
     def g_prop_cr(ws, pw):
         mtom = _mass_loop(ws, pw)
         D_cr = cfg["K_p"] * ((mtom * g) * pw / cfg["n_props_cruise"]) ** 0.25
-        return 0.5 - D_cr
+        return 1 - D_cr
 
     def g_prop_vt(ws, pw):
         mtom = _mass_loop(ws, pw)
         vtol = VTOLProp(ws, cfg["STOT_S_W"], mtom * g, cfg["n_props_vtol"])
         _, S_p, _, _ = vtol.power_required_vtol()
         D_v = 2 * np.sqrt(S_p / np.pi)
-        return 0.5 - D_v
+        return 1 - D_v
 
     return [g_stall, g_cruise, g_climb, g_span, g_prop_cr, g_prop_vt]
 
