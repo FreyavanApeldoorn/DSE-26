@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-class UAVProfile:
+class SizeUAV:
 
     """
     Class to define the mission profile of a UAV
@@ -238,40 +238,20 @@ class UAVProfile:
 
     
 
-#===============================
-#===============================
-# Example usage
-
-
-if __name__ == '__main__':
-    mission_definition = []   # Define the mission profile here
-    inputs = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise": 120/3.6, "V_descent": 3}   
-    inputs = {"t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60}
-    inputs = {"P_load": 100, "P_r_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
-
-
-    mission = MissionProfile(inputs, inputs, inputs)
-
-
-    total_time, total_energy, times, energies, powers = mission.mission_profile()
-
-    print("Total mission time: ", total_time/60, "minutes")
-    print("Total energy required: ", total_energy/3600, "Wh")
-
-    mission.plot_energy_consumption()
-    mission.plot_power_consumption()
 
 
 
-
-class MissionProfile:
+class SizeSwarm:
 
     def __init__(self, inputs, verbose=False):
 
         self.verbose = verbose
 
+        self.inputs = inputs
+
         # Parameters to do with wildfire & oil spill requirements
-        self.required_perimeter = inputs["required_perimeter"]
+        # self.required_perimeter is no longer required as input
+
         self.fire_break_width = inputs["fire_break_width"]
 
         # Constraints
@@ -285,14 +265,12 @@ class MissionProfile:
         self.aerogel_width = inputs["aerogel_width"]
         self.aerogel_thickness = inputs["aerogel_thickness"]
 
-
         # Previous calculation results
         self.uav_mission_time = inputs["total_mission_time"]
         self.uav_mission_energy = inputs["total_mission_energy"]
 
         # Deployment parameters:
         self.deployment_accuracy = inputs["deployment_accuracy"]
-
 
     def required_layers(self):
 
@@ -309,30 +287,48 @@ class MissionProfile:
 
         return n_layers
 
-
     def mission_performance(self):
-
         self.n_layers = self.required_layers()
 
-        # Calculate deployment rate
-        required_aerogel_length = self.required_perimeter * self.n_layers
-        required_trips = np.ceil(required_aerogel_length / self.aerogel_length)
-        self.required_trips = required_trips
+        # The total deployed aerogel length per mission
+        total_aerogel_length = self.aerogel_length * self.n_drones * self.n_layers
 
-        total_uav_time = required_trips * self.total_mission_time
-        mission_time = total_uav_time / self.n_drones
+        # The deployment rate is the total deployed length per total mission time
+        mission_time = self.uav_mission_time  # time for one mission per drone
 
-        self.deployment_rate = self.required_perimeter / mission_time
-        inputs["swarm_deployment_rate"] = self.deployment_rate
+        # Deployment rate: meters of aerogel deployed per second (all drones, all layers)
+        deployment_rate = total_aerogel_length / mission_time
+        self.inputs["swarm_deployment_rate"] = deployment_rate
 
-        # Calculate energy consumption
-        total_energy = self.uav_mission_energy * required_trips
-        inputs["swarm_energy"] = total_energy
+        # Calculate energy consumption (all drones, all layers)
+        total_energy = self.uav_mission_energy * self.n_drones * self.n_layers
+        self.inputs["swarm_energy"] = total_energy
 
-        return self.deployment_rate
+        return deployment_rate, total_energy
 
-    def mission_energy(self):
+    def update_parameters(self):
+        deployment_rate, total_energy = self.mission_performance()
+        self.inputs["swarm_deployment_rate"] = deployment_rate
+        self.inputs["swarm_energy"] = total_energy
 
-        self.required_trips 
+        return self.inputs
 
 
+
+# example usage
+if __name__ == '__main__':
+    mission_definition = []   # Define the mission profile here
+    swarm_inputs = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 6, "V_cruise": 120/3.6, "V_descent": 3, "required_perimeter": 1000, 
+                    "n_drones": 20, "n_nests": 1, "aerogel_length": 100, "aerogel_width": 10, "aerogel_thickness": 0.1, "deployment_accuracy": 0.5, "fire_break_width": 5}   
+    uav_inputs = {"total_mission_time":1200, "total_mission_energy": 4000, "t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60,
+                  "P_load": 100, "P_r_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
+    
+    inputs = swarm_inputs.copy()
+    inputs.update(uav_inputs)
+
+    #mission = MissionProfile(inputs, inputs, inputs)
+
+    Swarm = SizeSwarm(inputs)
+    inputs = Swarm.update_parameters()
+
+    print(inputs)
