@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-class MissionProfile:
+class UAVProfile:
 
     """
     Class to define the mission profile of a UAV
@@ -158,7 +158,7 @@ class MissionProfile:
 
     
 
-    def mission_profile(self):
+    def uav_profile(self):
 
         t_load = self.time_load()
         t_ascent = self.time_ascent()
@@ -260,3 +260,79 @@ if __name__ == '__main__':
 
     mission.plot_energy_consumption()
     mission.plot_power_consumption()
+
+
+
+
+class MissionProfile:
+
+    def __init__(self, inputs, verbose=False):
+
+        self.verbose = verbose
+
+        # Parameters to do with wildfire & oil spill requirements
+        self.required_perimeter = inputs["required_perimeter"]
+        self.fire_break_width = inputs["fire_break_width"]
+
+        # Constraints
+        self.R_max = inputs["R_max"]
+
+        # Things we vary within the mission
+        self.n_drones = inputs["n_drones"]
+        self.n_nests = inputs["n_nests"]
+
+        self.aerogel_length = inputs["aerogel_length"]
+        self.aerogel_width = inputs["aerogel_width"]
+        self.aerogel_thickness = inputs["aerogel_thickness"]
+
+
+        # Previous calculation results
+        self.uav_mission_time = inputs["total_mission_time"]
+        self.uav_mission_energy = inputs["total_mission_energy"]
+
+        # Deployment parameters:
+        self.deployment_accuracy = inputs["deployment_accuracy"]
+
+
+    def required_layers(self):
+
+        # Increase width to account for deployment accuracy
+        effective_width = self.aerogel_width - self.deployment_accuracy
+        if effective_width <= 0:
+            raise ValueError("Effective aerogel width must be positive. Check deployment_accuracy.")
+        
+        n_layers = np.ceil(self.fire_break_width / effective_width)
+        self.n_layers = n_layers
+
+        if self.verbose:
+            print(f"Number of layers for perimeter coverage: {n_layers}")
+
+        return n_layers
+
+
+    def mission_performance(self):
+
+        self.n_layers = self.required_layers()
+
+        # Calculate deployment rate
+        required_aerogel_length = self.required_perimeter * self.n_layers
+        required_trips = np.ceil(required_aerogel_length / self.aerogel_length)
+        self.required_trips = required_trips
+
+        total_uav_time = required_trips * self.total_mission_time
+        mission_time = total_uav_time / self.n_drones
+
+        self.deployment_rate = self.required_perimeter / mission_time
+        inputs["swarm_deployment_rate"] = self.deployment_rate
+
+        # Calculate energy consumption
+        total_energy = self.uav_mission_energy * required_trips
+        inputs["swarm_energy"] = total_energy
+
+        return self.deployment_rate
+
+    def mission_energy(self):
+
+        self.required_trips 
+
+
