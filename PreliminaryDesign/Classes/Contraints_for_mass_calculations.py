@@ -49,7 +49,7 @@ class Constraints:
         W_S_stall = 0.5 * self.Vstall**2 * rho * self.CLmax
         return W_S_stall
 
-    def plot(self, opt = False):
+    def plot(self, opt = False, save=False):
 
         W_S = np.arange(0, 600, 1)  # [N/m^2] variable
 
@@ -118,4 +118,7 @@ class Constraints:
         plt.xlim(20, int(W_S_stall[0]) + 40)
 
         plt.legend()
+
+        if save:
+            plt.savefig('PreliminaryDesign\Plots\constraints')
         plt.show()

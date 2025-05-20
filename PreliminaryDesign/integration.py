@@ -71,7 +71,7 @@ mission_parameters = {
     "h_service": 3000,
     "R_max": 30000, #30000
     "V_climb_v": 6, 
-    "V_cruise": 120/3.6, 
+    "V_cruise": 100/3.6, 
     "V_descent": 3
     }   
 inputs.update(mission_parameters)
@@ -117,7 +117,7 @@ fw_parameters = {
     "CD0": 0.040, 
     "V_stall": 19,             # m/s, stall speed
     "S_wing": 2.5, 
-    "AR": 7, #10.3
+    "AR": 9, #10.3
     "b_wing": 0,                # span (initialized to 0)
     "e": 0.7,
     "n_propellers_cruise": 1,        # number of cruise propellers
@@ -155,6 +155,7 @@ mass_parameters = {
     "MF_avion": 0.05,           # mass fraction for avionics
     "MF_Subsyst": 0.07         # mass fraction for subsystems
     }
+
 inputs.update(mass_parameters)
 
 
@@ -233,7 +234,7 @@ def integration_optimization(tolerance: float, max_iterations: int, inputs: dict
                         doesnt_converge.add(key)
 
         inputs = outputs
-    print('result did not stabilize at max iteration')
+    # print('result did not stabilize at max iteration')
     return outputs
 
 # print(integration_optimization(1, 100, inputs))
@@ -254,4 +255,9 @@ def speed_optimisation(inputs, V_range, max_to):
     else:
         return 'No viable outputs'
 
-print(speed_optimisation(inputs, V_range, 30))
+if __name__ == '__main__':
+    result = integration_optimization(1, 100, inputs)
+
+    for i in result:
+        if i in relevant:
+            print(i, result[i])
