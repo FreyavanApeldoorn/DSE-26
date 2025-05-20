@@ -1,4 +1,4 @@
-from mission_profile import SizeUAV, SizeSwarm
+from mission_profile import UAVProfile, SwarmProfile
 from mass_estimation import mass_sizing
 from Classes.Contraints_for_mass_calculations import Constraints
 from Battery_mass_estimation_v2 import calculate_battery_mass
@@ -61,6 +61,7 @@ constants = {
 
 mission_definition = []   # Define the mission profile here
 
+
 # Mission profile parameters: 
 mission_parameters = {
     "h_ground": 0,     # ground altitude in m
@@ -72,7 +73,17 @@ mission_parameters = {
     "R_max": 30000, #30000
     "V_climb_v": 6, 
     "V_cruise": 120/3.6, 
-    "V_descent": 3
+    "V_descent": 3,
+    "required_perimeter": 1000, # m
+    "deployment_accuracy": 0.5, # m (uncertainty of the deployment)
+    "fire_break_width": 3, # m
+    "n_drones": 20,
+    "n_nests": 1,
+    "aerogel_length": 5,
+    "aerogel_width": 1.5,
+    "aerogel_thickness": 0.1,
+    "total_mission_time": 60*60, # total mission time in seconds
+    "total_mission_energy": 4000 # total mission energy in Wh
     }   
 inputs.update(mission_parameters)
 
@@ -204,8 +215,14 @@ def integration_optimization(tolerance: float, max_iterations: int, inputs: dict
     inputs (dict): A dictionary containing the input parameters for the calculations.
     '''
     for i in range(max_iterations):
-        uav_sizing = SizeUAV(inputs)
-        outputs = uav_sizing.uav_profile().copy()
+        
+        current_inputs = inputs.copy()
+
+        swarm_sizing = SwarmProfile(current_inputs)
+        outputs = swarm_sizing.size_swarm_profile()
+
+        uav_profile = UAVProfile(inputs)
+        outputs = uav_profile.size_uav_profile()
         
 
         # Calculate the mass of the battery

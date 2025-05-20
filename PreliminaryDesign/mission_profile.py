@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-class SizeUAV:
+class UAVProfile:
 
     """
     Class to define the mission profile of a UAV
@@ -158,7 +158,7 @@ class SizeUAV:
 
     
 
-    def uav_profile(self):
+    def size_uav_profile(self):
 
         t_load = self.time_load()
         t_ascent = self.time_ascent()
@@ -171,31 +171,26 @@ class SizeUAV:
 
         times = [t_load, t_ascent, t_transition, t_cruise, t_transition, t_descent, t_scan, t_deploy, t_ascent, t_transition, t_cruise, t_transition, t_descent, t_recharge]
         times = np.array(times)
+        self.times_array = times
         total_time = np.sum(times)
 
         powers = [self.P_load, self.P_r_VTOL, self.P_a_transition, self.P_r_FW, self.P_a_transition, self.P_r, self.P_r, self.P_deploy, self.P_r_VTOL, self.P_a_transition, self.P_r_FW, self.P_a_transition, self.P_r, self.P_load]
         powers = np.array(powers)
+        self.powers_array = powers
         total_power = np.sum(powers)
 
         energies = times * powers
+        self.energies_array = energies
         total_energy = np.sum(energies)
 
         self.inputs['total_mission_time'] = total_time
         self.inputs['total_mission_energy'] = total_energy
-        self.inputs['mission_times_array'] = times
-        self.inputs['mission_energies_array'] = energies
-        self.inputs['mission_powers_array'] = powers
+        #self.inputs['mission_times_array'] = times
+        #self.inputs['mission_energies_array'] = energies
+        #self.inputs['mission_powers_array'] = powers
 
         return self.inputs
     
-
-    def aerogel_deployment_speed(self):
-        """
-        Calculate the speed of the aerogel deployment
-        """
-
-        pass
-
     
 
     def plot_energy_consumption(self):
@@ -241,7 +236,7 @@ class SizeUAV:
 
 
 
-class SizeSwarm:
+class SwarmProfile:
     """
     A class to model and size a swarm of drones for wildfire and oil spill containment missions,
     focusing on aerogel deployment for creating fire breaks.
@@ -272,6 +267,28 @@ class SizeSwarm:
     """
 
     def __init__(self, inputs, verbose=False):
+        """
+        Initializes the mission profile with the provided input parameters.
+        Parameters
+        ----------
+        inputs : dict
+            Dictionary containing all required input parameters:
+                - required_perimeter (float): The total perimeter (in meters) that needs to be covered for wildfire or oil spill containment.
+                - fire_break_width (float): The width (in meters) of the fire break to be created.
+                - R_max (float): The maximum allowed radius or constraint for the mission.
+                - n_drones (int): Number of drones to be deployed in the mission.
+                - n_nests (int): Number of nests (deployment bases) to be used.
+                - aerogel_length (float): Length (in meters) of the aerogel material used.
+                - aerogel_width (float): Width (in meters) of the aerogel material used.
+                - aerogel_thickness (float): Thickness (in meters) of the aerogel material used.
+                - total_mission_time (float): Total mission time (in seconds or minutes, as specified).
+                - total_mission_energy (float): Total energy consumption for the mission.
+                - deployment_accuracy (float): Accuracy (as a percentage or value) of the deployment process.
+        verbose : bool, optional
+            If True, prints detailed information about the initialization process. Default is False.
+        """
+
+        
 
         self.verbose = verbose
 
@@ -322,8 +339,10 @@ class SizeSwarm:
             If self.verbose is True, prints the number of layers required.
         """
 
+        
+
         # Increase width to account for deployment accuracy
-        effective_width = self.aerogel_width - self.deployment_accuracy
+        effective_width = self.aerogel_width - (2*self.deployment_accuracy)
         if effective_width <= 0:
             raise ValueError("Effective aerogel width must be positive. Check deployment_accuracy.")
         
@@ -384,7 +403,7 @@ class SizeSwarm:
 
 
 
-    def update_parameters(self):
+    def size_swarm_profile(self):
         """
         Updates the input parameters with the latest swarm deployment rate and total energy.
         This method calls `mission_performance()` to retrieve the current deployment rate and total energy

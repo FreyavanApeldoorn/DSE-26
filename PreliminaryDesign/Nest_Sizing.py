@@ -88,20 +88,301 @@ class AeroShield_Nest:
 
 
 
-class Nest_Generator:
+class OldNest:
 
     """Class for nest sizing."""
 
-    def __init__():
+    """
+    - Drones, including margin + Batteries
+    - Generator + Fuel tank
+    - Electronics (e.g., communication, sensors, cooling systems)
+    - Operating space (A_human * Length + something
+    - Equipment (e.g., tools, spare parts, fire-extinguishing)
+     
+    """
+
+
+    def __init__(self, inputs: dict[str, float | int], verbose: bool = False):
+        
+
+
+
+        self.verbose = verbose
+        self.inputs = inputs
+
+        self.uav_length = inputs["uav_length"]
+        self.uav_width = inputs["uav_width"]
+        self.uav_height = inputs["uav_height"]
+        self.uav_mass = inputs["uav_mass"]
+
+        self.n_nests = inputs["n_nests"]
+        self.n_drones = inputs["n_drones"]
+
+        # Generator parameters
+        self.generator_efficiency = inputs["generator_efficiency"]
+        self.diesel_energy_density = inputs["diesel_energy_density"]
+
+        self.nest_energy = inputs["nest_energy"]
+
+        # nest contraints
+        self.nest_length = inputs["nest_length"]
+        self.nest_width = inputs["nest_width"]
+        self.nest_height = inputs["nest_height"]
+        self.nest_mass = inputs["nest_mass"]
+
+
+
+    def energy_sizing(self):
+        
+        """
+        This function calculates the required volume of the fuel tank based on the nest energy requirements.
+        
+        """
+
+        total_energy = self.nest_energy   # required energy in Wh
+
+        # Estimate fuel tank volume based on required energy
+        # Assumptions:
+        # - Diesel fuel energy density: 35.8 MJ/liter (or 9.94 kWh/liter)
+        # - 1 kWh = 3.6 MJ
+        # - Generator efficiency is a fraction (e.g., 0.3 for 30%)
+        # - Add 10% margin to tank size
+
+        diesel_energy_density_kwh_per_l = 9.94  # kWh/liter
+        diesel_energy_density_wh_per_l = diesel_energy_density_kwh_per_l * 1000  # convert to Wh/liter
+        margin = 1.1  # 10% margin
+
+        # Calculate required fuel energy input (account for generator efficiency)
+        required_fuel_energy_wh = total_energy / self.generator_efficiency
+
+        # Calculate required fuel volume in liters
+        fuel_tank_volume_l = (required_fuel_energy_wh / diesel_energy_density_wh_per_l) * margin
+        self.fuel_tank_volume = fuel_tank_volume_l
+
+        if self.verbose:
+            print(f"Required fuel tank volume: {fuel_tank_volume_l:.2f} liters")
+
+
+    def power_sizing(self): 
+        pass
+        
+
+
+
+    def volume_sizing(self):
+
+        """
+        
+        Parameters that must be defined:
+        - VF_generator: fraction of nest volume for generator
+        - VF_UAV_battery: fraction of UAV volume for battery
+        - VF_UAV_margin: fraction of UAV volume for margin (between drones)
+
+
+
+        """
+        # Calculate the total volume available for one nest
+        available_volume_per_nest = self.nest_length * self.nest_width * self.nest_height
+
+
+        # Generator volume:
+        VF_generator = 0.1   # faction of nest volume for generator    
+        volume_generator = VF_generator * available_volume_per_nest
+
+        # UAVs volume:
+        VF_UAV_margin = 0.1   # fraction of UAV volume for margin
+        uav_volume = (self.uav_height * self.uav_width * self.uav_length) * (1 + VF_UAV_margin) # UAV volume in m^3
+        volume_uav = self.n_drones * uav_volume  # total UAV volume in m^3
+
+        # UAV batteries volume:
+        VF_UAV_battery = 0.3   # fraction of UAV volume for battery
+        battery_size = VF_UAV_battery * uav_volume # battery size in m^3
+        UAV_battery_volume = self.n_drones * battery_size # total battery volume in m^3
+
+        required_volume_uavs = volume_uav + UAV_battery_volume
+
+
+
+
+
+
+    def mass_sizing(self):
+
         pass
 
-    def volume():
-        pass
 
     def deployment_time():
         pass
 
 
 
-    def size_nest():
+    def size_nest(self):
+        
+        self.energy_sizing()
+
+        self.inputs["uavs_per_nest"] =   # amount of uavs in a nest
+        self.inputs["n_nests"] =    # number of nests for mission
+        self.inputs["nest_volume"] =
+        self.inputs["v_nest"] =   # nest volume
+        self.inputs["v_gen"] =   # generator volume
+        self.inputs["nest_mass"] = 
+        self.inputs["nest_energy"] = 
+        self.inputs["nest_fuel_tank"] = 
+        self.inputs["t_land_and_recharge"] = 
+
+    
+    def plot_nest_sizing(self):
+        
+        """
+        Plots something like number of nests vs time to complete mission, with different perimeter lines
+        """
+        
+        pass
+
+
+
+
+
+
+
+    class Nest:
+
+    """Class for nest sizing."""
+
+    """
+    - Drones, including margin + Batteries
+    - Generator + Fuel tank
+    - Electronics (e.g., communication, sensors, cooling systems)
+    - Operating space (A_human * Length + something
+    - Equipment (e.g., tools, spare parts, fire-extinguishing)
+     
+    """
+
+
+    def __init__(self, inputs: dict[str, float | int], verbose: bool = False):
+        
+
+
+
+        self.verbose = verbose
+        self.inputs = inputs
+
+        self.uav_length = inputs["uav_length"]
+        self.uav_width = inputs["uav_width"]
+        self.uav_height = inputs["uav_height"]
+        self.uav_mass = inputs["uav_mass"]
+
+        self.n_nests = inputs["n_nests"]
+        self.n_drones = inputs["n_drones"]
+
+        # Generator parameters
+        self.generator_efficiency = inputs["generator_efficiency"]
+        self.diesel_energy_density = inputs["diesel_energy_density"]
+
+        self.nest_energy = inputs["nest_energy"]
+
+        # nest contraints
+        self.nest_length = inputs["nest_length"]
+        self.nest_width = inputs["nest_width"]
+        self.nest_height = inputs["nest_height"]
+        self.nest_mass = inputs["nest_mass"]
+
+    def generator_sizing(self):
+        
+        total_energy = self.nest_energy   # required energy in Wh
+
+        # Estimate fuel tank volume based on required energy
+        # Assumptions:
+        # - Diesel fuel energy density: 35.8 MJ/liter (or 9.94 kWh/liter)
+        # - 1 kWh = 3.6 MJ
+        # - Generator efficiency is a fraction (e.g., 0.3 for 30%)
+        # - Add 10% margin to tank size
+
+        diesel_energy_density_kwh_per_l = 9.94  # kWh/liter
+        diesel_energy_density_wh_per_l = diesel_energy_density_kwh_per_l * 1000  # convert to Wh/liter
+        margin = 1.1  # 10% margin
+
+        # Calculate required fuel energy input (account for generator efficiency)
+        required_fuel_energy_wh = total_energy / self.generator_efficiency
+
+        # Calculate required fuel volume in liters
+        fuel_tank_volume_l = (required_fuel_energy_wh / diesel_energy_density_wh_per_l) * margin
+        self.fuel_tank_volume = fuel_tank_volume_l
+
+        if self.verbose:
+            print(f"Required fuel tank volume: {fuel_tank_volume_l:.2f} liters")
+
+
+
+
+
+
+    def volume_sizing(self):
+
+        """
+        
+        Parameters that must be defined:
+        - VF_generator: fraction of nest volume for generator
+        - VF_UAV_battery: fraction of UAV volume for battery
+        - VF_UAV_margin: fraction of UAV volume for margin (between drones)
+
+
+
+        """
+        # Calculate the total volume available for one nest
+        available_volume_per_nest = self.nest_length * self.nest_width * self.nest_height
+
+
+        # Generator volume:
+        VF_generator = 0.1   # faction of nest volume for generator    
+        volume_generator = VF_generator * available_volume_per_nest
+
+        # UAVs volume:
+        VF_UAV_margin = 0.1   # fraction of UAV volume for margin
+        uav_volume = (self.uav_height * self.uav_width * self.uav_length) * (1 + VF_UAV_margin) # UAV volume in m^3
+        volume_uav = self.n_drones * uav_volume  # total UAV volume in m^3
+
+        # UAV batteries volume:
+        VF_UAV_battery = 0.3   # fraction of UAV volume for battery
+        battery_size = VF_UAV_battery * uav_volume # battery size in m^3
+        UAV_battery_volume = self.n_drones * battery_size # total battery volume in m^3
+
+        required_volume_uavs = volume_uav + UAV_battery_volume
+
+
+
+
+
+
+    def mass_sizing(self):
+
+        pass
+
+
+    def deployment_time():
+        pass
+
+
+
+    def size_nest(self):
+        
+        self.energy_sizing()
+
+        self.inputs["uavs_per_nest"] =   # amount of uavs in a nest
+        self.inputs["n_nests"] =    # number of nests for mission
+        self.inputs["nest_volume"] =
+        self.inputs["v_nest"] =   # nest volume
+        self.inputs["v_gen"] =   # generator volume
+        self.inputs["nest_mass"] = 
+        self.inputs["nest_energy"] = 
+        self.inputs["nest_fuel_tank"] = 
+        self.inputs["t_land_and_recharge"] = 
+
+    
+    def plot_nest_sizing(self):
+        
+        """
+        Plots something like number of nests vs time to complete mission, with different perimeter lines
+        """
+        
         pass
