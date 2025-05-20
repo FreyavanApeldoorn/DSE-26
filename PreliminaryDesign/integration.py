@@ -1,4 +1,4 @@
-from mission_profile import MissionProfile
+from mission_profile import SizeUAV, SizeSwarm
 from mass_estimation import mass_sizing
 from Classes.Contraints_for_mass_calculations import Constraints
 from Battery_mass_estimation_v2 import calculate_battery_mass
@@ -205,8 +205,8 @@ def integration_optimization(tolerance: float, max_iterations: int, inputs: dict
     inputs (dict): A dictionary containing the input parameters for the calculations.
     '''
     for i in range(max_iterations):
-        mission = MissionProfile(inputs)
-        outputs = mission.mission_profile().copy()
+        uav_sizing = SizeUAV(inputs)
+        outputs = uav_sizing.uav_profile().copy()
         
 
         # Calculate the mass of the battery
