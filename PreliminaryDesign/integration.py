@@ -70,9 +70,9 @@ mission_parameters = {
     "rho_max": 1.225, 
     "RC_service": 0.5,
     "h_service": 3000,
-    "R_max": 30000, #30000
+    "R_max": 20000, #30000
     "V_climb_v": 6, 
-    "V_cruise": 120/3.6, 
+    "V_cruise": 100/3.6, 
     "V_descent": 3,
     "required_perimeter": 1000, # m
     "deployment_accuracy": 0.5, # m (uncertainty of the deployment)
@@ -203,7 +203,7 @@ V_range = np.arange(40, 70, 2)
 
 tolerance = 1
 max_iterations = 200
-relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter', 'M_battery']
+relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter', 'M_battery', 'swarm_deployment_rate']
 
 doesnt_converge = set()
 def integration_optimization(tolerance: float, max_iterations: int, inputs: dict[str, float | int]) -> tuple[dict[str, float | int], dict[str, list[float]]]:
@@ -222,7 +222,7 @@ def integration_optimization(tolerance: float, max_iterations: int, inputs: dict
         swarm_sizing = SwarmProfile(current_inputs)
         outputs = swarm_sizing.size_swarm_profile()
 
-        uav_profile = UAVProfile(inputs)
+        uav_profile = UAVProfile(outputs)
         outputs = uav_profile.size_uav_profile()
         
 
@@ -254,23 +254,6 @@ def integration_optimization(tolerance: float, max_iterations: int, inputs: dict
     # print('result did not stabilize at max iteration')
     return outputs
 
-# print(integration_optimization(1, 100, inputs))
-
-def speed_optimisation(inputs, V_range, max_to):
-    all_outputs = []
-    for V in V_range:
-        print('Calculating for V=', V)
-        inputs['V_cruise'] = V
-        inputs['V_stall'] = 0.5 * V
-
-        outputs = integration_optimization(0.01, 100, inputs)
-        if outputs['M_to'] < max_to:
-            all_outputs.append(outputs)
-
-    if all_outputs:
-        return all_outputs[-1]
-    else:
-        return 'No viable outputs'
 
 if __name__ == '__main__':
     result = integration_optimization(1, 100, inputs)
@@ -278,3 +261,15 @@ if __name__ == '__main__':
     for i in result:
         if i in relevant:
             print(i, result[i])
+
+    
+    # Constraints(
+    #     inputs["V_stall"],
+    #     inputs["V_cruise"],
+    #     inputs["e"],
+    #     inputs["AR"],
+    #     inputs["CL_max"],
+    #     inputs["CD0"],
+    #     inputs["propeller_efficiency_cruise"],
+    #     inputs["RC_service"]
+    #     ).plot(save=True)

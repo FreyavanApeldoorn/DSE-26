@@ -429,7 +429,7 @@ class SwarmProfile:
 # example usage
 if __name__ == '__main__':
     mission_definition = []   # Define the mission profile here
-    swarm_inputs = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 3, "V_cruise": 120/3.6, "V_descent": 3, "required_perimeter": 1000, 
+    swarm_inputs = {"h_cruise": 120, "R_max": 20000, "V_climb_v": 3, "V_cruise": 120/3.6, "V_descent": 3, "required_perimeter": 1000, 
                     "n_drones": 20, "n_nests": 1, "aerogel_length": 5, "aerogel_width": 1.5, "aerogel_thickness": 0.1, "deployment_accuracy": 0.1, "fire_break_width": 3}   
     uav_inputs = {"total_mission_time":1200, "total_mission_energy": 4000, "t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60,
                   "P_load": 100, "P_r_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
@@ -439,7 +439,7 @@ if __name__ == '__main__':
 
     #mission = MissionProfile(inputs, inputs, inputs)
 
-    Swarm = SizeSwarm(inputs, verbose=True)
-    inputs = Swarm.update_parameters()
+    Swarm = SwarmProfile(inputs, verbose=True)
+    inputs = Swarm.size_swarm_profile()
 
     print(inputs)
