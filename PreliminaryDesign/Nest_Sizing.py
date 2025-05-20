@@ -287,9 +287,36 @@ class OldNest:
         self.nest_height = inputs["nest_height"]
         self.nest_mass = inputs["nest_mass"]
 
+        self.available_volume_per_nest = self.nest_length * self.nest_width * self.nest_height
+
+
+    def uavs_battery_sizing(self):
+
+
+        # UAVs volume:
+        VF_UAV_margin = 0.1   # fraction of UAV volume for margin
+        uav_volume = (self.uav_height * self.uav_width * self.uav_length) * (1 + VF_UAV_margin) # UAV volume in m^3
+        volume_uav = self.n_drones * uav_volume  # total UAV volume in m^3
+
+
+        # UAV batteries volume:
+        VF_UAV_battery = 0.3   # fraction of UAV volume for battery
+        battery_size = VF_UAV_battery * uav_volume # battery size in m^3
+        UAV_battery_volume = self.n_drones * battery_size # total battery volume in m^3
+
+
+
+
     def generator_sizing(self):
         
         total_energy = self.nest_energy   # required energy in Wh
+
+        # Generator volume:
+        VF_generator = 0.1   # faction of nest volume for generator    
+        volume_generator = VF_generator * self.available_volume_per_nest
+
+        l_leftover = self.nest_length - 0.9
+
 
         # Estimate fuel tank volume based on required energy
         # Assumptions:
@@ -315,8 +342,6 @@ class OldNest:
 
 
 
-
-
     def volume_sizing(self):
 
         """
@@ -333,30 +358,19 @@ class OldNest:
         available_volume_per_nest = self.nest_length * self.nest_width * self.nest_height
 
 
-        # Generator volume:
-        VF_generator = 0.1   # faction of nest volume for generator    
-        volume_generator = VF_generator * available_volume_per_nest
-
-        # UAVs volume:
-        VF_UAV_margin = 0.1   # fraction of UAV volume for margin
-        uav_volume = (self.uav_height * self.uav_width * self.uav_length) * (1 + VF_UAV_margin) # UAV volume in m^3
-        volume_uav = self.n_drones * uav_volume  # total UAV volume in m^3
-
-        # UAV batteries volume:
-        VF_UAV_battery = 0.3   # fraction of UAV volume for battery
-        battery_size = VF_UAV_battery * uav_volume # battery size in m^3
-        UAV_battery_volume = self.n_drones * battery_size # total battery volume in m^3
-
         required_volume_uavs = volume_uav + UAV_battery_volume
 
 
 
-
+        return l_gen, v_gen
 
 
     def mass_sizing(self):
 
         pass
+
+
+    def energy_sizing(self):
 
 
     def deployment_time():
@@ -371,7 +385,7 @@ class OldNest:
         self.inputs["uavs_per_nest"] =   # amount of uavs in a nest
         self.inputs["n_nests"] =    # number of nests for mission
         self.inputs["nest_volume"] =
-        self.inputs["v_nest"] =   # nest volume
+        #self.inputs["v_nest"] =   # nest volume
         self.inputs["v_gen"] =   # generator volume
         self.inputs["nest_mass"] = 
         self.inputs["nest_energy"] = 
