@@ -6,6 +6,9 @@ from mission_profile import SwarmProfile, UAVProfile
 # ~~~ AR, Range diagram ~~~
 
 def AR_range_diagram(AR_range: list, range_range: list, mass_calculation: callable, inputs: dict):
+    '''
+    Creates a contour plot with the aspect ratio and the range on the axes and the take-off mass as a result
+    '''
     mass_range = []
     grid = []
     for AR in AR_range:
@@ -31,13 +34,16 @@ def AR_range_diagram(AR_range: list, range_range: list, mass_calculation: callab
     plt.colorbar(cp, label='Takeoff Mass (M_to)')
     plt.vlines(30000, AR_range[0], AR_range[-1], label="Required Range", color="red")
 
-    plt.xlabel('Range')
-    plt.ylabel('Aspect Ratio (AR)')
+    plt.xlabel('Range [m]')
+    plt.ylabel('Aspect Ratio [-]')
     plt.title('Contour Plot of Takeoff Mass')
     plt.savefig('PreliminaryDesign\Plots\AR_range.png')
     #plt.show()
 
 def cruise_speed_mass_diagram(V_range, inputs, mass_function):
+    '''
+    Plots the take-off mass as a function of cruise speed
+    '''
     mass_results = []
     for V in V_range:
         current_inputs = inputs.copy()
@@ -59,6 +65,9 @@ def cruise_speed_mass_diagram(V_range, inputs, mass_function):
     #plt.show()
 
 def payload_range_diagram(payload_range: list, range_range: list, mass_calculation: callable, inputs: dict):
+    '''
+    Creates a contour plot with the payload mass and the range on the axes and the take-off mass as a result  
+    '''
     mass_range = []
     grid = []
     for p in payload_range:
@@ -81,12 +90,12 @@ def payload_range_diagram(payload_range: list, range_range: list, mass_calculati
 
     plt.figure(figsize=(8, 6))
     cp = plt.contourf(X, Y, Z, cmap='plasma')
-    plt.colorbar(cp, label='Takeoff Mass (M_to)')
+    plt.colorbar(cp, label='Takeoff Mass [kg]')
     plt.vlines(30000, payload_range[0], payload_range[-1], label="Required Range", color="red")
     plt.hlines(5, range_range[0], range_range[-1], color='red', label='Required Payload')
 
-    plt.xlabel('Range')
-    plt.ylabel('Payload mass')
+    plt.xlabel('Range [m]')
+    plt.ylabel('Payload mass [kg]')
     plt.title('Contour Plot of Takeoff Mass')
     plt.savefig('PreliminaryDesign\Plots\payload_range.png')
     #plt.show()
@@ -134,9 +143,9 @@ def swarm_deployment_plot(V_range, l_range, inputs):
 
 
 if __name__ == '__main__':
-    # AR_range_diagram(np.arange(6, 13),np.arange(15000, 35001, 1000), integration_optimization, inputs)
+    AR_range_diagram(np.arange(6, 13),np.arange(15000, 35001, 1000), integration_optimization, inputs)
     # cruise_speed_mass_diagram(np.arange(int(50/3.6), int(150/3.6), 2), inputs, integration_optimization)
-    # payload_range_diagram(np.arange(0, 6.5, 0.5), np.arange(15000, 35001, 1000), integration_optimization, inputs)
+    payload_range_diagram(np.arange(0, 6.5, 0.5), np.arange(15000, 35001, 1000), integration_optimization, inputs)
     
     swarm_deployment_plot(np.arange(int(60/3.6), int(150/3.6), 5), np.arange(0, 6, 0.5), inputs)
 
