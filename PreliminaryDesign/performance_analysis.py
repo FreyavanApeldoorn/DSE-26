@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from Classes.Contraints_for_mass_calculations import Constraints
 from mission_profile import SwarmProfile, UAVProfile
+from Nest_Sizing import Nest 
 # ~~~ AR, Range diagram ~~~
 
 def AR_range_diagram(AR_range: list, range_range: list, mass_calculation: callable, inputs: dict):
@@ -115,11 +116,9 @@ def swarm_deployment_plot(V_range, l_range, inputs):
             current_inputs['V_cruise'] = V
 
             current_UAV = UAVProfile(current_inputs)
-
             current_inputs = current_UAV.size_uav_profile()
 
             current_swarm = SwarmProfile(current_inputs)
-
             current_swarm.mission_performance()
 
             grid.append((V, l))
@@ -140,7 +139,35 @@ def swarm_deployment_plot(V_range, l_range, inputs):
     plt.title('Contour Plot of Deployment rate')
     plt.savefig('PreliminaryDesign\Plots\swarm_deployment.png')
 
+def swarm_plots(inputs, n_uav_range):
+    res = []
+    outputs = integration_optimization(1, 100, inputs)
+    for n in n_uav_range:
+        current_inputs = outputs.copy()
+        current_inputs['n_drones'] = n
 
+        current_UAV = UAVProfile(current_inputs)
+
+        current_inputs = current_UAV.size_uav_profile()
+
+        current_swarm = SwarmProfile(current_inputs)
+
+        current_swarm.mission_performance()
+
+        nest_sizing = Nest(current_inputs, verbose=False)
+        outputs = nest_sizing.size_nest()
+
+        res.append(current_swarm.n_nests)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(n_uav_range[1:], res[1:], color='red')
+    plt.xlabel('Number of UAVs [-]')
+    plt.ylabel('Number of nests [-]')
+    plt.title('number of nests vs number of UAVs')
+    plt.grid(True)
+    plt.legend()
+    plt.savefig('PreliminaryDesign\Plots\est_amt.png')
+    #plt.show()
 
 
 
@@ -149,6 +176,7 @@ if __name__ == '__main__':
     # # cruise_speed_mass_diagram(np.arange(int(50/3.6), int(150/3.6), 2), inputs, integration_optimization)
     # payload_range_diagram(np.arange(0, 6.5, 0.5), np.arange(15000, 35001, 1000), integration_optimization, inputs)
     
-    swarm_deployment_plot(np.arange(int(60/3.6), int(150/3.6), 5), np.arange(0, 6, 0.5), inputs)
+    # swarm_deployment_plot(np.arange(int(60/3.6), int(150/3.6), 5), np.arange(0, 6, 0.5), inputs)
+    swarm_plots(inputs, np.arange(0, 41))
 
 
