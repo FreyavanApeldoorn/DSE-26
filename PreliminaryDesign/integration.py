@@ -1,4 +1,5 @@
 from mission_profile import UAVProfile, SwarmProfile
+from Nest_Sizing import Nest
 from mass_estimation import mass_sizing
 from Classes.Contraints_for_mass_calculations import Constraints
 from Battery_mass_estimation_v2 import calculate_battery_mass
@@ -81,11 +82,25 @@ mission_parameters = {
     "n_nests": 1,
     "aerogel_length": 3.32,
     "aerogel_width": 1.5,
+    "aerogel_diameter": 0.2,
     "aerogel_thickness": 0.006,
     "total_mission_time": 60*60, # total mission time in seconds
     "total_mission_energy": 4000 # total mission energy in Wh
     }   
 inputs.update(mission_parameters)
+
+nest_parameters = {
+    "FW_height": 0.3,
+    "FW_width": 2.25,
+
+    "generator_efficiency": 0.3,
+    "diesel_energy_density": 9.94,
+    "nest_energy": 1000,  # in Wh
+    "nest_length": 5.9,
+    "nest_width": 2.35,
+    "nest_height": 2.39
+}
+inputs.update(nest_parameters)
 
 # Mission time estimates
 time_estimates = {
@@ -233,13 +248,18 @@ def integration_optimization(tolerance: float, max_iterations: int, inputs: dict
             eta_battery=inputs['eta_battery'],
             M_to=inputs['M_to'] 
         )
+    
         
        
         outputs['M_battery'] = battery_mass
 
         outputs = mass_sizing(outputs)
-        
 
+        print(f'span: {outputs["b_wing"]}, wing area: {outputs["S_wing"]}, battery mass: {battery_mass}, MTOW: {inputs["MTOW"]}, M_battery: {inputs["M_battery"]}')
+
+        nest_sizing = Nest(outputs, verbose=False)
+        outputs = nest_sizing.size_nest()
+        
         if all(abs(outputs[key] - inputs[key]) < tolerance for key in outputs if isinstance(outputs[key], float) or isinstance(outputs[key], np.float64)):
             print('Converged')
             return outputs
@@ -276,3 +296,13 @@ if __name__ == '__main__':
     #     inputs["propeller_efficiency_cruise"],
     #     inputs["RC_service"]
     #     ).plot(save=True)
+
+
+
+
+
+    """
+    DEar Freya, plz plot
+    - inputs["n_nests] vs inputs["n_drones"] vs inputs["swarm_deployment_rate"]
+    
+    """

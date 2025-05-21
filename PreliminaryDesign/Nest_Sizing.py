@@ -115,9 +115,9 @@ class Nest:
         self.uav_wing_area = inputs["S_wing"]
         self.FW_height = inputs["FW_height"]  # height of the fuselage
         self.FW_width = inputs["FW_width"]  # width of the fuselage
-        self.uav_chord = self.uav_wing_area / self.uav_span  # m 
+        self.uav_chord = self.uav_wing_area / self.uav_span if self.uav_span != 0 else 0 
 
-        self.uav_mass = inputs["uav_mass"]
+        self.uav_mass = inputs["M_to"]
 
         self.aerogel_width = inputs["aerogel_width"]  # width of the aerogel
         self.aerogel_diameter = inputs["aerogel_diameter"]  # diameter of the aerogel
@@ -129,13 +129,13 @@ class Nest:
         self.generator_efficiency = inputs["generator_efficiency"]
         self.diesel_energy_density = inputs["diesel_energy_density"]
 
-        self.nest_energy = inputs["nest_energy"]
+        #self.nest_energy = inputs["nest_energy"]
 
         # nest contraints
         self.nest_length = inputs["nest_length"]
         self.nest_width = inputs["nest_width"]
         self.nest_height = inputs["nest_height"]
-        self.nest_mass = inputs["nest_mass"]
+        #self.nest_mass = inputs["nest_mass"]
 
         self.available_volume_per_nest = self.nest_length * self.nest_width * self.nest_height
 
@@ -160,7 +160,10 @@ class Nest:
 
     def generator_sizing(self):
         
-        total_energy = self.nest_energy   # required energy in Wh
+        
+        #total_energy = self.nest_energy   # required energy in Wh
+        total_energy = 1000
+
 
         # Generator volume:
         VF_generator = 0.1   # faction of nest volume for generator    
@@ -304,16 +307,35 @@ class Nest:
 
             print(f"number of remaining drones: {n_remaining}")
 
+            # n_cap_nest_nogen = int(v_op_nogen // self.v_uav_bat)  # Number of drones in overflow container
+            # n_nest_nogen = n_remaining // n_cap_nest_nogen  # Number of overflow containers needed
+
+            # empty_slots = (n_cap_nest_nogen * n_nest_nogen) - n_remaining
+
+            # if self.verbose
+            #     print(f"Number of drones that fit in generator nest: {n_cap_nest_gen}")
+            #     print(f"Number of drones remaining: {n_remaining}")
+            #     print(f"Number of drones that fit in non-generator nest: {n_cap_nest_nogen}")
+            #     print(f"Number of overflow nests needed: {n_nest_nogen}")
+            #     print(f"Empty slots in last overflow nest: {empty_slots}")
+
+            # n_containers = 1 + n_nest_nogen
             n_cap_nest_nogen = int(v_op_nogen // self.v_uav_bat)  # Number of drones in overflow container
-            n_nest_nogen = n_remaining // n_cap_nest_nogen  # Number of overflow containers needed
+            n_nest_nogen = int(np.ceil(n_remaining / n_cap_nest_nogen))  # Number of overflow containers needed
 
-            empty_slots = (n_cap_nest_nogen * n_nest_nogen) - n_remaining
+            # Number of drones in the last overflow nest
+            drones_in_last_nest = n_remaining % n_cap_nest_nogen
+            if drones_in_last_nest == 0:
+                empty_slots = 0
+            else:
+                empty_slots = n_cap_nest_nogen - drones_in_last_nest
 
-            print(f"Number of drones that fit in generator nest: {n_cap_nest_gen}")
-            print(f"Number of drones remaining: {n_remaining}")
-            print(f"Number of drones that fit in non-generator nest: {n_cap_nest_nogen}")
-            print(f"Number of overflow nests needed: {n_nest_nogen}")
-            print(f"Empty slots in last overflow nest: {empty_slots}")
+            if self.verbose:
+                print(f"Number of drones that fit in generator nest: {n_cap_nest_gen}")
+                print(f"Number of drones remaining: {n_remaining}")
+                print(f"Number of drones that fit in non-generator nest: {n_cap_nest_nogen}")
+                print(f"Number of overflow nests needed: {n_nest_nogen}")
+                print(f"Empty slots in last overflow nest: {empty_slots}")
 
             n_containers = 1 + n_nest_nogen
 
@@ -359,6 +381,8 @@ class Nest:
         self.inputs["nest_fuel_tank_volume"] = self.fuel_tank_volume
         #self.inputs["t_land_and_recharge"] = 
 
+        return self.inputs
+
     
     def plot_nest_sizing(self):
         
@@ -381,7 +405,7 @@ if __name__ == "__main__":
         "uav_length": 2.5,
         "uav_width": 2.5,
         "uav_height": 0.5,
-        "uav_mass": 1.0,
+        "M_to": 1.0,
         "n_drones": 20,
         "generator_efficiency": 0.3,
         "diesel_energy_density": 9.94,
