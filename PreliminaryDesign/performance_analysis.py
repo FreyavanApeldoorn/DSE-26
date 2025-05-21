@@ -106,6 +106,8 @@ def swarm_deployment_plot(V_range, l_range, inputs):
     '''
     grid = []
     res = []
+    inputs['P_r_VTOL'] = 4423
+    inputs['P_r_FW'] = 1554
     for V in V_range:
         for l in l_range:
             current_inputs = inputs.copy()
@@ -131,11 +133,11 @@ def swarm_deployment_plot(V_range, l_range, inputs):
 
     plt.figure(figsize=(8, 6))
     cp = plt.contourf(X, Y, Z, cmap='plasma')
-    plt.colorbar(cp, label='Deployment Rate')
+    plt.colorbar(cp, label='Deployment Rate [m/h]')
 
     plt.xlabel('Aerogel Length [m]')
     plt.ylabel('Cruise speed [m/s]')
-    plt.title('Contour Plot of Deployment rate [m/h]')
+    plt.title('Contour Plot of Deployment rate')
     plt.savefig('PreliminaryDesign\Plots\swarm_deployment.png')
 
 
@@ -143,9 +145,9 @@ def swarm_deployment_plot(V_range, l_range, inputs):
 
 
 if __name__ == '__main__':
-    AR_range_diagram(np.arange(6, 13),np.arange(15000, 35001, 1000), integration_optimization, inputs)
-    # cruise_speed_mass_diagram(np.arange(int(50/3.6), int(150/3.6), 2), inputs, integration_optimization)
-    payload_range_diagram(np.arange(0, 6.5, 0.5), np.arange(15000, 35001, 1000), integration_optimization, inputs)
+    # AR_range_diagram(np.arange(6, 13),np.arange(15000, 35001, 1000), integration_optimization, inputs)
+    # # cruise_speed_mass_diagram(np.arange(int(50/3.6), int(150/3.6), 2), inputs, integration_optimization)
+    # payload_range_diagram(np.arange(0, 6.5, 0.5), np.arange(15000, 35001, 1000), integration_optimization, inputs)
     
     swarm_deployment_plot(np.arange(int(60/3.6), int(150/3.6), 5), np.arange(0, 6, 0.5), inputs)
 

@@ -70,7 +70,7 @@ mission_parameters = {
     "rho_max": 1.225, 
     "RC_service": 0.5,
     "h_service": 3000,
-    "R_max": 20000, #30000
+    "R_max": 5000, #30000
     "V_climb_v": 6, 
     "V_cruise": 100/3.6, 
     "V_descent": 3,
@@ -79,7 +79,7 @@ mission_parameters = {
     "fire_break_width": 3, # m
     "n_drones": 20,
     "n_nests": 1,
-    "aerogel_length": 5,
+    "aerogel_length": 3.32,
     "aerogel_width": 1.5,
     "aerogel_thickness": 0.1,
     "total_mission_time": 60*60, # total mission time in seconds
@@ -203,7 +203,7 @@ V_range = np.arange(40, 70, 2)
 
 tolerance = 1
 max_iterations = 200
-relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter', 'M_battery', 'swarm_deployment_rate']
+relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter', 'M_battery', 'swarm_deployment_rate', 'P_r_VTOL', 'P_r_FW']
 
 doesnt_converge = set()
 def integration_optimization(tolerance: float, max_iterations: int, inputs: dict[str, float | int]) -> tuple[dict[str, float | int], dict[str, list[float]]]:
