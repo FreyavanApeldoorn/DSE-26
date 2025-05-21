@@ -391,6 +391,10 @@ class SwarmProfile:
         deployment_rate = uav_deployment_rate * self.n_drones
         self.deployment_rate = deployment_rate
 
+        aerogel_weight = 3 # [kg] CHANGE THIS TO A NICE INPUT IT SHOULD NOT BE HARDCODED
+        uav_deployment_rate = aerogel_weight / self.uav_mission_time
+        self.deployment_rate_mass = uav_deployment_rate * self.n_drones       
+
         # Calculate energy consumption (all drones, all layers)
         total_energy = self.uav_mission_energy * self.required_trips
         self.total_energy = total_energy
@@ -418,6 +422,7 @@ class SwarmProfile:
 
         self.mission_performance()
         self.inputs["swarm_deployment_rate"] = self.deployment_rate   # meters/second
+        self.inputs["swarm_deployment_rate_mass"] = self.deployment_rate_mass
         self.inputs["swarm_energy"] = self.total_energy
         self.inputs["nest_energy"] = self.total_energy_per_nest
         self.inputs["swarm_time"] = self.swarm_time
@@ -432,8 +437,8 @@ class SwarmProfile:
 # example usage
 if __name__ == '__main__':
     mission_definition = []   # Define the mission profile here
-    swarm_inputs = {"h_cruise": 120, "R_max": 30000, "V_climb_v": 3, "V_cruise": 100/3.6, "V_descent": 3, "required_perimeter": 1000, 
-                    "n_drones": 20, "n_nests": 1, "aerogel_length": 5, "aerogel_width": 1.5, "aerogel_thickness": 0.006, "deployment_accuracy": 0.1, "fire_break_width": 3}   
+    swarm_inputs = {"h_cruise": 120, "R_max": 20000, "V_climb_v": 3, "V_cruise": 100/3.6, "V_descent": 3, "required_perimeter": 1000, 
+                    "n_drones": 20, "n_nests": 1, "aerogel_length": 3.32, "aerogel_width": 1.5, "aerogel_thickness": 0.006, "deployment_accuracy": 0.1, "fire_break_width": 3}   
     uav_inputs = {"total_mission_time":52*60, "total_mission_energy": 4000, "t_load": 1*60, "t_transition": 30, "t_scan": 60, "t_deploy": 5*60, "t_recharge": 5*60,
                   "P_load": 100, "P_r_VTOL": 3500, "P_r_FW": 1100, "P_a_transition": 4600, "P_r": 3500, "P_deploy": 4000}
     

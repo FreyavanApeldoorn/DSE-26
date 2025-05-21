@@ -70,7 +70,7 @@ mission_parameters = {
     "rho_max": 1.225, 
     "RC_service": 0.5,
     "h_service": 3000,
-    "R_max": 5000, #30000
+    "R_max": 20000, #30000
     "V_climb_v": 6, 
     "V_cruise": 100/3.6, 
     "V_descent": 3,
@@ -81,7 +81,7 @@ mission_parameters = {
     "n_nests": 1,
     "aerogel_length": 3.32,
     "aerogel_width": 1.5,
-    "aerogel_thickness": 0.1,
+    "aerogel_thickness": 0.006,
     "total_mission_time": 60*60, # total mission time in seconds
     "total_mission_energy": 4000 # total mission energy in Wh
     }   
@@ -128,7 +128,7 @@ fw_parameters = {
     "CD0": 0.040, 
     "V_stall": 19,             # m/s, stall speed
     "S_wing": 2.5, 
-    "AR": 9, #10.3
+    "AR": 7, #10.3
     "b_wing": 0,                # span (initialized to 0)
     "e": 0.7,
     "n_propellers_cruise": 1,        # number of cruise propellers
@@ -203,7 +203,7 @@ V_range = np.arange(40, 70, 2)
 
 tolerance = 1
 max_iterations = 200
-relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter', 'M_battery', 'swarm_deployment_rate', 'P_r_VTOL', 'P_r_FW']
+relevant = ['M_to', 'S_wing', 'b_wing', 'R_max', 'propeller_diameter', 'M_battery', 'swarm_deployment_rate', 'swarm_deployment_rate_mass', 'P_r_VTOL', 'P_r_FW']
 
 doesnt_converge = set()
 def integration_optimization(tolerance: float, max_iterations: int, inputs: dict[str, float | int]) -> tuple[dict[str, float | int], dict[str, list[float]]]:
@@ -260,7 +260,10 @@ if __name__ == '__main__':
 
     for i in result:
         if i in relevant:
-            print(i, result[i])
+            if i == 'swarm_deployment_rate':
+                print(i, result[i]*60*60)
+            else:
+                print(i, result[i])
 
     
     # Constraints(
