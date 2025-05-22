@@ -29,6 +29,8 @@ class ExampleName:
         updated_inputs = something
         return updated_inputs
 
+Note that all output functions should start with get_... so that they are consistent and wasy to use, you can have a get_specific_output or get_all, which would execute all the updates/functions
+
 ## Inputs and outputs
 
 All classes only take a single input, the inputs dictionary which is defined in inputs.py. If you need to add any inputs you need to do so here. When initially coding, please use funny_inputs, this way, the original inputs don't get adjusted unless with the knowledge of the group. Once you are done, you can tell the group you are adjusting the inputs, the way to do this should be clear from the layout of the file. 
@@ -37,6 +39,8 @@ All output functions should return an updated version of the inputs dictionary, 
 
 ## Testing
 There are three pytest files set up in DetailedDesign. One for unit tests, one for subsystem tests and one for system tests. Not that all test functions should begin with the word test, as otherwise pytest will not recognise them, and that would be sad.
+
+If you want to set up pytest, either click the chemistry bottle at the left size of the screen, or do cntrl + shift + P and click Python:Configure Tests. Select Pytest and the DetailedDesign.
 
 ## __main__
 There is a file called __main__.py, this is the part where the final code is executed. The naming convention means that if you type 'python DetailedDesign' in your terminal, it executes this file. There should be no functions in this file, only function calls.
