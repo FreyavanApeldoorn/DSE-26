@@ -161,7 +161,7 @@ def n_nests_plot(inputs, n_uav_range):
         res.append(current_swarm.n_nests)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(n_uav_range[1:], res[1:], color='red')
+    plt.plot(np.array(n_uav_range[1:]) - 1, res[1:], color='red')
     plt.xlabel('Number of UAVs [-]')
     plt.ylabel('Number of nests [-]')
     plt.title('number of nests vs number of UAVs')
