@@ -29,7 +29,7 @@ class ExampleName:
         updated_inputs = something
         return updated_inputs
 
-Note that all output functions should start with get_... so that they are consistent and wasy to use, you can have a get_specific_output or get_all, which would execute all the updates/functions
+Note that all output functions should start with get_... so that they are consistent and easy to use, you can have a get_specific_output or get_all, which would execute all the updates/functions
 
 ## Inputs and outputs
 
