@@ -1,4 +1,4 @@
-from PreliminaryDesign.Classes.electric_propulsion_mass_sizing import PropMass
+from Classes.electric_propulsion_mass_sizing import PropMass
 
 Prop_Mass = PropMass(
     P_max_cruise=1400,

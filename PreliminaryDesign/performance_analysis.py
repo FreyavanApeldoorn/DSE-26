@@ -35,6 +35,7 @@ def AR_range_diagram(AR_range: list, range_range: list, mass_calculation: callab
     plt.colorbar(cp, label='Takeoff Mass (M_to)')
     plt.vlines(30000, AR_range[0], AR_range[-1], label="Required Range", color="red")
 
+
     plt.xlabel('Range [m]')
     plt.ylabel('Aspect Ratio [-]')
     plt.title('Contour Plot of Takeoff Mass')
