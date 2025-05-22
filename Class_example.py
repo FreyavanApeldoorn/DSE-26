@@ -28,5 +28,3 @@ if __name__ == '__main__':
 
     sqA.update_with_diameter(5)
     print(sqA.side)
-
-    #blablabla
