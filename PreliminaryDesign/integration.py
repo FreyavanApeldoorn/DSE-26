@@ -1,4 +1,5 @@
-from mission_profile import SizeUAV, SizeSwarm
+from mission_profile import UAVProfile, SwarmProfile
+from Nest_Sizing import Nest
 from mass_estimation import mass_sizing
 from Classes.Contraints_for_mass_calculations import Constraints
 from Battery_mass_estimation_v2 import calculate_battery_mass
@@ -60,6 +61,7 @@ constants = {
 
 mission_definition = []  # Define the mission profile here
 
+
 # Mission profile parameters:
 mission_parameters = {
     "h_ground": 0,  # ground altitude in m
@@ -68,12 +70,35 @@ mission_parameters = {
     "rho_max": 1.225,
     "RC_service": 0.5,
     "h_service": 3000,
-    "R_max": 40000,  # 30000
+    "R_max": 20000,  # 30000
     "V_climb_v": 6,
-    "V_cruise": 120 / 3.6,
+    "V_cruise": 100 / 3.6,
     "V_descent": 3,
+    "required_perimeter": 1000,  # m
+    "deployment_accuracy": 0.5,  # m (uncertainty of the deployment)
+    "fire_break_width": 3,  # m
+    "n_drones": 20,
+    "n_nests": 1,
+    "aerogel_length": 3.32,
+    "aerogel_width": 1.5,
+    "aerogel_diameter": 0.2,
+    "aerogel_thickness": 0.006,
+    "total_mission_time": 60 * 60,  # total mission time in seconds
+    "total_mission_energy": 4000,  # total mission energy in Wh
 }
 inputs.update(mission_parameters)
+
+nest_parameters = {
+    "FW_height": 0.3,
+    "FW_width": 2.25,
+    "generator_efficiency": 0.3,
+    "diesel_energy_density": 9.94,
+    "nest_energy": 1000,  # in Wh
+    "nest_length": 5.9,
+    "nest_width": 2.35,
+    "nest_height": 2.39,
+}
+inputs.update(nest_parameters)
 
 # Mission time estimates
 time_estimates = {
@@ -152,6 +177,7 @@ mass_parameters = {
     "MF_avion": 0.05,  # mass fraction for avionics
     "MF_Subsyst": 0.07,  # mass fraction for subsystems
 }
+
 inputs.update(mass_parameters)
 
 
@@ -187,7 +213,18 @@ V_range = np.arange(40, 70, 2)
 
 tolerance = 1
 max_iterations = 200
-relevant = ["M_to", "S_wing", "b_wing", "R_max", "propeller_diameter", "M_battery"]
+relevant = [
+    "M_to",
+    "S_wing",
+    "b_wing",
+    "R_max",
+    "propeller_diameter",
+    "M_battery",
+    "swarm_deployment_rate",
+    "swarm_deployment_rate_mass",
+    "P_r_VTOL",
+    "P_r_FW",
+]
 
 doesnt_converge = set()
 
@@ -204,8 +241,14 @@ def integration_optimization(
     inputs (dict): A dictionary containing the input parameters for the calculations.
     """
     for i in range(max_iterations):
-        uav_sizing = SizeUAV(inputs)
-        outputs = uav_sizing.uav_profile().copy()
+
+        current_inputs = inputs.copy()
+
+        swarm_sizing = SwarmProfile(current_inputs)
+        outputs = swarm_sizing.size_swarm_profile()
+
+        uav_profile = UAVProfile(outputs)
+        outputs = uav_profile.size_uav_profile()
 
         # Calculate the mass of the battery
         battery_mass = calculate_battery_mass(
@@ -218,6 +261,13 @@ def integration_optimization(
         outputs["M_battery"] = battery_mass
 
         outputs = mass_sizing(outputs)
+
+        print(
+            f'span: {outputs["b_wing"]}, wing area: {outputs["S_wing"]}, battery mass: {battery_mass}, MTOW: {inputs["MTOW"]}, M_battery: {inputs["M_battery"]}'
+        )
+
+        nest_sizing = Nest(outputs, verbose=False)
+        outputs = nest_sizing.size_nest()
 
         if all(
             abs(outputs[key] - inputs[key]) < tolerance
@@ -236,28 +286,33 @@ def integration_optimization(
                         doesnt_converge.add(key)
 
         inputs = outputs
-    print("result did not stabilize at max iteration")
+    # print('result did not stabilize at max iteration')
     return outputs
 
 
-print(integration_optimization(1, 100, inputs))
+if __name__ == "__main__":
+    result = integration_optimization(1, 100, inputs)
 
+    for i in result:
+        if i in relevant:
+            if i == "swarm_deployment_rate":
+                print(i, result[i] * 60 * 60)
+            else:
+                print(i, result[i])
 
-def speed_optimisation(inputs, V_range, max_to):
-    all_outputs = []
-    for V in V_range:
-        print("Calculating for V=", V)
-        inputs["V_cruise"] = V
-        inputs["V_stall"] = 0.5 * V
+    # Constraints(
+    #     inputs["V_stall"],
+    #     inputs["V_cruise"],
+    #     inputs["e"],
+    #     inputs["AR"],
+    #     inputs["CL_max"],
+    #     inputs["CD0"],
+    #     inputs["propeller_efficiency_cruise"],
+    #     inputs["RC_service"]
+    #     ).plot(save=True)
 
-        outputs = integration_optimization(0.01, 100, inputs)
-        if outputs["M_to"] < max_to:
-            all_outputs.append(outputs)
-
-    if all_outputs:
-        return all_outputs[-1]
-    else:
-        return "No viable outputs"
-
-
-# print(speed_optimisation(inputs, V_range, 30))
+    """
+    DEar Freya, plz plot
+    - inputs["n_nests] vs inputs["n_drones"] vs inputs["swarm_deployment_rate"]
+    
+    """
