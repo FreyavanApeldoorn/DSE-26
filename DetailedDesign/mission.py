@@ -9,16 +9,32 @@ class Mission:
         self.outputs = self.inputs.copy()
 
     # ~~~ Intermediate Functions ~~~
+    
 
-    def example_function(self):
-        '''
-        This is an example intermediate function
-        '''
-        return True
+    def time_preparation(self) -> float:
+        pass
+
+
+    def time_operation(self) -> float:
+        pass
+
+
+    def time_wrapup(self) -> float:
+        pass
+
+
+    def total_mission_time(self) -> float:
+
+        
+        return self.time_preparation + time_operation + time_wrapup
 
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
+
+
+
+        self.inputs["total_mission_time"] = self.total_mission_time
 
         updated_inputs = True
         return updated_inputs
