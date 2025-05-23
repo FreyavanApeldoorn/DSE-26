@@ -7,7 +7,8 @@ All files in the code contain a single class. This class always has the same lay
 class ExampleName:
 
     def __init__(inputs: dict[str, float]) -> None:
-        ...
+        self.inputs = inputs
+        self.outputs = self.inputs.copy()
 
     # ~~~ Intermediate Functions ~~~
 
@@ -25,11 +26,9 @@ class ExampleName:
 
     def get_all(self):
         ''' This returns all outputs '''
+        return self.outputs
 
-        updated_inputs = something
-        return updated_inputs
-
-Note that all output functions should start with get_... so that they are consistent and easy to use, you can have a get_specific_output or get_all, which would execute all the updates/functions
+Note that all output functions should start with get_... so that they are consistent and easy to use, you can have a get_specific_output or get_all, which would execute all the updates/functions. Also, for outputs, only update self.outputs, so you don't accidentally change your inputs twice. 
 
 ## Inputs and outputs
 
