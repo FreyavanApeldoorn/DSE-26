@@ -62,6 +62,8 @@ def my_function(var1: int, var2: list[float]) -> float:
 
 4. It is usually better to have longer clear variable names over shorter ones. Also, generally use snake case, except with class names. 
 
+5. All inputs that are not integers should be inputted as a floats. So not '5' but '5.0' or '5.'
+
 # Classes explanation
 
 The code for this is in Class example.py, feel free to mess with that to try things out
