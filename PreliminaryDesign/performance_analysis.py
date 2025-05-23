@@ -197,7 +197,38 @@ def deployment_rate_n_UAVS_plot(inputs, n_uav_range):
     plt.savefig('PreliminaryDesign\Plots\deployment_n_UAVs.png')
     #plt.show()
 
+def cruise_speed_range_deployment_rate(V_range, range_range, inputs):
+    '''
+    Creates a contour plot with the cruise_speed and the range on the axes and the take-off mass as a result  
+    '''
+    deployment_speed_range = []
+    grid = []
+    for V in V_range:
+        for r in range_range:
+            current_inputs = inputs.copy()
+            current_inputs['R_max'] = r
+            current_inputs['V_cruise'] = V
 
+            res = integration_optimization(1, 100, current_inputs)
+            deployment_speed_range.append(res['swarm_deployment_rate']*60*60)
+            grid.append((V, r))
+            print((V, r, res['swarm_deployment_rate']))
+
+
+    V_vals = sorted(set([pt[0] for pt in grid]))
+    range_vals = sorted(set([pt[1] for pt in grid]))
+
+    Z = np.array(deployment_speed_range).reshape(len(V_vals), len(range_vals))
+    X, Y = np.meshgrid(range_vals, V_vals)  # X: range, Y: AR
+
+    plt.figure(figsize=(8, 6))
+    cp = plt.contourf(X, Y, Z, cmap='plasma')
+    plt.colorbar(cp, label='Deployment Rate [m/h]')
+
+    plt.xlabel('Distance to fire [m]')
+    plt.ylabel('Cruise speed [m/s]')
+    plt.savefig('PreliminaryDesign\Plots\cruise_speed_range_dep.png')
+    #plt.show()
 
 if __name__ == '__main__':
     # AR_range_diagram(np.arange(6, 13),np.arange(15000, 35001, 1000), integration_optimization, inputs)
@@ -205,6 +236,7 @@ if __name__ == '__main__':
     # payload_range_diagram(np.arange(0, 6.5, 0.5), np.arange(15000, 35001, 1000), integration_optimization, inputs)
     
     # swarm_deployment_plot(np.arange(int(60/3.6), int(150/3.6), 5), np.arange(0, 6, 0.5), inputs)
-    deployment_rate_n_UAVS_plot(inputs, np.arange(0, 41))
+    # deployment_rate_n_UAVS_plot(inputs, np.arange(0, 41))
+    cruise_speed_range_deployment_rate(np.arange(int(50/3.6), int(150/3.6)), np.arange(5000, 20001, 1000), inputs)
 
 

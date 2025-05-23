@@ -7,7 +7,8 @@ All files in the code contain a single class. This class always has the same lay
 class ExampleName:
 
     def __init__(inputs: dict[str, float]) -> None:
-        ...
+        self.inputs = inputs
+        self.outputs = self.inputs.copy()
 
     # ~~~ Intermediate Functions ~~~
 
@@ -25,11 +26,9 @@ class ExampleName:
 
     def get_all(self):
         ''' This returns all outputs '''
+        return self.outputs
 
-        updated_inputs = something
-        return updated_inputs
-
-Note that all output functions should start with get_... so that they are consistent and easy to use, you can have a get_specific_output or get_all, which would execute all the updates/functions
+Note that all output functions should start with get_... so that they are consistent and easy to use, you can have a get_specific_output or get_all, which would execute all the updates/functions. Also, for outputs, only update self.outputs, so you don't accidentally change your inputs twice. 
 
 ## Inputs and outputs
 
@@ -61,6 +60,8 @@ def my_function(var1: int, var2: list[float]) -> float:
 3. All code should be verified. You can verify your code in two ways, the first is to use the test files in the test folder, these use pytest (how you layout a test is in the files), or you can do sanity checks at the bottom of you file within your if __name__ == '__main__' statement. Ideally do both. 
 
 4. It is usually better to have longer clear variable names over shorter ones. Also, generally use snake case, except with class names. 
+
+5. All inputs that are not integers should be inputted as a floats. So not '5' but '5.0' or '5.'
 
 # Classes explanation
 

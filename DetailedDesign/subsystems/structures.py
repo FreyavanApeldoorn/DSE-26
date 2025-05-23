@@ -5,7 +5,8 @@ This is the file for the Structures subsystem. It contains a single class.
 class Structures:
 
     def __init__(self, inputs: dict[str, float]) -> None:
-        ...
+        self.inputs = inputs
+        self.outputs = self.inputs.copy()
 
     # ~~~ Intermediate Functions ~~~
 
@@ -19,8 +20,7 @@ class Structures:
 
     def get_all(self) -> dict[str, float]:
 
-        updated_inputs = True
-        return updated_inputs
+        return self.outputs
     
 if __name__ == '__main__':
     # Perform sanity checks here
