@@ -103,7 +103,7 @@ class Deployment:
         '''
         return self.winch_mass + self.spring_mass*self.n_wire + self.wire_mass*self.n_wire + self.payload_mass +self.n_pulleys*self.pulley_mass +self.n_epms*self.epm_mass
     
-    def duration(self):
+    def deployment_duration(self):
         '''
         Deployment duration
         '''
