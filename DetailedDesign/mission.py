@@ -9,12 +9,13 @@ class Mission:
         self.inputs = inputs
         self.outputs = self.inputs.copy() # Copy inputs to outputs
 
-
+        #Nest
         self.number_of_UAV = inputs["number_of_UAV"] #expected from nest per nest
         self.number_of_containers = inputs["number_of_containers"] #expected from nest
         self.number_of_nests = inputs["number_of_nests"] #expected from nest
         self.number_of_slaves = inputs["number_of_slaves"] #We define, per nest
 
+        #Input Times
         self.time_wing_attachment = inputs["time_wing_attachment"] #We define, upper bound [s]
         self.time_aerogel_loading = inputs["time_aerogel_loading"] #We define, upper bound [s]
         self.time_startup_UAV = inputs["time_startup_UAV"] #We define, upper bound [s]
@@ -27,6 +28,9 @@ class Mission:
         self.time_between_UAV = inputs["time_between_UAV"] #We define, upper bound, time to walk between UAVs [s]
         self.time_battery_swapping = inputs["time_battery_swapping"] #We define, upper bound, time to swap batteries [s]
 
+        #UAV Inputs
+        #Mission Specifics
+        self.mission_perimeter = inputs["mission_perimeter"] #We define, mission perimeter [m] 
     # ~~~ Intermediate Functions ~~~
 
     def time_preparation(self) -> float: #Verified
@@ -44,7 +48,8 @@ class Mission:
         return time_preparation 
 
     def time_operation(self) -> float:
-
+        time_turnaround = self.time_UAV_turnaround_check + self.time_battery_swapping + self.time_aerogel_loading # Time for 1 UAV to turnaround nothing special
+        time_operation_ideal_conditions = self.mission_perimeter/ ()
         pass
 
 
@@ -64,7 +69,7 @@ class Mission:
     
     def total_mission_time(self) -> float:
 
-        pass
+        return
         #return self.time_preparation + time_operation + time_wrapup
 
     # ~~~ Output functions ~~~ 
