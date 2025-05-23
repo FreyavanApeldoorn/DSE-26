@@ -103,13 +103,13 @@ class Deployment:
         '''
         return self.winch_mass + self.spring_mass*self.n_wire + self.wire_mass*self.n_wire + self.payload_mass +self.n_pulleys*self.pulley_mass +self.n_epms*self.epm_mass
     
-    def deployment_duration(self):
+    def duration(self):
         '''
         Deployment duration
         '''
         return (self.wire_length / self.deployment_speed) * 2 + self.deployment_time_margin # This concerns the time that the winch is activated and using power
 
-    def determine_deployment_energy(self):
+    def deployment_energy(self):
         '''
         Total deployment power and energy required, conservative estimates
         '''
@@ -118,7 +118,7 @@ class Deployment:
 
         return total_deployment_power, total_energy
 
-    def determine_cg_change(self):
+    def cg_change(self):
         ...
 
     # ~~~ Output functions ~~~ 
