@@ -5,7 +5,8 @@ This is the file for the mission. It contains a single class.
 class Mission:
 
     def __init__(self, inputs: dict[str, float]) -> None:
-        ...
+        self.inputs = inputs
+        self.outputs = self.inputs.copy()
 
     # ~~~ Intermediate Functions ~~~
 
