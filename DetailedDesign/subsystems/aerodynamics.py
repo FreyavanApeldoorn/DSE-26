@@ -4,7 +4,7 @@ This is the file for the aerodynamics subsystem. It contains a single class.
 
 class Aerodynamics:
 
-    def __init__(inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float]) -> None:
         ...
 
     # ~~~ Intermediate Functions ~~~

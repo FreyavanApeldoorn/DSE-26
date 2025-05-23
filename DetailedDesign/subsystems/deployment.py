@@ -4,8 +4,8 @@ This is the file for the deployment subsystem. It contains a single class.
 
 class Deployment:
 
-    def __init__(inputs: dict[str, float]) -> None:
-        ...
+    def __init__(self, inputs: dict[str, float]) -> None:
+        self.aerogel_mass = 5
 
     # ~~~ Intermediate Functions ~~~
 

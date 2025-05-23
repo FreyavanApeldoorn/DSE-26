@@ -4,7 +4,7 @@ This is the file for the propulsion and power subsystem. It contains a single cl
 
 class PropnPow:
 
-    def __init__(inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float]) -> None:
         ...
 
     # ~~~ Intermediate Functions ~~~
