@@ -1,8 +1,14 @@
 '''
 This is the file for the deployment subsystem. It contains a single class.
 '''
-
 import numpy as np
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from DetailedDesign.funny_inputs import funny_inputs
+
 
 def compute_outer_diameter(length, thickness, internal_diameter):
     '''
@@ -62,6 +68,7 @@ class Deployment:
 
         self.deployment_system_volume = inputs['deployment_system_volume']
         self.deployment_speed = inputs['deployment_speed']
+        self.deployment_time_margin = inputs['deployment_time_margin']
 
         self.power_required_epm = inputs['power_required_epm']
         self.epm_duration = inputs['epm_duration']
@@ -95,9 +102,21 @@ class Deployment:
         Deployment system mass based on the number of wires, springs, winch, pulleys and EPMs
         '''
         return self.winch_mass + self.spring_mass*self.n_wire + self.wire_mass*self.n_wire + self.payload_mass +self.n_pulleys*self.pulley_mass +self.n_epms*self.epm_mass
+    
+    def deployment_duration(self):
+        '''
+        Deployment duration
+        '''
+        return (self.wire_length / self.deployment_speed) * 2 + self.deployment_time_margin # This concerns the time that the winch is activated and using power
 
     def determine_deployment_energy(self):
-        ...
+        '''
+        Total deployment power and energy required, conservative estimates
+        '''
+        total_deployment_power = self.power_required_epm * self.n_epms + self.power_required_winch # Conservative estimate, as usually only 2 out of 4 EPMs are powered at the same time
+        total_energy =  self.power_required_winch * self.deployment_duration() + self.power_required_epm * self.n_epms * self.epm_duration # If winch is fully extended during deployment, then the deployment duration should not include the deployment time margin
+
+        return total_deployment_power, total_energy
 
     def determine_cg_change(self):
         ...
@@ -119,4 +138,4 @@ class Deployment:
     
 if __name__ == '__main__':
     # Perform sanity checks here
-    ...
+    print(funny_inputs)

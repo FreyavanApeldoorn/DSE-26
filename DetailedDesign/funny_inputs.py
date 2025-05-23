@@ -45,6 +45,7 @@ deployment_funny_inputs = {
 
     'deployment_system_volume' : 0.0026554, # m3, guesstimate only incl. winch volume
     'deployment_speed' : 0.3, # m/s
+    'deployment_time_margin' : 15., # s, guesstimate for aerogel unrolling, final positioning, and dropping
 
     'power_required_epm' : 20., # W
     'epm_duration' : 8., # s, maximum OFF-mode duration
