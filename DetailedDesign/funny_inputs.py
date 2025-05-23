@@ -37,11 +37,11 @@ deployment_funny_inputs = {
     'wire_density' : 0.27, # kg/m
     'n_wires' : 2, # nr
 
-    'spring_mass' : 0. # kg
+    'spring_mass' : 0., # kg
     'winch_mass' : 1.5, #kg
-    'n_pulleys' : 4 # nr
-    'pulley_mass' : 0.2 # kg, guesstimate
-    'n_epms' : 4 # nr
+    'n_pulleys' : 4, # nr
+    'pulley_mass' : 0.2, # kg, guesstimate
+    'n_epms' : 4, # nr
     'epm_diameter'  : 0.0025, # m
     'epm_mass' : 0.039, # kg
 
@@ -52,8 +52,7 @@ deployment_funny_inputs = {
     'epm_duration' : 8., # s, maximum OFF-mode duration
     'power_required_winch' : 96., # W
 
-    'cg_change_deployment' : ...
-    'deployment_accuracy' : 0.5 # m, guesstimate
+    'deployment_accuracy' : 0.5, # m, guesstimate
 
     'fuselage_size' : 1.5, # m, guesstimate
 }
