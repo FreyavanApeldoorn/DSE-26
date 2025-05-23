@@ -5,6 +5,10 @@ This is the file for the deployment subsystem. It contains a single class.
 import numpy as np
 
 def compute_outer_diameter(length, thickness, internal_diameter):
+    '''
+    Archimedes spiral
+    '''
+
     a = internal_diameter / 2
     b = thickness / (2 * np.pi)
     def arc_length(theta):

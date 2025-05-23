@@ -23,8 +23,6 @@ funny_inputs.update(aerodynamics_funny_inputs)
 
 deployment_funny_inputs = {
     'payload_mass' : 5., # kg
-
-    'aerogel_mass' : 3., # kg
     'aerogel_width' : 1.5, # m
     'aerogel_thickness' : 0.003, # m
     'aerogel_density' : 200., # kg/m3
