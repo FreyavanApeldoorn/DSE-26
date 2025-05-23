@@ -76,7 +76,7 @@ class Deployment:
 
     def determine_aerogel_size(self):
         '''
-        This is an example intermediate function
+        Aerogel dimensions and mass based on available payload mass
         '''
         aerogel_mass = self.payload_mass - self.ferro_magnet_mass*self.n_ferro_magnets - self.deployment_added_mass
         aerogel_length = self.aerogel_mass / (self.aerogel_width*self.aerogel_thickness)
@@ -85,9 +85,15 @@ class Deployment:
         return aerogel_mass, aerogel_length, aerogel_diameter
     
     def determine_wire_mass(self):
+        '''
+        Wire mass
+        '''
         return self.wire_length*self.wire_density
 
     def determine_deployment_system_mass(self):
+        '''
+        Deployment system mass based on the number of wires, springs, winch, pulleys and EPMs
+        '''
         return self.winch_mass + self.spring_mass*self.n_wire + self.wire_mass*self.n_wire + self.payload_mass +self.n_pulleys*self.pulley_mass +self.n_epms*self.epm_mass
 
     def determine_deployment_energy(self):
