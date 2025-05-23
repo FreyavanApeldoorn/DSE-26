@@ -80,7 +80,7 @@ class Deployment:
         '''
         aerogel_mass = self.payload_mass - self.ferro_magnet_mass*self.n_ferro_magnets - self.deployment_added_mass
         aerogel_length = self.aerogel_mass / (self.aerogel_width*self.aerogel_thickness)
-        aerogel_diameter = compute_outer_diameter(self.aerogel_length, self.aerogel_thickness, self.epm_diameter)
+        aerogel_diameter = compute_outer_diameter(aerogel_length, self.aerogel_thickness, self.epm_diameter)
 
         return aerogel_mass, aerogel_length, aerogel_diameter
     
