@@ -8,7 +8,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from DetailedDesign.funny_inputs import funny_inputs
-
+from DetailedDesign.test.test_inputs import deployment_test_inputs
 
 def compute_outer_diameter(length: float, thickness:float, internal_diameter:float) -> float:
     '''
@@ -283,15 +283,5 @@ class Deployment:
     
 if __name__ == '__main__':
     # Perform sanity checks here
-    funny_inputs['payload_mass'] = 8
-    dep = Deployment(funny_inputs)
-    
-    dep.payload_mass = (dep.firebreak_width*dep.aerogel_width*dep.aerogel_thickness) * dep.aerogel_density + dep.n_ferro_magnets * dep.ferro_magnet_mass + dep.deployment_added_mass
-
-    print(dep.perimeter_creation('nr_aerogels', 5, verbose=True, test = True))
-    print(dep.perimeter_creation('perimeter', 6, verbose=True, test = True))
-
-    dep.payload_mass = (2*dep.firebreak_width*dep.aerogel_width*dep.aerogel_thickness) * dep.aerogel_density + dep.n_ferro_magnets * dep.ferro_magnet_mass + dep.deployment_added_mass
-
-    print(dep.perimeter_creation('nr_aerogels', 5, verbose=True, test = True))
-    print(dep.perimeter_creation('perimeter', 6, verbose=True, test = True))
+    dep = Deployment(deployment_test_inputs)
+    print(dep.get_all())
