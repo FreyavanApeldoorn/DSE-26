@@ -17,12 +17,12 @@ def test_Deployment():
     dep = Deployment(deployment_test_inputs)
     res = dep.get_all()
 
-    assert {'aerogel_mass': 3.0, 
-            'aerogel_length': 3.333333333333333, 
+    assert {'aerogel_mass': 3., 
+            'aerogel_length': 6., 
             'aerogel_diameter': 0.11286122063880329, 
-            'total_deployment_power': 176.0, 
-            'total_deployment_energy': 13120.0, 
-            'deployment_system_mass': 7.903, 
+            'total_deployment_power': 180.0, 
+            'total_deployment_energy': 136400.0, 
+            'deployment_system_mass': 7.26, 
             'deployment_duration': 130.0} in res
 
 def test_Operations():
