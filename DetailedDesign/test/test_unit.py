@@ -22,5 +22,5 @@ def test_Deployment_perimeter_creation():
 
     dep.payload_mass = (2*dep.firebreak_width*dep.aerogel_width*dep.aerogel_thickness) * dep.aerogel_density + dep.n_ferro_magnets * dep.ferro_magnet_mass + dep.deployment_added_mass
 
-    assert dep.perimeter_creation('nr_aerogels', 5, test = True) == ('l', 9)
-    assert dep.perimeter_creation('perimeter', 6, test = True) == ('l', 4)
+    assert dep.perimeter_creation('nr_aerogels', 5, test = True) == ('l', 6)
+    assert dep.perimeter_creation('perimeter', 6, test = True) == ('l', 3)

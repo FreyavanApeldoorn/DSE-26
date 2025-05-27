@@ -147,14 +147,13 @@ class Deployment:
 
         # Lengthwise
         n_layers_l = np.ceil(((self.firebreak_width - self.aerogel_width) / (self.aerogel_width - self.deployment_accuracy)) + 1) # Number of layers needed to cover the firebreak width 
-        eff_length_l = (aerogel_length - self.deployment_accuracy) / n_layers_l # Effective added perimeter length by adding one column of aerogels in the direction of the perimeter
+        eff_length_l = (aerogel_length - self.deployment_accuracy) # Effective added perimeter length by adding one column of aerogels in the direction of the perimeter
 
         # Widthwise
         n_layers_w = np.ceil(((self.firebreak_width - aerogel_length) / (aerogel_length - self.deployment_accuracy)) + 1) # Number of layers needed to cover the firebreak width
-        eff_length_w = (self.aerogel_width - self.deployment_accuracy) / n_layers_w # Effective added perimeter length by adding one column of aerogels in the direction of the perimeter
+        eff_length_w = (self.aerogel_width - self.deployment_accuracy) # Effective added perimeter length by adding one column of aerogels in the direction of the perimeter
 
-        if eff_length_l > eff_length_w: # This chooses the most efficient deployment direction
-            initial = aerogel_length / n_layers_l
+        if eff_length_l / n_layers_l > eff_length_w / n_layers_w: # This chooses the most efficient deployment direction
             eff_length = eff_length_l
             method = 'l'
             n_layers = n_layers_l
@@ -162,7 +161,6 @@ class Deployment:
                 print('The aerogel is deployed lengthwise, number of layers is: ', n_layers_l,
                       '\n effective length:', eff_length)
         else:
-            initial = self.aerogel_width / n_layers_w
             eff_length = eff_length_w
             n_layers = n_layers_w
             if verbose:
@@ -172,22 +170,21 @@ class Deployment:
 
         if strategy == 'nr_aerogels':
             amt = amt - (amt % n_layers)
-            print(amt, initial, eff_length)
-            per_length = initial + (eff_length)*(amt - 1)
+            print(amt, eff_length)
+            per_length = ((eff_length)*(amt) / n_layers) + self.deployment_accuracy
             if test:
                 return method, per_length
             return per_length
     
         elif strategy == 'perimeter':
-            nr_aerogels = np.ceil((amt - initial)/(eff_length) + 1)
+            nr_aerogels = np.ceil(((amt - self.deployment_accuracy) / eff_length)* n_layers)
+            print('nr_aerogels: ', nr_aerogels)
             if test:
                 return method, nr_aerogels
             return nr_aerogels
         else:
             print('Not a valid strategy option')
-
-    
-        
+            
 
     # ~~~ Output functions ~~~ 
 
@@ -291,8 +288,10 @@ if __name__ == '__main__':
     
     dep.payload_mass = (dep.firebreak_width*dep.aerogel_width*dep.aerogel_thickness) * dep.aerogel_density + dep.n_ferro_magnets * dep.ferro_magnet_mass + dep.deployment_added_mass
 
-    print(dep.perimeter_creation('nr_aerogels', 5, test = True))
+    print(dep.perimeter_creation('nr_aerogels', 5, verbose=True, test = True))
+    print(dep.perimeter_creation('perimeter', 6, verbose=True, test = True))
 
     dep.payload_mass = (2*dep.firebreak_width*dep.aerogel_width*dep.aerogel_thickness) * dep.aerogel_density + dep.n_ferro_magnets * dep.ferro_magnet_mass + dep.deployment_added_mass
 
-    print(dep.perimeter_creation('nr_aerogels', 5, test = True))  
+    print(dep.perimeter_creation('nr_aerogels', 5, verbose=True, test = True))
+    print(dep.perimeter_creation('perimeter', 6, verbose=True, test = True))
