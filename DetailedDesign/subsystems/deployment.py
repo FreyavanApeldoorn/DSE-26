@@ -86,7 +86,7 @@ class Deployment:
         aerogel_length = aerogel_mass / (self.aerogel_width*self.aerogel_thickness*self.aerogel_density)
         aerogel_diameter = compute_outer_diameter(aerogel_length, self.aerogel_thickness, self.epm_diameter)
 
-        return aerogel_mass, aerogel_length, aerogel_diameter
+        return aerogel_mass, round(aerogel_length, 2), aerogel_diameter
     
     def wire_mass(self) -> float:
         '''
@@ -118,7 +118,7 @@ class Deployment:
     def cg_change(self):
         ...
 
-    def perimeter_creation(self, strategy: str, amt: float, verbose = False):
+    def perimeter_creation(self, strategy: str, amt: float, verbose = False, test = False):
         '''
         
         Definitions:
@@ -156,24 +156,37 @@ class Deployment:
         if eff_length_l > eff_length_w: # This chooses the most efficient deployment direction
             initial = aerogel_length / n_layers_l
             eff_length = eff_length_l
+            method = 'l'
+            n_layers = n_layers_l
             if verbose:
                 print('The aerogel is deployed lengthwise, number of layers is: ', n_layers_l,
                       '\n effective length:', eff_length)
         else:
             initial = self.aerogel_width / n_layers_w
             eff_length = eff_length_w
+            n_layers = n_layers_w
             if verbose:
                 print('The aerogel is deployed widthwise, number of layers is: ', n_layers_w, 
                       '\n effective length:', eff_length)
+            method = 'w'
 
         if strategy == 'nr_aerogels':
+            amt = amt - (amt % n_layers)
+            print(amt, initial, eff_length)
             per_length = initial + (eff_length)*(amt - 1)
+            if test:
+                return method, per_length
             return per_length
+    
         elif strategy == 'perimeter':
-            nr_aerogels = (amt - initial)/(eff_length) + 1
+            nr_aerogels = np.ceil((amt - initial)/(eff_length) + 1)
+            if test:
+                return method, nr_aerogels
             return nr_aerogels
         else:
             print('Not a valid strategy option')
+
+    
         
 
     # ~~~ Output functions ~~~ 
@@ -274,8 +287,12 @@ class Deployment:
 if __name__ == '__main__':
     # Perform sanity checks here
     funny_inputs['payload_mass'] = 8
-    test = Deployment(funny_inputs)
+    dep = Deployment(funny_inputs)
+    
+    dep.payload_mass = (dep.firebreak_width*dep.aerogel_width*dep.aerogel_thickness) * dep.aerogel_density + dep.n_ferro_magnets * dep.ferro_magnet_mass + dep.deployment_added_mass
 
+    print(dep.perimeter_creation('nr_aerogels', 5, test = True))
 
+    dep.payload_mass = (2*dep.firebreak_width*dep.aerogel_width*dep.aerogel_thickness) * dep.aerogel_density + dep.n_ferro_magnets * dep.ferro_magnet_mass + dep.deployment_added_mass
 
-    print(test.perimeter_creation('perimeter', 50, True))
+    print(dep.perimeter_creation('nr_aerogels', 5, test = True))  

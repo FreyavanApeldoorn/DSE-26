@@ -23,7 +23,7 @@ test_inputs.update(aerodynamics_test_inputs)
 
 deployment_test_inputs = {
     'payload_mass' : 5., # kg
-    'aerogel_width' : 1., # m
+    'aerogel_width' : 1.5, # m
     'aerogel_thickness' : 0.005, # m
     'aerogel_density' : 100., # kg/m3
 
@@ -52,6 +52,7 @@ deployment_test_inputs = {
     'power_required_winch' : 100., # W
 
     'deployment_accuracy' : 0.5, # m, guesstimate
+    'firebreak_width': 3, # m
 
     'fuselage_size' : 1., # m, guesstimate
 }
