@@ -2,7 +2,7 @@
 This is the file for the propulsion and power subsystem. It contains a single class.
 '''
 
-class PropnPow:
+class Propulsion:
 
     def __init__(self, inputs: dict[str, float]) -> None:
         self.inputs = inputs

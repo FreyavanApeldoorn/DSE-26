@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from DetailedDesign.funny_inputs import funny_inputs
 
 
-def compute_outer_diameter(length, thickness, internal_diameter):
+def compute_outer_diameter(length: float, thickness:float, internal_diameter:float) -> float:
     '''
     Archimedes spiral
     '''
@@ -77,7 +77,7 @@ class Deployment:
 
     # ~~~ Intermediate Functions ~~~
 
-    def aerogel_size(self):
+    def aerogel_size(self) -> float:
         '''
         Aerogel dimensions and mass based on available payload mass
         '''
@@ -87,25 +87,25 @@ class Deployment:
 
         return aerogel_mass, aerogel_length, aerogel_diameter
     
-    def wire_mass(self):
+    def wire_mass(self) -> float:
         '''
         Wire mass
         '''
         return self.wire_length*self.wire_density
 
-    def deployment_system_mass(self):
+    def deployment_system_mass(self) -> float:
         '''
         Deployment system mass based on the number of wires, springs, winch, pulleys and EPMs
         '''
         return self.winch_mass + self.spring_mass*self.n_wire + self.wire_mass()*self.n_wire + self.payload_mass +self.n_pulleys*self.pulley_mass +self.n_epms*self.epm_mass
     
-    def deployment_duration(self):
+    def deployment_duration(self) -> float:
         '''
         Deployment duration
         '''
         return (self.wire_length / self.deployment_speed) * 2 + self.deployment_time_margin # This concerns the time that the winch is activated and using power
 
-    def deployment_energy(self):
+    def deployment_energy(self) -> tuple[float, float]:
         '''
         Total deployment power and energy required, conservative estimates
         '''
@@ -119,7 +119,14 @@ class Deployment:
 
     # ~~~ Output functions ~~~ 
 
-    def get_aerogel_dimensions(self):
+    def get_aerogel_dimensions(self) -> dict[str, float]:
+        '''
+        Outputs:
+
+        aerogel mass:               The mass of the aerogel part of te payload
+        aerogel length:             The length of the aerogel sheet
+        aerogel diameter:           The diameter of the rolled up aerogel sheet
+        '''
         outputs = self.inputs.copy()
         aerogel_mass, aerogel_length, aerogel_diameter = self.aerogel_size()
         outputs['aerogel_mass'] = aerogel_mass
@@ -127,22 +134,39 @@ class Deployment:
         outputs['aerogel_diameter'] = aerogel_diameter
         return outputs
     
-    def get_deployment_power(self):
+    def get_deployment_power(self) -> dict[str, float]:
+        '''
+        Outputs:
+
+        total deployment power:     The total power needed by the deployment system while in operation
+        total deployment energy:    The total energy used by the deployment system
+        '''
         outputs = self.inputs.copy()
         total_deployment_power, total_deployment_energy = self.deployment_energy()
         outputs['total_deployment_power'] = total_deployment_power
         outputs['total_deployment_energy'] = total_deployment_energy
         return outputs
 
-    def get_deployment_system_mass(self):
-        #splits
+    def get_deployment_system_mass(self) -> dict[str, float]:
+        '''
+        Outputs:
+
+        deployment system mass:     The total mass of the deployment subsystem
+        wire mass:                  The mass of the wires used in the deployment system
+        '''
         outputs = self.inputs.copy()
         outputs['deployment_system_mass'] = self.deployment_system_mass()
         outputs['aerogel_mass'], _, _ = self.aerogel_size()
         outputs['wire_mass'] = self.wire_mass()
         return outputs
     
-    def get_deployment_duration(self):
+    def get_deployment_duration(self) -> dict[str, float]:
+        '''
+        Outputs:
+
+        deployment duration:        The total duration of the deployment
+        '''
+
         outputs = self.inputs.copy()
         outputs['deployment_duration'] = self.deployment_duration()
         return outputs
@@ -152,6 +176,21 @@ class Deployment:
         ...
 
     def get_all(self) -> dict[str, float]:
+        '''
+        Outputs:
+
+        aerogel mass:               The mass of the aerogel part of te payload
+        aerogel length:             The length of the aerogel sheet
+        aerogel diameter:           The diameter of the rolled up aerogel sheet
+
+        total deployment power:     The total power needed by the deployment system while in operation
+        total deployment energy:    The total energy used by the deployment system
+
+        deployment system mass:     The total mass of the deployment subsystem
+        wire mass:                  The mass of the wires used in the deployment system
+
+        deployment duration:        The total duration of the deployment
+        '''
         outputs = self.inputs.copy() 
 
         aerogel_mass, aerogel_length, aerogel_diameter = self.aerogel_size()
@@ -163,6 +202,7 @@ class Deployment:
         outputs['total_deployment_power'] = total_deployment_power
         outputs['total_deployment_energy'] = total_deployment_energy
 
+        outputs['wire_mass'] = self.wire_mass()
         outputs['deployment_system_mass'] = self.deployment_system_mass()
 
         outputs['deployment_duration'] = self.deployment_duration()

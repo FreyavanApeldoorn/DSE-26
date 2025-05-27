@@ -14,8 +14,16 @@ def test_Aerodynamics():
     assert 1==1
 
 def test_Deployment():
+    # Verified using a hand calculation
+
     dep = Deployment(deployment_test_inputs)
     res = dep.get_all()
+
+    # Sanity checks
+
+    assert res['aerogel_mass'] < res['payload_mass']
+    assert res['aerogel_length'] > 0
+    
 
     assert {'aerogel_mass': 3., 
             'aerogel_length': 6., 
