@@ -72,6 +72,7 @@ class Deployment:
         self.power_required_winch = inputs['power_required_winch']
 
         self.deployment_accuracy = inputs['deployment_accuracy']
+        self.firebreak_width = inputs['firebreak_width']
 
         self.fuselage_size = inputs['fuselage_size']
 
@@ -116,6 +117,50 @@ class Deployment:
 
     def cg_change(self):
         ...
+
+    def perimeter_creation(self, strategy: str, amt: float, verbose = False):
+        '''
+        Inputs:
+        strategy: either 'nr_aerogels' OR 'perimeter' if it's nr aerogels the amount of aerogels is set and you maximise perimeter, if it's perimeter that is set and you minimise the amount of aerogels.
+        amt: Depending on the strategy, the amount of aerogels or the perimeter length.
+
+        Outputs:
+        Total perimeter length OR number of aerogels needed 
+        n_layers
+
+        '''
+        _, aerogel_length, _ = self.aerogel_size()
+
+        # Decide whether the aerogels will be deployed length or widthwise.
+
+        # Lengthwise
+        n_layers_l = np.ceil(((self.firebreak_width - self.aerogel_width) / (self.aerogel_width - self.deployment_accuracy)) + 1)
+        eff_length_l = (aerogel_length - self.deployment_accuracy) / n_layers_l
+
+        # Widthwise
+        n_layers_w = np.ceil(((self.firebreak_width - aerogel_length) / (aerogel_length - self.deployment_accuracy)) + 1)
+        eff_length_w = (self.aerogel_width - self.deployment_accuracy) / n_layers_w
+
+        if eff_length_l > eff_length_w:
+            initial = aerogel_length / n_layers_l
+            eff_length = eff_length_l
+            if verbose:
+                print('The aerogel is deployed lengthwise, number of layers is: ', n_layers_l)
+        else:
+            initial = self.aerogel_width / n_layers_w
+            eff_length = eff_length_w
+            if verbose:
+                print('The aerogel is deployed widthwise, number of layers is: ', n_layers_w)
+
+        if strategy == 'nr_aerogels':
+            per_length = initial + (eff_length)*(amt - 1)
+            return per_length
+        elif strategy == 'perimeter':
+            nr_aerogels = (amt - initial)*(eff_length + 1)
+            return nr_aerogels
+        else:
+            print('Not a valid strategy option')
+        
 
     # ~~~ Output functions ~~~ 
 
