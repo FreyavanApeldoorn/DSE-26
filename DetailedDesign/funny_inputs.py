@@ -31,9 +31,9 @@ deployment_funny_inputs = {
     'ferro_magnet_mass' : 0.5, # kg, guesstimate
     'deployment_added_mass' : 1., # kg, guesstimate
 
-    'wire_length' : 15., # m
-    'wire_density' : 0.01488, # kg/m
-    'n_wire' : 2, # nr
+    'wire_length' : 15., # m, neglecting the split ends of the wire
+    'wire_density' : 0.27, # kg/m
+    'n_wires' : 2, # nr
 
     'spring_mass' : 0., # kg
     'winch_mass' : 1.5, #kg
