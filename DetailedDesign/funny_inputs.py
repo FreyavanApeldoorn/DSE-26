@@ -52,6 +52,7 @@ deployment_funny_inputs = {
     'power_required_winch' : 96., # W
 
     'deployment_accuracy' : 0.5, # m, guesstimate
+    'firebreak_width': 3, # m
 
     'fuselage_size' : 1.5, # m, guesstimate
 }
