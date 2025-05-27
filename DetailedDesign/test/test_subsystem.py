@@ -23,15 +23,15 @@ def test_Deployment():
 
     assert res['aerogel_mass'] < res['payload_mass']
     assert res['aerogel_length'] > 0
-    
+
 
     assert {'aerogel_mass': 3., 
-            'aerogel_length': 6., 
-            'aerogel_diameter': 0.11286122063880329, 
+            'aerogel_length': 4., 
+            'aerogel_diameter': 0.15959254850813723, 
             'total_deployment_power': 180.0, 
-            'total_deployment_energy': 136400.0, 
+            'total_deployment_energy': 13640.0, 
             'deployment_system_mass': 7.26, 
-            'deployment_duration': 130.0} in res
+            'deployment_duration': 130.0}.items() <= res.items()
 
 def test_Operations():
     assert 1==1
