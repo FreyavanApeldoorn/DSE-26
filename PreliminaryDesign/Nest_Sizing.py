@@ -305,7 +305,7 @@ class Nest:
             n_cap_nest_gen = int(v_op_gen // self.v_uav_bat)  # Number of whole drones (with battery) that fit in v_op
             n_remaining = int(self.n_drones - n_cap_nest_gen)
 
-            print(f"number of remaining drones: {n_remaining}")
+            # print(f"number of remaining drones: {n_remaining}")
 
             # n_cap_nest_nogen = int(v_op_nogen // self.v_uav_bat)  # Number of drones in overflow container
             # n_nest_nogen = n_remaining // n_cap_nest_nogen  # Number of overflow containers needed

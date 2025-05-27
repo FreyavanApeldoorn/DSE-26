@@ -32,8 +32,8 @@ deployment_funny_inputs = {
     'deployment_added_mass' : 1., # kg, guesstimate
 
     'wire_length' : 15., # m
-    'wire_density' : 0.27, # kg/m
-    'n_wires' : 2, # nr
+    'wire_density' : 0.01488, # kg/m
+    'n_wire' : 2, # nr
 
     'spring_mass' : 0., # kg
     'winch_mass' : 1.5, #kg
@@ -45,7 +45,7 @@ deployment_funny_inputs = {
 
     'deployment_system_volume' : 0.0026554, # m3, guesstimate only incl. winch volume
     'deployment_speed' : 0.3, # m/s
-    'deployment_time_margin' : 15., # s, guesstimate for aerogel unrolling, final positioning, and dropping
+    'deployment_time_margin' : 30., # s, guesstimate for aerogel unrolling, final positioning, and dropping
 
     'power_required_epm' : 20., # W
     'epm_duration' : 8., # s, maximum OFF-mode duration
