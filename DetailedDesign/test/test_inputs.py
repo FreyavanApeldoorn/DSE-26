@@ -1,27 +1,27 @@
 '''
-This is the funny_inputs file, you are allowed and supposed to change this while coding. 
+This is the test_inputs file, you are allowed and supposed to change this while coding. 
 If your code is unfinished, please use these
 '''
 
-funny_inputs = {}
+test_inputs = {}
 
 # ~~~ Constants ~~~ 
 
-constants_funny_inputs = {
+constants_test_inputs = {
     'g': 9.81           # Gravitational constant [m/s2]
 }
 
-funny_inputs.update(constants_funny_inputs)
+test_inputs.update(constants_test_inputs)
 
 # ~~~ Aerodynamics ~~~
 
-aerodynamics_funny_inputs = {}
+aerodynamics_test_inputs = {}
 
-funny_inputs.update(aerodynamics_funny_inputs)
+test_inputs.update(aerodynamics_test_inputs)
 
 # ~~~ Deployment ~~~~
 
-deployment_funny_inputs = {
+deployment_test_inputs = {
     'payload_mass' : 5., # kg
     'aerogel_width' : 1.5, # m
     'aerogel_thickness' : 0.003, # m
@@ -56,34 +56,34 @@ deployment_funny_inputs = {
     'fuselage_size' : 1.5, # m, guesstimate
 }
 
-funny_inputs.update(deployment_funny_inputs)
+test_inputs.update(deployment_test_inputs)
 
 # ~~~ Operations ~~~
 
-operations_funny_inputs = {}
+operations_test_inputs = {}
 
-funny_inputs.update(operations_funny_inputs)
+test_inputs.update(operations_test_inputs)
 
 # ~~~ Propulsion and Power ~~~ 
 
-prop_n_pow_funny_inputs = {}
+prop_n_pow_test_inputs = {}
 
-funny_inputs.update(prop_n_pow_funny_inputs)
+test_inputs.update(prop_n_pow_test_inputs)
 
 # ~~~ Stability and control ~~~ 
 
-stab_n_con_funny_inputs = {}
+stab_n_con_test_inputs = {}
 
-funny_inputs.update(stab_n_con_funny_inputs)
+test_inputs.update(stab_n_con_test_inputs)
 
 # ~~~ Structures ~~~ 
 
-structures_funny_inputs = {}
+structures_test_inputs = {}
 
-funny_inputs.update(structures_funny_inputs)
+test_inputs.update(structures_test_inputs)
 
 # ~~~ Thermal control ~~~
 
-thermal_funny_inputs = {}
+thermal_test_inputs = {}
 
-funny_inputs.update()
+test_inputs.update()
