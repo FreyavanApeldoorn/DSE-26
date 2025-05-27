@@ -1,5 +1,5 @@
 '''
-This is the file for the deployment subsystem. It contains a single class.
+This is the file for the deployment subsystem. It contains a single class. Perimeter_creation takes external inputs. 
 '''
 import numpy as np
 import sys
@@ -145,18 +145,20 @@ class Deployment:
             initial = aerogel_length / n_layers_l
             eff_length = eff_length_l
             if verbose:
-                print('The aerogel is deployed lengthwise, number of layers is: ', n_layers_l)
+                print('The aerogel is deployed lengthwise, number of layers is: ', n_layers_l,
+                      '\n effective length:', eff_length)
         else:
             initial = self.aerogel_width / n_layers_w
             eff_length = eff_length_w
             if verbose:
-                print('The aerogel is deployed widthwise, number of layers is: ', n_layers_w)
+                print('The aerogel is deployed widthwise, number of layers is: ', n_layers_w, 
+                      '\n effective length:', eff_length)
 
         if strategy == 'nr_aerogels':
             per_length = initial + (eff_length)*(amt - 1)
             return per_length
         elif strategy == 'perimeter':
-            nr_aerogels = (amt - initial)*(eff_length + 1)
+            nr_aerogels = (amt - initial)/(eff_length) + 1
             return nr_aerogels
         else:
             print('Not a valid strategy option')
@@ -259,6 +261,9 @@ class Deployment:
     
 if __name__ == '__main__':
     # Perform sanity checks here
+    funny_inputs['payload_mass'] = 8
     test = Deployment(funny_inputs)
 
-    print(test.get_all())
+
+
+    print(test.perimeter_creation('perimeter', 50, True))
