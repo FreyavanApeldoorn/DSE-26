@@ -120,13 +120,25 @@ class Deployment:
 
     def perimeter_creation(self, strategy: str, amt: float, verbose = False):
         '''
+        
+        Definitions:
+            -> Lengthwise: the aerogel is deployed along its length, i.e. the long side of the aerogel is parallel to the perimeter direction
+            -> Widthwise: the aerogel is deployed along its width, i.e. the short side of the aerogel is parallel to the perimeter direction
+            -> Firebreak width: also the 'depth' of the firebreak, i.e. the distance between the 'fire' and 'no fire' sides of the firebreak
+
         Inputs:
-        strategy: either 'nr_aerogels' OR 'perimeter' if it's nr aerogels the amount of aerogels is set and you maximise perimeter, if it's perimeter that is set and you minimise the amount of aerogels.
-        amt: Depending on the strategy, the amount of aerogels or the perimeter length.
+        strategy: either 'nr_aerogels' OR 'perimeter' 
+            -> nr_aerogels: the amount of aerogels is set and you maximise perimeter
+            -> perimeter: perimeter length is set and you minimise the amount of aerogels
+        amt: depending on the strategy
+            -> nr_aerogels: the amount of aerogels available
+            -> perimeter: the required perimeter length
 
         Outputs:
-        Total perimeter length OR number of aerogels needed 
-        n_layers
+        depending on the strategy
+            -> nr_aerogels: total perimeter length ('per_length') 
+            -> perimeter: total aerogels needed ('nr_aerogels')
+        n_layers: the number of aerogel layers needed to cover the required firebreak width
 
         '''
         _, aerogel_length, _ = self.aerogel_size()
@@ -134,14 +146,14 @@ class Deployment:
         # Decide whether the aerogels will be deployed length or widthwise.
 
         # Lengthwise
-        n_layers_l = np.ceil(((self.firebreak_width - self.aerogel_width) / (self.aerogel_width - self.deployment_accuracy)) + 1)
-        eff_length_l = (aerogel_length - self.deployment_accuracy) / n_layers_l
+        n_layers_l = np.ceil(((self.firebreak_width - self.aerogel_width) / (self.aerogel_width - self.deployment_accuracy)) + 1) # Number of layers needed to cover the firebreak width 
+        eff_length_l = (aerogel_length - self.deployment_accuracy) / n_layers_l # Effective added perimeter length by adding one column of aerogels in the direction of the perimeter
 
         # Widthwise
-        n_layers_w = np.ceil(((self.firebreak_width - aerogel_length) / (aerogel_length - self.deployment_accuracy)) + 1)
-        eff_length_w = (self.aerogel_width - self.deployment_accuracy) / n_layers_w
+        n_layers_w = np.ceil(((self.firebreak_width - aerogel_length) / (aerogel_length - self.deployment_accuracy)) + 1) # Number of layers needed to cover the firebreak width
+        eff_length_w = (self.aerogel_width - self.deployment_accuracy) / n_layers_w # Effective added perimeter length by adding one column of aerogels in the direction of the perimeter
 
-        if eff_length_l > eff_length_w:
+        if eff_length_l > eff_length_w: # This chooses the most efficient deployment direction
             initial = aerogel_length / n_layers_l
             eff_length = eff_length_l
             if verbose:
