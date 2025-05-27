@@ -23,37 +23,37 @@ test_inputs.update(aerodynamics_test_inputs)
 
 deployment_test_inputs = {
     'payload_mass' : 5., # kg
-    'aerogel_width' : 1.5, # m
-    'aerogel_thickness' : 0.003, # m
-    'aerogel_density' : 200., # kg/m3
+    'aerogel_width' : 1., # m
+    'aerogel_thickness' : 0.005, # m
+    'aerogel_density' : 100., # kg/m3
 
     'n_ferro_magnets' : 2, # nr
     'ferro_magnet_mass' : 0.5, # kg, guesstimate
     'deployment_added_mass' : 1., # kg, guesstimate
 
     'wire_length' : 15., # m, neglecting the split ends of the wire
-    'wire_density' : 0.0149, # kg/m
+    'wire_density' : 0.01, # kg/m
     'n_wire' : 2, # nr
 
     'spring_mass' : 0., # kg
-    'winch_mass' : 1.5, #kg
+    'winch_mass' : 1., #kg
     'n_pulleys' : 4, # nr
     'pulley_mass' : 0.2, # kg, guesstimate
     'n_epms' : 4, # nr
-    'epm_diameter'  : 0.0025, # m
-    'epm_mass' : 0.039, # kg
+    'epm_diameter'  : 0.003, # m
+    'epm_mass' : 0.04, # kg
 
-    'deployment_system_volume' : 0.0026554, # m3, guesstimate only incl. winch volume
+    'deployment_system_volume' : 0.003, # m3, guesstimate only incl. winch volume
     'deployment_speed' : 0.3, # m/s
     'deployment_time_margin' : 30., # s, guesstimate for aerogel unrolling, final positioning, and dropping
 
     'power_required_epm' : 20., # W
     'epm_duration' : 8., # s, maximum OFF-mode duration
-    'power_required_winch' : 96., # W
+    'power_required_winch' : 100., # W
 
     'deployment_accuracy' : 0.5, # m, guesstimate
 
-    'fuselage_size' : 1.5, # m, guesstimate
+    'fuselage_size' : 1., # m, guesstimate
 }
 
 test_inputs.update(deployment_test_inputs)
