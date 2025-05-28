@@ -92,7 +92,7 @@ class Thermal:
         self.outputs["Cooling_time_to_cruise_set"] = self.get_cooling_time_to_cruise_set()
         return self.outputs
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     # Sanity check with example inputs
     example_inputs = {
         "T_amb_hot": 140.0,
