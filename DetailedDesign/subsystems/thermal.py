@@ -19,6 +19,11 @@ class Thermal:
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
+        
+        # These are all the required outputs for this class. Plz consult the rest if removing any of them!
+
+        outputs["Thermal_mass"] = ...
+        outputs["Thermal_power_required"] = ...
 
         return self.outputs
     

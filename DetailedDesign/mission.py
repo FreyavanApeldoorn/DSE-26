@@ -162,6 +162,10 @@ class Mission:
 
         self.total_mission_time()
 
+        self.outputs["time_hover"] = ...
+        self.outputs["time_cruise"] = ...
+        # self.outputs["time_"]
+
         self.outputs["time_preparation"] = self.time_preparation
         self.outputs["time_operation"] = self.time_operation
         self.outputs["time_wrapup"] = self.time_wrapup
