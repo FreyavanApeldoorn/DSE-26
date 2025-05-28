@@ -24,6 +24,15 @@ class Propulsion:
         self.vtol_roc = inputs ['vtol_roc']
         self.mtow = inputs ['mtow']
         self.g = inputs ['g']
+        self.eff_prop = inputs['eff_prop']
+        self.K_p = inputs['K_p']
+        self.n_props_cruise = inputs['n_props_cruise']
+        self.motor_mass_cruise = inputs['motor_mass_cruise']
+        self.motor_mass_VTOL = inputs['motor_mass_VTOL']
+        self.propeller_mass_VTOL = inputs['propeller_mass_VTOL']
+        self.propeller_mass_cruise = inputs['propeller_mass_cruise']
+        self.power_available_VTOL = inputs['power_available_VTOL']
+        self.power_available_cruise = inputs ['power_available_cruise']
 
         self.outputs = self.inputs.copy()
         
@@ -85,31 +94,41 @@ class Propulsion:
     def power_required_cruise(self): 
         constraints = Constraints(funny_inputs)
         W_S, P_W_cruise, P_W_climb, P_W_service, W_S_stall, optimal_cruise_power = constraints.form_variable_lists()
-        return optimal_cruise_power
+        D_cruise = self.K_p * (optimal_cruise_power / self.n_props_cruise) ** (1 / 4)
+
+        return optimal_cruise_power, D_cruise 
+
+    def power_required_hover(self): 
+        vtol_power , S_prop, prop_disk_loading, total_thrust = self.power_required_vtol()
+        P_hov = (2/(self.rho*S_prop))*(self.mtow)**(3/2)/self.eff_prop
+        return P_hov
     
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
         outputs = self.inputs.copy()
         vtol_power, S_prop, prop_disk_loading , total_thrust = self.power_required_vtol()
-        optimal_cruise_power = self.power_required_cruise()
+        optimal_cruise_power, D_cruise = self.power_required_cruise()
+        P_hov = self.power_required_hover() 
+        
+        propulsion_system_mass = self.motor_mass_cruise  + self.motor_mass_VTOL * 4 + self.propeller_mass_cruise + self.propeller_mass_VTOL * 4
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         outputs["Power_required_VTOL"] = vtol_power
         outputs["Power_required_cruise"] = optimal_cruise_power
-        outputs["Power_required_hover"] = ...
+        outputs["Power_required_hover"] = P_hov
     
-        outputs["Power_available_VTOL"] = ...
-        outputs["Power_available_cruise"] = ...
+        outputs["Power_available_VTOL"] = self.power_available_VTOL
+        outputs["Power_available_cruise"] = self.power_available_cruise
 
         outputs["Propeller_diameter_VTOL"] = np.sqrt(S_prop/3.14) * 2
-        outputs["Propeller_diameter_cruise"] = ...
+        outputs["Propeller_diameter_cruise"] = D_cruise
         
-        outputs["Propulsion_system_mass"] = ...
-        outputs["Motor_mass_VTOL"] = ...
-        outputs["Motor_mass_cruise"] = ...
-        outputs["Propeller_mass_VTOL"] = ...
-        outputs["Propeller_mass_cruise"] = ...
+        outputs["Propulsion_system_mass"] = propulsion_system_mass
+        outputs["Motor_mass_VTOL"] = self.motor_mass_VTOL
+        outputs["Motor_mass_cruise"] = self.motor_mass_cruise
+        outputs["Propeller_mass_VTOL"] = self.propeller_mass_VTOL
+        outputs["Propeller_mass_cruise"] = self.propeller_mass_cruise
 
         return outputs
 
