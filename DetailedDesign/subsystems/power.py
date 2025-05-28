@@ -1,6 +1,10 @@
+import numpy as np
+
 '''
 This is the file for the propulsion and power subsystem. It contains a single class.
 '''
+
+
 
 class Power:
 
@@ -8,13 +12,82 @@ class Power:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
 
+        self.time_hover = inputs["time_hover"]
+        self.time_cruise = inputs["time_cruise"]
+        self.time_ascent = inputs["time_ascent"]
+        self.time_descent = inputs["time_descent"]
+        self.time_deploy = inputs["time_deploy"]
+        self.time_transition = inputs["time_transition"]
+        self.time_scan = inputs["time_scan"]
+        self.time_idle = inputs["time_idle"]
+
+        self.power_hover = inputs["power_hover"]
+        self.power_cruise = inputs["power_cruise"]
+        self.power_ascent = inputs["power_ascent"]
+        self.power_descent = inputs["power_descent"]
+        self.power_deploy = inputs["power_deploy"]
+        self.power_transition = inputs["power_transition"]
+        self.power_scan = inputs["power_scan"]
+        self.power_idle = inputs["power_idle"]
+
+
     # ~~~ Intermediate Functions ~~~
 
-    def example_function(self):
+    def calculate_required_capacity(self) -> float:
+        
+        times = np.array([
+            self.time_hover,
+            self.time_cruise,
+            self.time_ascent,
+            self.time_descent,
+            self.time_deploy,
+            self.time_transition,
+            self.time_scan,
+            self.time_idle
+        ])
+        powers = np.array([
+            self.power_hover,
+            self.power_cruise,
+            self.power_ascent,
+            self.power_descent,
+            self.power_deploy,
+            self.power_transition,
+            self.power_scan,
+            self.power_idle
+        ])
+        self.required_capacity = np.sum(times * powers)
+        self.required_capacity_wh = self.required_capacity / 3600
+
+
+    def calculate_battery_mass(self) -> float:
         '''
-        This is an example intermediate function
+        This calculates the required battery mass given mission energy and constraints
         '''
-        return True
+        self.calculate_required_capacity()   # calculated the required capacity in Wh
+        E_required_Wh = self.required_capacity_wh
+        DOD_fraction = self.inputs["DOD_fraction"]
+        eta_battery = self.inputs["eta_battery"]
+        M_to = self.inputs["M_to"]
+
+        E_battery = E_required_Wh / 3600 / (eta_battery * DOD_fraction) # convert J to Wh and consider efficiency and depth of discharge
+        #Use formula from research paper to determine battery mass
+        a = 4.04
+        b = 139
+        c = 0.0155
+    
+        discriminant = b**2 - 4 * a * (c - E_battery)
+
+        if discriminant < 0:
+            raise ValueError("No real solution for the given energy input.")
+
+        M_battery = (-b + (discriminant)**(1/2)) / (2 * a)
+        M_battery = E_battery / 240  # assume different specific energy density of 240 Wh/kg
+
+        max_battery_frac = 0.35
+        max_battery_mass = max_battery_frac * M_to # Maximum battery mass is 40% of MTOW
+        battery_mass = min(M_battery, max_battery_mass) 
+
+        return battery_mass
 
     # ~~~ Output functions ~~~ 
 
@@ -22,12 +95,12 @@ class Power:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
 
-        inputs["Battery_mass"] = ...
-        inputs["Battery_volume"] = ...
-        inputs["Battery_capacity"] = ...
+        outputs["Battery_mass"] = self.calculate_battery_mass()
+        outputs["Battery_volume"] = ...
+        outputs["Battery_capacity"] = ...   # updated true capacity (might increase after choosing a battery)
 
         return self.outputs
     
 if __name__ == '__main__':
     # Perform sanity checks here
-    ...
+    pow = Power(funny_inputs)

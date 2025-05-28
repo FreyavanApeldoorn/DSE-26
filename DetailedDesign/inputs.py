@@ -12,11 +12,12 @@ constants_inputs = {
 
 inputs.update(constants_inputs)
 
-# ~~~ Aerodynamics ~~~
 
-aerodynamics_inputs = {}
+# ~~~ Mission ~~~
 
-inputs.update(aerodynamics_inputs)
+mission_inputs = {}
+
+inputs.update(mission_inputs)
 
 # ~~~ Deployment ~~~~
 
@@ -24,11 +25,6 @@ deployment_inputs = {}
 
 inputs.update(deployment_inputs)
 
-# ~~~ Operations ~~~
-
-operations_inputs = {}
-
-inputs.update(operations_inputs)
 
 # ~~~ Propulsion and Power ~~~ 
 
@@ -41,6 +37,12 @@ inputs.update(prop_n_pow_inputs)
 stab_n_con_inputs = {}
 
 inputs.update(stab_n_con_inputs)
+
+# ~~~ Aerodynamics ~~~
+
+aerodynamics_inputs = {}
+
+inputs.update(aerodynamics_inputs)
 
 # ~~~ Structures ~~~ 
 

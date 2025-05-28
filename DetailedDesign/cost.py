@@ -2,7 +2,7 @@
 This is the file for the thermal subsystem. It contains a single class.
 '''
 
-class Thermal:
+class Costs:
 
     def __init__(self, inputs: dict[str, float]) -> None:
         self.inputs = inputs
@@ -19,11 +19,6 @@ class Thermal:
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
-        
-        # These are all the required outputs for this class. Plz consult the rest if removing any of them!
-
-        outputs["Thermal_mass"] = ...
-        outputs["Thermal_power_required"] = ...
 
         return self.outputs
     

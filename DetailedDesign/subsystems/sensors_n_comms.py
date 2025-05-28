@@ -2,7 +2,7 @@
 This is the file for the operations subsystem. It contains a single class.
 '''
 
-class CommnSens:
+class SensComs:
 
     def __init__(self, inputs: dict[str, float]) -> None:
         self.inputs = inputs
