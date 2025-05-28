@@ -25,8 +25,10 @@ class Structures:
         outputs["Mass_structure"] = ...
         outputs["Mass_payload"] = ...   # updated mass of the payload (with an added margin to avoid exceeding the MTOW requirement)
         
-        outputs[]
 
+        outputs["Volume_uav"] = ...
+
+        #CG calculations:
         outputs["CG_"]
 
         return self.outputs

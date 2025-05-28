@@ -20,6 +20,15 @@ class Nest:
 
     def get_all(self) -> dict[str, float]:
 
+        outputs["Number_of_nests"] = ...
+        outputs["Number_of_UAVs"]
+
+
+        outputs["Nest_volume"] = ...
+        outputs["Nest_mass"] = ...
+
+        outputs["Volume_fueltank"] = ...
+
         return self.outputs
     
 if __name__ == '__main__':
