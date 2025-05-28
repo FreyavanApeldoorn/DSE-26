@@ -51,6 +51,10 @@ class Mission:
         self.aerogel_width = inputs["aerogel_width"] 
         self.deployment_accuracy = inputs["deployment_accuracy"] 
 
+
+
+        self.num_aerogels = inputs["num_aerogels"]
+
         
 
     # ~~~ Intermediate Functions ~~~
@@ -94,19 +98,19 @@ class Mission:
         self.time_uav = np.sum(mission_times)
 
 
-    def deployment_rate_uav(self) -> float: 
+    # def deployment_rate_uav(self) -> float: 
         
-        effective_width = self.aerogel_width - (2*self.deployment_accuracy)
-        if effective_width <= 0:
-            raise ValueError("Effective aerogel width must be positive. Check deployment_accuracy.")
+    #     effective_width = self.aerogel_width - (2*self.deployment_accuracy)
+    #     if effective_width <= 0:
+    #         raise ValueError("Effective aerogel width must be positive. Check deployment_accuracy.")
         
-        n_layers = np.ceil(self.fire_break_width / effective_width)
-        self.n_layers = n_layers
+    #     n_layers = np.ceil(self.fire_break_width / effective_width)
+    #     self.n_layers = n_layers
 
-        self.uav_mission_time()
+    #     self.uav_mission_time()
 
-        perimeter_per_trip = self.aerogel_length / self.n_layers
-        self.uav_deployment_rate = perimeter_per_trip / self.time_uav
+    #     perimeter_per_trip = self.aerogel_length / self.n_layers
+    #     self.uav_deployment_rate = perimeter_per_trip / self.time_uav
 
 
 
@@ -148,8 +152,9 @@ class Mission:
             pass # ADD MARGIN STUFF
 
 
-    def total_deployment_rate(self) -> float:
-        pass
+    def mission_deployment_rate(self) -> float:
+        
+        self.mission_perimeter / 
 
     # ~~~ Output functions ~~~ 
  

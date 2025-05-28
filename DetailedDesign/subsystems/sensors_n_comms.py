@@ -1,8 +1,8 @@
 '''
-This is the file for the propulsion and power subsystem. It contains a single class.
+This is the file for the operations subsystem. It contains a single class.
 '''
 
-class Power:
+class SensComs:
 
     def __init__(self, inputs: dict[str, float]) -> None:
         self.inputs = inputs
@@ -19,12 +19,6 @@ class Power:
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
-
-        # These are all the required outputs for this class. Plz consult the rest if removing any of them!
-
-        outputs["Battery_mass"] = ...
-        outputs["Battery_volume"] = ...
-        outputs["Battery_capacity"] = ...
 
         return self.outputs
     
