@@ -1,10 +1,15 @@
 '''
 This is the file for the propulsion and power subsystem. It contains a single class.
 '''
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 
 import numpy as np
-from DetailedDesign.funny_inputs import constants_funny_inputs
-from DetailedDesign.funny_inputs import prop_n_pow_funny_inputs
+
+from DetailedDesign.subsystems.constraints import Constraints
+from DetailedDesign.funny_inputs import funny_inputs
 
 
 
@@ -14,11 +19,20 @@ class Propulsion:
         self.inputs = inputs
         self.wing_loading = inputs['wing_loading']
         self.s_tot_sw = inputs['s_tot_sw'] # Total projected aircraft area to wing area ratio
-        self.n_prop_vtol = inputs ['n_prop_vtol']
+        self.n_prop_vtol = inputs ['n_prop_vtol'] #number of vtol properlers
         self.rho = inputs['rho']
         self.vtol_roc = inputs ['vtol_roc']
         self.mtow = inputs ['mtow']
         self.g = inputs ['g']
+        self.eff_prop = inputs['eff_prop']
+        self.K_p = inputs['K_p']
+        self.n_props_cruise = inputs['n_props_cruise']
+        self.motor_mass_cruise = inputs['motor_mass_cruise']
+        self.motor_mass_VTOL = inputs['motor_mass_VTOL']
+        self.propeller_mass_VTOL = inputs['propeller_mass_VTOL']
+        self.propeller_mass_cruise = inputs['propeller_mass_cruise']
+        self.power_available_VTOL = inputs['power_available_VTOL']
+        self.power_available_cruise = inputs ['power_available_cruise']
 
         self.outputs = self.inputs.copy()
         
@@ -77,43 +91,50 @@ class Propulsion:
 
         return vtol_power , S_prop, prop_disk_loading, total_thrust
 
+    def power_required_cruise(self): 
+        constraints = Constraints(funny_inputs)
+        W_S, P_W_cruise, P_W_climb, P_W_service, W_S_stall, optimal_cruise_power = constraints.form_variable_lists()
+        D_cruise = self.K_p * (optimal_cruise_power / self.n_props_cruise) ** (1 / 4)
+
+        return optimal_cruise_power, D_cruise 
+
+    def power_required_hover(self): 
+        vtol_power , S_prop, prop_disk_loading, total_thrust = self.power_required_vtol()
+        P_hov = (2/(self.rho*S_prop))*(self.mtow)**(3/2)/self.eff_prop
+        return P_hov
+    
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
         outputs = self.inputs.copy()
-        vtol_power, S_prop, prop_disk_loading , total_thrust = self.aerogel_size()
-
-        outputs['vtol_power'] = vtol_power
-        outputs['S_prop'] = S_prop
-        outputs['prop_disk_loading'] = prop_disk_loading
-        outputs['total_thrust'] = total_thrust
-
+        vtol_power, S_prop, prop_disk_loading , total_thrust = self.power_required_vtol()
+        optimal_cruise_power, D_cruise = self.power_required_cruise()
+        P_hov = self.power_required_hover() 
         
+        propulsion_system_mass = self.motor_mass_cruise  + self.motor_mass_VTOL * 4 + self.propeller_mass_cruise + self.propeller_mass_VTOL * 4
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
-
-        inputs["Power_required_VTOL"] = ...
-        inputs["Power_required_cruise"] = ...
-        inputs["Power_required_hover"] = ...
+        outputs["Power_required_VTOL"] = vtol_power
+        outputs["Power_required_cruise"] = optimal_cruise_power
+        outputs["Power_required_hover"] = P_hov
     
-        inputs["Power_available_VTOL"] = ...
-        inputs["Power_available_cruise"] = ...
+        outputs["Power_available_VTOL"] = self.power_available_VTOL
+        outputs["Power_available_cruise"] = self.power_available_cruise
 
-        inputs["Propeller_diameter_VTOL"] = ...
-        inputs["Propeller_diameter_cruise"] = ...
+        outputs["Propeller_diameter_VTOL"] = np.sqrt(S_prop/3.14) * 2
+        outputs["Propeller_diameter_cruise"] = D_cruise
         
-        inputs["Propulsion_system_mass"] = ...
-        inputs["Motor_mass_VTOL"] = ...
-        inputs["Motor_mass_cruise"] = ...
-        inputs["Propeller_mass_VTOL"] = ...
-        inputs["Propeller_mass_cruise"] = ...
+        outputs["Propulsion_system_mass"] = propulsion_system_mass
+        outputs["Motor_mass_VTOL"] = self.motor_mass_VTOL
+        outputs["Motor_mass_cruise"] = self.motor_mass_cruise
+        outputs["Propeller_mass_VTOL"] = self.propeller_mass_VTOL
+        outputs["Propeller_mass_cruise"] = self.propeller_mass_cruise
 
-        return self.outputs
-
+        return outputs
     
 if __name__ == '__main__':
     # Perform sanity checks here
-    propulsion = Propulsion(prop_n_pow_funny_inputs)
+    propulsion = Propulsion(funny_inputs)
     print(propulsion.get_all())
 
     
