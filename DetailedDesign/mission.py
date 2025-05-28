@@ -83,6 +83,7 @@ class Mission:
 
 
     def uav_mission_time(self) -> float: 
+        
         self.time_ascent = self.h_cruise / self.V_climb_v
         self.time_descent = self.h_cruise / self.V_descent
         self.time_cruise = self.R_max / self.V_cruise
