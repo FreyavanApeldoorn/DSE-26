@@ -56,6 +56,22 @@ deployment_funny_inputs = {
 
 funny_inputs.update(deployment_funny_inputs)
 
+# ~~~ Constraints ~~~
+
+Constraints_funny_inputs = {
+    "V_stall": 19,  # m/s
+    "V_max": 100 / 3.6,  # m/s
+    "e": 0.7,  # -
+    "AR": 7,  # -
+    "CL_max": 1.34,  # -
+    "CD_0": 0.040,  # -
+    "eff_prop": 0.83,  # -
+    "R_C_service": 0.5,  # m/s
+}
+
+funny_inputs.update(Constraints_funny_inputs)
+
+
 # ~~~ Operations ~~~
 
 operations_funny_inputs = {}
@@ -65,10 +81,19 @@ funny_inputs.update(operations_funny_inputs)
 # ~~~ Propulsion and Power ~~~
 
 prop_n_pow_funny_inputs = {
-    "wing_loading": 5.0,  # kg
-    "aerogel_thickness": 0.003,  # m
-    "aerogel_density": 200.0,  # kg/m3
-    "vtol_roc": 1.5,  # m/s
+    "wing_loading": 217,  # N
+    "s_tot_sw": 0.003,  # m
+    "n_prop_vtol": 4,  # number of propellers in VTOL mode
+    "vtol_roc": 6,  # m/s
+    "eff_prop": 0.83,  # -
+    "K_p": 0.0938,  # propeller constant (kg/W^E1 * V^E2)
+    "n_props_cruise": 1,  # number of propellers in cruise
+    "motor_mass_cruise": (940 + 495 + 10) * 0.001,
+    "motor_mass_VTOL": 0.655 + 0.170,  # kg
+    "propeller_mass_VTOL": 0.073,  # kg
+    "propeller_mass_cruise": 0.0100,  # kg
+    "power_available_VTOL": 1418,  # W
+    "power_available_cruise": 2552,  # W
 }
 
 funny_inputs.update(prop_n_pow_funny_inputs)

@@ -12,6 +12,10 @@ class Power:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
 
+        self.M_to = inputs["M_to"]
+        self.DOD_fraction = self.inputs["DOD_fraction"]
+        self.eta_battery = self.inputs["eta_battery"]
+
         self.time_hover = inputs["time_hover"]
         self.time_cruise = inputs["time_cruise"]
         self.time_ascent = inputs["time_ascent"]
@@ -65,11 +69,8 @@ class Power:
         '''
         self.calculate_required_capacity()   # calculated the required capacity in Wh
         E_required_Wh = self.required_capacity_wh
-        DOD_fraction = self.inputs["DOD_fraction"]
-        eta_battery = self.inputs["eta_battery"]
-        M_to = self.inputs["M_to"]
 
-        E_battery = E_required_Wh / 3600 / (eta_battery * DOD_fraction) # convert J to Wh and consider efficiency and depth of discharge
+        E_battery = E_required_Wh / 3600 / (self.eta_battery * self.DOD_fraction) # convert J to Wh and consider efficiency and depth of discharge
         #Use formula from research paper to determine battery mass
         a = 4.04
         b = 139
@@ -84,7 +85,7 @@ class Power:
         M_battery = E_battery / 240  # assume different specific energy density of 240 Wh/kg
 
         max_battery_frac = 0.35
-        max_battery_mass = max_battery_frac * M_to # Maximum battery mass is 40% of MTOW
+        max_battery_mass = max_battery_frac * self.M_to # Maximum battery mass is 40% of MTOW
         battery_mass = min(M_battery, max_battery_mass) 
 
         return battery_mass
@@ -95,12 +96,41 @@ class Power:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
 
-        outputs["Battery_mass"] = self.calculate_battery_mass()
-        outputs["Battery_volume"] = ...
-        outputs["Battery_capacity"] = ...   # updated true capacity (might increase after choosing a battery)
+        self.outputs["Battery_mass"] = self.calculate_battery_mass()
+        self.outputs["Battery_volume"] = ...
+        self.outputs["Battery_capacity"] = ...   # updated true capacity (might increase after choosing a battery)
 
         return self.outputs
     
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
-    pow = Power(funny_inputs)
+    
+    inputs = {
+
+        "time_hover": 60*10,  # seconds
+        "time_cruise": 20*60,  # seconds
+        "time_ascent": 120,  # seconds
+        "time_descent": 120,  # seconds
+        "time_deploy": 180,  # seconds
+        "time_transition": 60,  # seconds
+        "time_scan": 240,  # seconds
+        "time_idle": 180,  # seconds
+        "power_hover": 100,  # Watts
+        "power_cruise": 80,  # Watts
+        "power_ascent": 120,  # Watts
+        "power_descent": 90,  # Watts
+        "power_deploy": 150,  # Watts
+        "power_transition": 110,  # Watts
+        "power_scan": 130,  # Watts
+        "power_idle": 50,  # Watts
+        "DOD_fraction": 0.8,  # Depth of discharge fraction
+        "eta_battery": 0.9,  # Battery efficiency
+        "M_to": 30,  # Maximum Takeoff Mass [kg]
+        "battery_energy_density": 240,  # Wh/kg, specific energy density of the battery
+
+    }
+    power = Power(inputs)
+    outputs = power.get_all()
+    print("Battery mass:", outputs["Battery_mass"], "kg")
+    print("Battery volume:", outputs["Battery_volume"], "m^3")
+    print("Battery capacity:", outputs["Battery_capacity"], "Wh")

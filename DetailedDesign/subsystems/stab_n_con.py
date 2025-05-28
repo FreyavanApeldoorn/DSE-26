@@ -118,8 +118,10 @@ class StabCon:
         """
         return "self.outputs"
 
+        return self.outputs
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":  # pragma: no cover
     # Perform sanity checks here
     A = StabCon(fi)
 

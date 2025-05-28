@@ -8,7 +8,9 @@ test_inputs = {}
 # ~~~ Constants ~~~ 
 
 constants_test_inputs = {
-    'g': 9.81           # Gravitational constant [m/s2]
+    'g': 9.81,           # Gravitational constant [m/s2]
+    'rho': 0.9093,       # Density at 3000m [kg/m^3]
+    'mtow': 30*9.81      # maximum takeoff weight [kg]
 }
 
 test_inputs.update(constants_test_inputs)
@@ -59,6 +61,22 @@ deployment_test_inputs = {
 
 test_inputs.update(deployment_test_inputs)
 
+# ~~~ Constraints ~~~
+
+Constraints_test_inputs = {
+    'V_stall' : 19,    #m/s
+    'V_max' : 100/3.6,    #m/s
+    'e' : 0.7,          #-
+    'AR' : 7,           #-
+    'CL_max': 1.34,      #- 
+    'CD_0' : 0.040,      #- 
+    'eff_prop' : 0.83,   #- 
+    'R_C_service': 0.5, #m/s 
+
+}
+
+test_inputs.update(Constraints_test_inputs)
+
 # ~~~ Operations ~~~
 
 operations_test_inputs = {}
@@ -67,7 +85,22 @@ test_inputs.update(operations_test_inputs)
 
 # ~~~ Propulsion and Power ~~~ 
 
-prop_n_pow_test_inputs = {}
+prop_n_pow_test_inputs = {
+    'wing_loading' : 217, # N
+    's_tot_sw' : 0.003, # m
+    'n_prop_vtol' : 4 , # number of propellers in VTOL mode
+    'vtol_roc' : 6, # m/s
+    'eff_prop' : 0.83, #-
+    'K_p' : 0.0938, # propeller constant (kg/W^E1 * V^E2)
+    'n_props_cruise' : 1, # number of propellers in cruise
+    'motor_mass_cruise' : (940+495+10)*0.001, 
+    'motor_mass_VTOL' : 0.655+0.170, #kg
+    'propeller_mass_VTOL' : 0.073, #kg
+    'propeller_mass_cruise' : 0.0100 , #kg
+    'power_available_VTOL' : 1418 , #W
+    'power_available_cruise' : 2552 , #W
+    
+}
 
 test_inputs.update(prop_n_pow_test_inputs)
 
