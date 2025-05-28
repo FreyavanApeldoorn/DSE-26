@@ -8,7 +8,10 @@ funny_inputs = {}
 # ~~~ Constants ~~~ 
 
 constants_funny_inputs = {
-    'g': 9.81           # Gravitational constant [m/s2]
+    'g': 9.81,           # Gravitational constant [m/s2]
+    'rho': 0.9093,       # Density at 3000m [kg/m^3]
+    'mtow': 30*9.81      # maximum takeoff weight [kg]
+
 }
 
 funny_inputs.update(constants_funny_inputs)
@@ -67,7 +70,12 @@ funny_inputs.update(operations_funny_inputs)
 
 # ~~~ Propulsion and Power ~~~ 
 
-prop_n_pow_funny_inputs = {}
+prop_n_pow_funny_inputs = {
+    'wing_loading' : 5., # kg
+    'aerogel_thickness' : 0.003, # m
+    'aerogel_density' : 200., # kg/m3
+    'vtol_roc' : 1.5, # m/s
+}
 
 funny_inputs.update(prop_n_pow_funny_inputs)
 
