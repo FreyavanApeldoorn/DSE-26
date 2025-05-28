@@ -131,7 +131,6 @@ class Propulsion:
         outputs["Propeller_mass_cruise"] = self.propeller_mass_cruise
 
         return outputs
-
     
 if __name__ == '__main__':
     # Perform sanity checks here
