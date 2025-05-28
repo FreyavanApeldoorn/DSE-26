@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 import math 
 from DetailedDesign.subsystems.deployment import Deployment
 from DetailedDesign.subsystems.propulsion import Propulsion
+from DetailedDesign.subsystems.constraints import Constraints
 
 
 from test_inputs import test_inputs, deployment_test_inputs
@@ -26,6 +27,19 @@ def test_Deployment_perimeter_creation():
 
     assert dep.perimeter_creation('nr_aerogels', 5, test = True) == ('l', 6)
     assert dep.perimeter_creation('perimeter', 6, test = True) == ('l', 3)
+
+def test_deployment_get_functions():
+    dep = Deployment(test_inputs)
+
+    assert isinstance(dep.get_aerogel_dimensions(), dict)
+    assert isinstance(dep.get_deployment_duration(), dict)
+    assert isinstance(dep.get_deployment_power(), dict)
+    assert isinstance(dep.get_deployment_system_mass(), dict)
+
+def test_constraints_get_function():
+    con = Constraints(test_inputs)
+
+    assert isinstance(con.get_all(), dict)
 
 
 def test_thrust_to_weight_vtol(): 

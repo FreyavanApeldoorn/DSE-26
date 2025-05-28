@@ -133,7 +133,7 @@ class Propulsion:
 
         return outputs
     
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
     propulsion = Propulsion(funny_inputs)
     res = propulsion.get_all()

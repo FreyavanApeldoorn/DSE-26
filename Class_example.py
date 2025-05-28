@@ -1,4 +1,4 @@
-class Square:
+class Square: # pragma: no cover
     def __init__(self, side: int, colour: str):         
         self.side = side                   
         self.colour = colour
@@ -13,7 +13,7 @@ class Square:
         self.side = (0.5*diameter**2)**0.5
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     sqA = Square(4, 'Blue')
     sqB = Square(7, 'Red')
 

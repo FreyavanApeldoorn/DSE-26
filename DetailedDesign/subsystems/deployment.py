@@ -280,7 +280,7 @@ class Deployment:
     def __str__(self):
         return 'Its the deployment system!'
     
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
     dep = Deployment(deployment_test_inputs)
     print(dep.get_all())

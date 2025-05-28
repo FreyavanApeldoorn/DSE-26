@@ -125,7 +125,7 @@ class Constraints:
             return outputs
 
     
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
     constraints = Constraints(funny_inputs)
     W_S, P_W_cruise, P_W_climb, P_W_service, W_S_stall, optimal_cruise_power = constraints.form_variable_lists()

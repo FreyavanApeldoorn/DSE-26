@@ -61,6 +61,22 @@ deployment_test_inputs = {
 
 test_inputs.update(deployment_test_inputs)
 
+# ~~~ Constraints ~~~
+
+Constraints_test_inputs = {
+    'V_stall' : 19,    #m/s
+    'V_max' : 100/3.6,    #m/s
+    'e' : 0.7,          #-
+    'AR' : 7,           #-
+    'CL_max': 1.34,      #- 
+    'CD_0' : 0.040,      #- 
+    'eff_prop' : 0.83,   #- 
+    'R_C_service': 0.5, #m/s 
+
+}
+
+test_inputs.update(Constraints_test_inputs)
+
 # ~~~ Operations ~~~
 
 operations_test_inputs = {}
