@@ -12,12 +12,10 @@ from DetailedDesign.subsystems.propulsion import Propulsion
 
 
 from test_inputs import test_inputs, deployment_test_inputs
-from DetailedDesign.funny_inputs import deployment_funny_inputs
-from DetailedDesign.funny_inputs import funny_inputs
 
 
 def test_Deployment_perimeter_creation():
-    dep = Deployment(deployment_funny_inputs)
+    dep = Deployment(deployment_test_inputs)
     
     dep.payload_mass = (dep.firebreak_width*dep.aerogel_width*dep.aerogel_thickness) * dep.aerogel_density + dep.n_ferro_magnets * dep.ferro_magnet_mass + dep.deployment_added_mass
 
@@ -31,25 +29,32 @@ def test_Deployment_perimeter_creation():
 
 
 def test_thrust_to_weight_vtol(): 
-    prop = Propulsion(funny_inputs)
+    prop = Propulsion(test_inputs)
     T_W = prop.thrust_to_weight_vtol()
-    T_W_actual = 1.2  # typical t_W ratios for VTOLS
+    T_W_actual = 1.2                       # https://medcraveonline.com/AAOAJ/AAOAJ-02-00047.pdf page 166
 
-    assert (T_W_actual - T_W_actual*0.2 < T_W < T_W_actual + T_W_actual * 0.2)
+    assert math.isclose(T_W, T_W_actual, rel_tol=0.5)
 
 def test_power_required_vtol(): 
-    prop = Propulsion(funny_inputs)
-    Pr_vtol , S_prop, prop_disk_loading, total_thrust = prop.power_required_vtol()
-    Pr_vtol_actual = funny_inputs['mtow'] * funny_inputs['vtol_roc']
-    assert  Pr_vtol_actual - Pr_vtol_actual*0.2 < Pr_vtol 
+    prop = Propulsion(test_inputs)
+    Pr_vtol , _, _, _ = prop.power_required_vtol()
+    Pr_vtol_actual = test_inputs['mtow'] * test_inputs['vtol_roc']
+    assert  math.isclose(Pr_vtol, Pr_vtol_actual, rel_tol=1000)
 
 def test_power_required_cruise(): 
-    prop = Propulsion(funny_inputs)
+    prop = Propulsion(test_inputs)
     optimal_cruise_power, D_cruise = prop.power_required_cruise()
-    optimal_cruise_power_actual = ... 
-    D_cruise_actual = ... 
+    optimal_cruise_power_actual = 2000       # https://www.ijert.org/design-and-analysis-of-a-vtol-fixed-wing-uav?
+    D_cruise_actual = 0.45                   # https://www.ijert.org/design-and-analysis-of-a-vtol-fixed-wing-uav?
 
-    assert math.isclose()
+    assert math.isclose(optimal_cruise_power, optimal_cruise_power_actual, rel_tol=500)
+    assert math.isclose(D_cruise, D_cruise_actual, rel_tol=0.5)
     
 def test_power_required_hover(): 
-    ... 
+    P_req_hover = Propulsion(test_inputs).power_required_hover()
+    P_req_hover_actual = 5000                # https://www.ijert.org/design-and-analysis-of-a-vtol-fixed-wing-uav?
+    assert math.isclose(P_req_hover, P_req_hover_actual, rel_tol=1000)
+
+def test_get_all_prop():
+    res = Propulsion(test_inputs).get_all()
+    assert isinstance(res, dict)

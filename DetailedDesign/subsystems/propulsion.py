@@ -7,6 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 
 import numpy as np
+import math
 
 from DetailedDesign.subsystems.constraints import Constraints
 from DetailedDesign.funny_inputs import funny_inputs
@@ -135,6 +136,8 @@ class Propulsion:
 if __name__ == '__main__':
     # Perform sanity checks here
     propulsion = Propulsion(funny_inputs)
-    print(propulsion.get_all())
+    res = propulsion.get_all()
 
+    print(math.isclose(res['Power_required_cruise'], 2000, rel_tol=1000))
+    print(math.isclose(res['Propeller_diameter_cruise'], 0.45, rel_tol=0.5))
     
