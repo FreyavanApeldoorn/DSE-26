@@ -42,18 +42,16 @@ class UAV:
             propulsion = Propulsion(outputs)
             outputs = propulsion.get_all()
 
-            """
-            new values for:
-            - power_required_vtol
-            - power_required_cruise
+            power = Power(outputs)
+            outputs = power.get_all()
 
-            - 
-            """
-
-            #power = Power()
             #stab_n_con = StabnCon()
-            #aero = Aero()
-            #structure = Structure()  new payload mass from here
+            aerodynamics = Aerodynamics(outputs)
+            outputs = aerodynamics.get_all()
+
+            structures = Structures(outputs)
+            outputs = structures.get_all()
+
             # thermal = Thermal()
 
             if self.history:

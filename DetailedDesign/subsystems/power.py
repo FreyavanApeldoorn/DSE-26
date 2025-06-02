@@ -27,9 +27,9 @@ class Power:
         self.time_scan = inputs["time_scan"]
         self.time_idle = inputs["time_turnaround"]
 
-        self.power_cruise = inputs["power_cruise"]
-        self.power_ascent = inputs["power_ascent"]
-        self.power_descent = inputs["power_descent"]
+        self.power_cruise = inputs["power_required_cruise"]
+        self.power_ascent = inputs["power_required_VTOL"]
+        self.power_descent = inputs["power_required_hover"]  # assuming hover power is used for descent
         self.power_deploy = inputs["power_deploy"]
         self.power_transition = inputs["power_transition"]
         self.power_scan = inputs["power_scan"]
@@ -58,6 +58,7 @@ class Power:
             self.power_scan,
             self.power_idle
         ])
+
         self.required_capacity = np.sum(times * powers)
         self.required_capacity_wh = self.required_capacity / 3600
 
@@ -95,9 +96,9 @@ class Power:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
 
-        self.outputs["Battery_mass"] = self.calculate_battery_mass()
-        self.outputs["Battery_volume"] = ...
-        self.outputs["Battery_capacity"] = self.required_capacity_wh   # updated true capacity (might increase after choosing a battery)
+        self.outputs["mass_battery"] = self.calculate_battery_mass()
+        #self.outputs["Battery_volume"] = ...
+        self.outputs["battery_capacity"] = self.required_capacity_wh   # updated true capacity (might increase after choosing a battery)
 
         return self.outputs
     
@@ -122,8 +123,6 @@ if __name__ == '__main__': # pragma: no cover
         "DOD_fraction": 0.8,  # Depth of discharge fraction
         "eta_battery": 0.9,  # Battery efficiency
         "M_to": 30,  # Maximum Takeoff Mass [kg]
-        "battery_energy_density": 240,  # Wh/kg, specific energy density of the battery
-
     }
     power = Power(inputs)
     outputs = power.get_all()

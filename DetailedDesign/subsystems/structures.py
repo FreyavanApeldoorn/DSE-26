@@ -14,6 +14,16 @@ class Structures:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
 
+        self.M_to = inputs["M_to"]
+
+        self.mass_payload = inputs["payload_mass"]
+        self.mass_hardware = inputs["mass_hardware"]
+        self.mass_battery = inputs["mass_battery"]
+        self.mass_propulsion = inputs["mass_propulsion"]
+        
+        self.wing_span = inputs["wing_span"]
+                
+
     # ~~~ Intermediate Functions ~~~
 
     def example_function(self):
@@ -21,21 +31,34 @@ class Structures:
         This is an example intermediate function
         '''
         return True
+    
+
+
+    
+    def total_mass(self) -> float:
+
+        self.mass_structure = 10 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+        
+        masses_nopay = np.array([self.mass_hardware, self.mass_battery, self.mass_propulsion, self.mass_structure])
+        mass_nopay = np.sum(masses_nopay)
+
+        self.leftover_for_payload = self.M_to - mass_nopay
 
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
-
-        outputs["Mass_structure"] = ...
-        outputs["Mass_payload"] = ...   # updated mass of the payload (with an added margin to avoid exceeding the MTOW requirement)
         
+        self.total_mass()
 
-        outputs["Volume_uav"] = ...
+        self.outputs["payload_mass"] = self.leftover_for_payload   # updated mass of the payload (with an added margin to avoid exceeding the MTOW requirement)
+        self.outputs['mass_structure'] = self.mass_structure # kg
+
+        #self.outputs["Volume_uav"] = ...
 
         #CG calculations:
-        outputs["CG_"]
+        #self.outputs["CG"] = ...
 
         return self.outputs
     
