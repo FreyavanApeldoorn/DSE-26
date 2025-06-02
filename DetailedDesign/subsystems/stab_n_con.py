@@ -98,6 +98,28 @@ class StabCon:
             return "siuuuuuu"
 
         return p_achieved
+        return
+
+    def size_VTOL_arms(self) -> float:
+        """
+        Calculate the minimum boom arm length required for VTOL mode, based on the wind speed requirement.
+        Returns the minimum boom arm length in meters, measured horizontally from the center of gravity to the propeller axis.
+        """
+        wind_force_wing = 0.5 * self.rho_sea * self.wind_speed**2 * self.wing_area
+        wind_force_prop = (
+            0.5
+            * self.rho_sea
+            * self.wind_speed**2
+            * (self.Propeller_diameter_VTOL / 2) ** 2
+            * np.pi
+        )
+        T_a_prop = self.T_max - (self.mtow / self.n_prop_vtol)
+
+        minimum_boom_arm = (0.25 * self.wing_span * wind_force_wing) / (
+            2 * (T_a_prop - wind_force_prop)
+        )
+
+        return minimum_boom_arm
 
     # ~~~ Scissor plot ~~~
 

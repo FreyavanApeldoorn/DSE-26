@@ -2,36 +2,87 @@
 This is the file for the UAV. It contains a single class.
 '''
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+
+from subsystems.propulsion import Constraints
+from subsystems.propulsion import Propulsion
+from subsystems.power import Power
+from subsystems.stab_n_con import StabCon
+from subsystems.aerodynamics import Aerodynamics
+from subsystems.structures import Structures
+from subsystems.thermal import Thermal
+
+
 class UAV:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], iterations: int, history: bool = False, verbose : bool = False) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
-
+        self.iterations = iterations
+        self.verbose = verbose
+        
+        self.history = history
+        if self.history:
+            self.history_data = self.outputs.copy()
+    
     # ~~~ Intermediate Functions ~~~
 
-    def design(self):
-        '''
-        This is an example intermediate function
-        '''
-        #propulsion = Propulsion()
-        #power = Power()
-        #stab_n_con = StabnCon()
-        #aero = Aero()
-        #structure = Structure()
-        # thermal = Thermal()
+    def size(self):
+
+        for _ in range(self.iterations):
+            
+            outputs = self.inputs.copy()
+
+            constraints = Constraints(outputs)
+            outputs = constraints.get_all()
+            
+            propulsion = Propulsion(outputs)
+            outputs = propulsion.get_all()
+
+            """
+            new values for:
+            - power_required_vtol
+            - power_required_cruise
+
+            - 
+            """
+
+            #power = Power()
+            #stab_n_con = StabnCon()
+            #aero = Aero()
+            #structure = Structure()  new payload mass from here
+            # thermal = Thermal()
+
+            if self.history:
+                self.history_data.update(outputs)  
 
 
-        
+        if self.verbose:
+            print("UAV sizing completed after", self.iterations, "iterations.")
 
-        return True
+        return outputs
 
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
 
+        self.outputs = self.size()
+
         return self.outputs
     
 if __name__ == '__main__':
     # Perform sanity checks here
-    ...
+    from inputs import initial_inputs
+    inputs = initial_inputs.copy()
+
+    uav = UAV(inputs, iterations=10)
+    outputs = uav.size()
+
+    for key, value in outputs.items():
+        print(f"{key}: {value}")
+
+
+    

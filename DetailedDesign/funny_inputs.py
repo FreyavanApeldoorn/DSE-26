@@ -12,6 +12,7 @@ funny_inputs = {}
 constants_funny_inputs = {
     "g": 9.81,  # Gravitational constant [m/s2]
     "rho": 0.9093,  # Density at 3000m [kg/m^3]
+    "rho_sea": 1.225,  # Density at sea level [kg/m^3]
     "mtow": 30 * 9.81,  # maximum takeoff weight [kg]
 }
 
@@ -126,6 +127,9 @@ stab_n_con_funny_inputs = {
     "d_epsilon_d_alpha": 0.1,  # Downwash gradient [rad/(rad*m)]
     "Vh_V": 0.5,  # Horizontal tail velocity to wing velocity ratio [-]
     "Cm_ac": 0.3,  # Moment coefficient at the aerodynamic center of the wing [-]
+    "wind_speed": 30 / 3.6,  # m/s, wind speed from requirement
+    "rpm_max": 4200,  # rpm
+    "T_max": 17.6 * 9.81,  # N, maximum thrust per motor.
 }
 
 funny_inputs.update(stab_n_con_funny_inputs)
