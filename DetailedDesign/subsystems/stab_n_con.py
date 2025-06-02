@@ -26,6 +26,14 @@ class StabCon:
         self.roll_rate_req = self.inputs["roll_rate_req"]  # Roll rate requirement
         self.cl_alpha = self.inputs["cl_alpha"]
         self.cd_0 = self.inputs["cd_0"]
+        self.wind_speed = self.inputs['wind_speed']
+        self.rho_sea = self.inputs['rho_sea']
+        self.Propeller_diameter_VTOL = self.inputs["Propeller_diameter_VTOL"]
+
+        self.T_max = self.inputs['T_max']
+        self.wing_area = self.inputs['wing_area']
+        self.n_prop_vtol = self.inputs['n_prop_vtol']
+        self.mtow = self.inputs['mtow']
 
         self.outputs = self.inputs.copy()
 
@@ -92,6 +100,20 @@ class StabCon:
         ) * simpson(c * y**2, y[mask])
 
         return
+    
+    def size_VTOL_arms(self) -> float:
+        '''
+        Calculate the minimum boom arm length required for VTOL mode, based on the wind speed requirement.
+        Returns the minimum boom arm length in meters, measured horizontally from the center of gravity to the propeller axis.
+        '''
+        wind_force_wing = 0.5*self.rho_sea*self.wind_speed**2 * self.wing_area
+        wind_force_prop = 0.5*self.rho_sea*self.wind_speed**2 * (self.Propeller_diameter_VTOL/2)**2 * np.pi
+        T_a_prop = self.T_max - (self.mtow / self.n_prop_vtol)
+
+        minimum_boom_arm = (0.25*self.wing_span*wind_force_wing) / (2*(T_a_prop - wind_force_prop))
+
+        return minimum_boom_arm
+        
 
     # ~~~ Output functions ~~~
 
@@ -125,4 +147,4 @@ if __name__ == "__main__":  # pragma: no cover
 
     A = StabCon(fi)
 
-    print(A.tau_from_ca_over_c())
+    print(A.size_VTOL_arms())

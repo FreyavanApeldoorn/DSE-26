@@ -12,6 +12,7 @@ funny_inputs = {}
 constants_funny_inputs = {
     "g": 9.81,  # Gravitational constant [m/s2]
     "rho": 0.9093,  # Density at 3000m [kg/m^3]
+    "rho_sea": 1.225, # Density at sea level [kg/m^3]
     "mtow": 30 * 9.81,  # maximum takeoff weight [kg]
 }
 
@@ -112,6 +113,10 @@ stab_n_con_funny_inputs = {
     "delta_a_max": np.deg2rad(25),  # rad, maximum aileron deflection angle
     "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
     "roll_rate_req": 0.5,  # rad/s, guesstimate
+    
+    "wind_speed": 30/3.6, # m/s, wind speed from requirement
+    "rpm_max": 4200, #rpm
+    "T_max": 17.6*9.81, #N, maximum thrust per motor. 
 }
 
 funny_inputs.update(stab_n_con_funny_inputs)
