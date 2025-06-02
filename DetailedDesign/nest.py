@@ -31,9 +31,11 @@ class Nest:
         # Generator parameters
         self.generator_efficiency = inputs["generator_efficiency"]
         self.diesel_energy_density = inputs["diesel_energy_density"]
+        self.generator_length, self.generator_width, self.generator_height = 2.278, 0.9, 1.322 # - https://www.cat.com/en_MX/products/new/power-systems/electric-power/diesel-generator-sets/106402.html
+        self.power_generator = 1000 # in W, assumed power output of the generator
 
         # Nest contraints
-        #self.nest_energy = inputs["nest_energy"]
+        self.nest_energy = inputs["nest_energy"]
         self.nest_length = inputs["nest_length"]
         self.nest_width = inputs["nest_width"]
         self.nest_height = inputs["nest_height"]
@@ -49,71 +51,57 @@ class Nest:
         uav_heigh_FW = self.FW_height
         v_UAV_FW = uav_span * uav_width_FW * uav_heigh_FW  # m^3
 
-        fuselage_length_margin = 0
-        delta_fuselage_length = 0.5
-        fuselage_width_margin = 0.5
-        uav_fuselage_length = self.aerogel_width * (1 + fuselage_length_margin) + delta_fuselage_length  # m
+        fuselage_length_margin = 0   # == MOVE TO INPUTS
+        delta_fuselage_length = 0.5   # == MOVE TO INPUTS
+        fuselage_width_margin = 0.5   # == MOVE TO INPUTS
+        uav_fuselage_length = self.aerogel_width * (1 + fuselage_length_margin) + delta_fuselage_length  # m   ! this part might need to be adjusted based on the actual fuselage design
         uav_fuselage_width = self.aerogel_diameter * (1 + fuselage_width_margin)  # m
         v_UAV_fuselage = uav_fuselage_length * uav_fuselage_width * uav_fuselage_width
-
 
         self.uav_volume = v_UAV_FW + v_UAV_fuselage  # m^3
 
 
     def generator_sizing(self):
         
-        
-        #total_energy = self.nest_energy   # required energy in Wh
-        total_energy = 1000
+        required_energy = self.nest_energy # in Wh
 
 
         # Generator volume:
-        VF_generator = 0.1   # faction of nest volume for generator    
-        l_generator = 0.9   # width of generator in m
-        height_generator = 1.3
+        #VF_generator = 0.1   # faction of nest volume for generator    ! === MOVE TO INPUTS
+        #l_generator = 0.9   # width of generator in m                  ! === MOVE TO INPUTS
 
-        volume_generator = VF_generator * self.available_volume_per_nest
-        self.volume_generator = volume_generator
-        l_op = self.nest_length - l_generator   # total length minus generator width
+        #volume_generator = VF_generator * self.available_volume_per_nest
+
+
+        self.volume_generator = self.generator_length * self.generator_width * self.generator_height
+
+        fuel_tank_margin = 0.1
+        self.fuel_tank_volume = self.generator_width * (self.nest_width * (1 - fuel_tank_margin)) * ((self.nest_height - self.generator_height) * (1 - fuel_tank_margin))
+
+        l_op = self.nest_length - self.generator_width   # total length minus generator width
         self.l_op = l_op 
 
-        #mass of generator
-        #m_
+        # Calculate the amount of the mission we can power with one fuel tank fill
+        diesel_energy_density_Wh_per_liter = 9167
+        diesel_energy_density_Wh_per_m3 = diesel_energy_density_Wh_per_liter * 1000
 
 
-        # Estimate fuel tank volume based on required energy
-        # Assumptions:
-        # - Diesel fuel energy density: 35.8 MJ/liter (or 9.94 kWh/liter)
-        # - 1 kWh = 3.6 MJ
-        # - Generator efficiency is a fraction (e.g., 0.3 for 30%)
-        # - Add 10% margin to tank size
+        energy_in_fuel_tank = self.fuel_tank_volume * diesel_energy_density_Wh_per_m3
+        available_energy = energy_in_fuel_tank * self.generator_efficiency
 
-        diesel_energy_density_kwh_per_l = 9.94  # kWh/liter
-        diesel_energy_density_wh_per_l = diesel_energy_density_kwh_per_l * 1000  # convert to Wh/liter
-        margin = 1.1  # 10% margin
+        percentage_energy_achieved = available_energy / required_energy
 
-        # Calculate required fuel energy input (account for generator efficiency)
-        required_fuel_energy_wh = total_energy / self.generator_efficiency
-
-        # Calculate required fuel volume in liters
-        fuel_tank_volume_l = (required_fuel_energy_wh / diesel_energy_density_wh_per_l) * margin
-        self.fuel_tank_volume = fuel_tank_volume_l
-
-        # mass of 
-
-
-        # Check if fuel tank can be fitted within width_generator
-        if self.fuel_tank_volume > (l_generator * self.nest_width * self.nest_height) - volume_generator:
-            print(f"Fuel tank volume: {self.fuel_tank_volume:.2f} liters")
-            print(f"Available space in generator compartment: {(l_generator * self.nest_width * self.nest_height) - volume_generator:.2f} liters")
-            raise ValueError("Fuel tank volume exceeds available space in the generator compartment.")
-        
-
-        self.volume_generator = 5.05
-
+        if percentage_energy_achieved >= 1:
+            self.refills_for_mission = 0
+        else:
+            self.refills_for_mission = np.ceil(1 / percentage_energy_achieved)
 
         if self.verbose:
-            print(f"Required fuel tank volume: {fuel_tank_volume_l:.2f} liters")
+            print(f"Volume of generator: {self.volume_generator:.2f} m^3")
+            print(f"Volume of fuel tank: {self.fuel_tank_volume:.2f} m^3")
+            print(f"Energy in fuel tank: {energy_in_fuel_tank/1000:.2f} kWh")
+            print(f"Energy required for missions: {required_energy/1000:.2f} kWh")
+            print(f"Refills needed for the mission: {self.refills_for_mission}")
 
 
     def misc_sizing(self):
@@ -295,11 +283,11 @@ if __name__ == '__main__':
         "uav_length": 2.5,
         "uav_width": 2.5,
         "uav_height": 0.5,
-        "M_to": 1.0,
+        "M_to": 30.0,
         "Number_of_UAVs": 20,
         "generator_efficiency": 0.3,
         "diesel_energy_density": 9.94,
-        "nest_energy": 1000,  # in Wh
+        "nest_energy": 4000*20,  # in Wh
         "nest_length": 5.9,
         "nest_width": 2.35,
         "nest_height": 2.39,

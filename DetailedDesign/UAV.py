@@ -10,10 +10,8 @@ class UAV:
 
     # ~~~ Intermediate Functions ~~~
 
-    def design(self):
-        '''
-        This is an example intermediate function
-        '''
+    def size(self):
+
         #propulsion = Propulsion()
         #power = Power()
         #stab_n_con = StabnCon()
@@ -21,10 +19,7 @@ class UAV:
         #structure = Structure()
         # thermal = Thermal()
 
-
-        
-
-        return True
+        return self.outputs
 
     # ~~~ Output functions ~~~ 
 
