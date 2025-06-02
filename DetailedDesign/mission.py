@@ -6,14 +6,14 @@ This is the file for the mission. It contains a single class.
 
 class Mission:
 
-    def __init__(self, inputs: dict[str, float], verbose: bool = True) -> None:
+    def __init__(self, inputs: dict[str, float], verbose: bool = False) -> None:
         
         self.inputs = inputs
         self.outputs = self.inputs.copy() # Copy inputs to outputs
         self.verbose = verbose
 
         #Nest
-        self.number_of_UAV = inputs["number_of_UAV"] # mission input
+        self.number_of_UAV = inputs["number_of_UAVs"] # mission input
         self.number_of_containers = inputs["number_of_containers"] #expected from nest
         #self.number_of_nests = inputs["number_of_nests"] # expected from nest
         self.number_of_slaves = inputs["number_of_workers"] # 
@@ -36,8 +36,8 @@ class Mission:
 
         #UAV Inputs
         self.h_cruise = inputs["h_cruise"] # Mission altitude [m]: mission definition
-        self.V_climb_v = inputs["V_climb_v"] # Climb speed [m/s]: mission definition
-        self.V_descent = inputs["V_descent"] # Descent speed [m/s]: mission definition
+        self.V_climb_v = inputs["ROC_VTOL"] # Climb speed [m/s]: mission definition
+        self.V_descent = inputs["ROD_VTOL"] # Descent speed [m/s]: mission definition
         self.V_cruise = inputs["V_cruise"] # Cruise speed [m/s]: mission definition
 
         self.time_transition = inputs["time_transition"]
@@ -52,7 +52,7 @@ class Mission:
 
 
         #Aerogel Specifics
-        self.num_aerogels = inputs["num_aerogels"]
+        self.num_aerogels = inputs["nr_aerogels"]
         
     
 
@@ -132,9 +132,6 @@ class Mission:
         self.time_ascent = self.h_cruise / self.V_climb_v
         self.time_descent = self.h_cruise / self.V_descent
         self.time_cruise = self.R_max / self.V_cruise
-        self.time_transition = self.time_transition
-        self.time_scan = self.time_scan
-        self.time_deploy = self.time_deploy
 
         self.calc_time_turn_around()   # calculate time for turnaround
 
@@ -143,12 +140,14 @@ class Mission:
                          self.time_transition, self.time_cruise, self.time_transition, self.time_descent, self.time_turnaround])
         self.time_uav = np.sum(mission_times)
 
-        hover_times = np.array([self.time_ascent, self.time_transition, self.time_transition, self.time_scan, self.time_descent, 
-                                self.time_deploy, self.time_ascent, self.time_transition, self.time_transition, self.time_descent])
-        self.hover_time = np.sum(np.array(hover_times))
-
         cruise_times = np.array([self.time_cruise, self.time_cruise])
         self.cruise_time = np.sum(np.array(cruise_times))
+
+        ascent_times = np.array([self.time_ascent, self.time_ascent])
+        self.time_ascent = np.sum(np.array(ascent_times))
+
+        descent_times = np.array([self.time_descent, self.time_descent])
+        self.time_descent = np.sum(np.array(descent_times))
 
         if self.verbose:
             print(f"UAV Mission Time: {self.time_uav} seconds")
@@ -285,9 +284,12 @@ class Mission:
         self.calc_total_mission_time()
         self.true_mission_deployment_rate()
 
-        self.outputs["time_hover"] = self.hover_time
-        self.outputs["time_cruise"] = self.cruise_time
         self.outputs["time_uav"] = self.time_uav
+        self.outputs["time_cruise"] = self.cruise_time
+        self.outputs['time_ascent'] = self.time_ascent
+        self.outputs['time_descent'] = self.time_descent
+        self.outputs["time_turnaround"] = self.time_turnaround
+
 
         self.outputs["time_preparation"] = self.time_preparation
         self.outputs["time_operation"] = self.time_operation
