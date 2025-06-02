@@ -104,22 +104,28 @@ class Propulsion:
     def power_required_hover(self): 
         vtol_power , S_prop, prop_disk_loading, total_thrust = self.power_required_vtol()
         P_hov = (2/(self.rho*S_prop))*(self.mtow)**(3/2)/self.eff_prop
-        return P_hov
+        self.P_hov = P_hov
     
+    def power_transition(self):
+        
+        self.transition_power = self.optimal_cruise_power + self.P_hov
+        
+
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
 
         vtol_power, S_prop, prop_disk_loading , total_thrust = self.power_required_vtol()
         optimal_cruise_power, D_cruise = self.power_required_cruise()
-        P_hov = self.power_required_hover() 
-        
+        self.power_required_hover() 
         propulsion_system_mass = self.motor_mass_cruise  + self.motor_mass_VTOL * 4 + self.propeller_mass_cruise + self.propeller_mass_VTOL * 4
+
+        self.power_transition()
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         self.outputs["power_required_VTOL"] = vtol_power
         self.outputs["power_required_cruise"] = optimal_cruise_power
-        self.outputs["power_required_hover"] = P_hov
+        self.outputs["power_required_hover"] = self.P_hov
     
         self.outputs["power_available_VTOL"] = self.power_available_VTOL
         self.outputs["power_available_cruise"] = self.power_available_cruise
@@ -127,11 +133,13 @@ class Propulsion:
         self.outputs["propeller_diameter_VTOL"] = np.sqrt(S_prop/3.14) * 2
         self.outputs["propeller_diameter_cruise"] = D_cruise
         
-        self.outputs["propulsion_system_mass"] = propulsion_system_mass
+        self.outputs["mass_propulsion"] = propulsion_system_mass
         self.outputs["motor_mass_VTOL"] = self.motor_mass_VTOL
         self.outputs["motor_mass_cruise"] = self.motor_mass_cruise
         self.outputs["propeller_mass_VTOL"] = self.propeller_mass_VTOL
         self.outputs["propeller_mass_cruise"] = self.propeller_mass_cruise
+
+        self.outputs["power_transition"] = self.transition_power
 
         return self.outputs
     

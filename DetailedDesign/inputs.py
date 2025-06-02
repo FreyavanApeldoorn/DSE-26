@@ -116,7 +116,8 @@ inputs.update(propulsion_inputs)
 # ~~~ Power ~~~ initial inputs for power sizing
 
 power_inputs = {
-
+    "DOD_fraction": 0.8,  # Depth of discharge fraction
+    "eta_battery": 0.9,  # Battery efficiency
 }
 inputs.update(power_inputs)
 

@@ -39,7 +39,7 @@ class Deployment:
         self.inputs = inputs
 
         self.payload_mass = inputs['payload_mass']
-
+    
         self.aerogel_width = inputs['aerogel_width']
         self.aerogel_thickness = inputs['aerogel_thickness']
         self.aerogel_density = inputs['aerogel_density']
@@ -267,7 +267,7 @@ class Deployment:
         outputs['aerogel_diameter'] = aerogel_diameter
 
         total_deployment_power, total_deployment_energy = self.deployment_energy()
-        outputs['total_deployment_power'] = total_deployment_power
+        outputs['power_deploy'] = total_deployment_power
         outputs['total_deployment_energy'] = total_deployment_energy
 
         outputs['wire_mass'] = self.wire_mass()
@@ -276,9 +276,9 @@ class Deployment:
         outputs['time_deploy'] = self.deployment_duration()
         
         if self.strategy == 'perimeter':
-            outputs['nr_aerogels'] = self.perimeter_creation(verbose=False, test=True)[1]
+            outputs['nr_aerogels'] = self.perimeter_creation(verbose=False, test=False)
         elif self.strategy == 'nr_aerogels':
-            outputs['per_length'] = self.perimeter_creation(verbose=False, test=True)[1]
+            outputs['per_length'] = self.perimeter_creation(verbose=False, test=False)
         else:
             print('Not a valid strategy option')
 
@@ -287,3 +287,9 @@ class Deployment:
     
 if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
+    from funny_inputs import funny_inputs
+    #from test.test_inputs import deployment_test_inputs
+    from inputs import initial_inputs
+    initial_inputs["payload_mass"] = 10 
+    dep = Deployment(initial_inputs, strategy='perimeter', amt=initial_inputs['mission_perimeter'])
+    print(dep.get_all())
