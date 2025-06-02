@@ -2,7 +2,6 @@
 This is the file for the thermal subsystem. It contains a single class.
 '''
 
-
 import math
 import matplotlib.pyplot as plt
 
@@ -16,12 +15,11 @@ class Thermal:
         self.T_amb_hot = inputs["T_amb_hot"]
         # Cruise-region ambient temperature (°C)
         self.T_amb_cruise = inputs["T_amb_cruise"]
-        # Maximum allowable internal temperature (°C)
-        self.T_int_max = inputs["T_int_max"]
         # Initial internal temperature before hot region (°C)
         self.T_int_init = inputs["T_int_init"]
         # Cruise internal set-point after hot region (°C)
         self.T_int_cruise_set = inputs["T_int_cruise_set"]
+
 
         # Shell geometry and materials
         self.A_heat_shell = inputs["A_heat_shell"]    # Effective heat-transfer area (m²)
@@ -43,6 +41,8 @@ class Thermal:
 
         # Exposure time in hot region (s)
         self.t_exposure = inputs["t_exposure"]
+        # Cruise leg duration (s) for both outbound and return
+        self.t_cruise = inputs.get("t_cruise", 12*60)  
         # Maximum cooler power available (W)
         self.Q_cooler = inputs.get("Q_cooler", 0.0)       # Maximum cooler capacity (W)
 
@@ -65,8 +65,23 @@ class Thermal:
     def simulate_hot_phase(self, Q_cool: float) -> float:
         '''Simulate the 1-s iterative hot phase and return the exit internal temperature.'''
         R_tot = self._compute_resistances()
+        # Compute the steady hold power at T_int_init in hot ambient
+        Q_hold_initial = self.heat_int + (self.T_amb_hot - self.T_int_init) / R_tot
+        # If max cooler is larger than hold, clamp to hold power (no temperature rise)
+        if Q_cool >= Q_hold_initial:
+            self.outputs["Hot_hold_power"] = Q_hold_initial
+            return self.T_int_init
+
+        # Otherwise run full-power iteration, but clamp each second if overcool
         T_current = self.T_int_init
         for _ in range(int(self.t_exposure)):
+            # recompute the hold power at this T_current
+            Q_hold = self.heat_int + (self.T_amb_hot - T_current) / R_tot
+            if Q_cool >= Q_hold:
+                # clamp to Q_hold to keep T_current constant
+                self.outputs.setdefault("Hot_hold_power_times", []).append(Q_hold)
+                return T_current
+            # integrate one second with full Q_cool
             dTdt = (self.heat_int + (self.T_amb_hot - T_current) / R_tot - Q_cool) / (self.m_int * self.c_p_int)
             T_current += dTdt
         return T_current
@@ -108,11 +123,11 @@ class Thermal:
         def mission_end_temp(Q_trial: float) -> float:
             # 1) Cruise-out: hold initial temp at cruise ambient using just enough power
             Q_cruise_hold = self.get_cruise_cooling_power()
-            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, 12*60)
+            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, self.t_cruise)
             # 2) Hot region: run at Q_trial
             T_mid = self.simulate_hot_phase(Q_trial)
             # 3) Cruise back: continue at Q_trial
-            T_end = self.simulate_cruise_phase(T_mid, Q_trial, 12*60)
+            T_end = self.simulate_cruise_phase(T_mid, Q_trial, self.t_cruise)
             return T_end
 
         # Bounds: Q_low=0, Q_high large enough so T_end < T_int_init
@@ -142,7 +157,7 @@ class Thermal:
         self.outputs["Required_cooler_zero_gain"] = self.get_required_cooler_for_zero_gain()
         return self.outputs
 
-if __name__ == '__main__':  # pragma: no cover
+if __name__ == '__main__': 
     # Sanity check with example inputs
     example_inputs = {
         "T_amb_hot": 140.0,
@@ -152,15 +167,16 @@ if __name__ == '__main__':  # pragma: no cover
         "T_int_cruise_set": 30.0,
         "A_heat_shell": 0.5,
         "t_shell": 0.002,
-        "k_Ti": 22.0,
+        "k_Ti": 6.7,
         "include_insulation": True,
         "t_insulation": 0.01,
-        "k_insulation": 0.02,
-        "heat_coeff_ext": 50.0,
+        "k_insulation": 0.017,
+        "heat_coeff_ext": 45.0,
         "heat_int": 200.0,
         "m_int": 5.0,
-        "c_p_int": 900.0,
+        "c_p_int": 500.0,
         "t_exposure": 600.0,
+        "t_cruise": 12*60,
         "Q_cooler": 300.0
     }
     thermal = Thermal(example_inputs)
@@ -171,7 +187,7 @@ if __name__ == '__main__':  # pragma: no cover
 
     # --- Simulation and plotting ---
     dt = 1.0  # s interval
-    phases = [("cruise", 12*60), ("hot", example_inputs["t_exposure"]), ("cruise", 12*60)]
+    phases = [("cruise", example_inputs["t_cruise"]), ("hot", example_inputs["t_exposure"]), ("cruise", example_inputs["t_cruise"])]
     times, temps, power_req = [], [], []
     T = example_inputs["T_int_init"]
     R_tot = thermal._compute_resistances()
@@ -184,7 +200,7 @@ if __name__ == '__main__':  # pragma: no cover
                 current_time = len(times) * dt
                 times.append(current_time)
 
-                if current_time < 12*60:
+                if current_time < example_inputs["t_cruise"]:
                     # Outbound cruise: hold at initial temp
                     T_amb = example_inputs["T_amb_cruise"]
                     Q_command = Q_cruise_hold
@@ -206,6 +222,14 @@ if __name__ == '__main__':  # pragma: no cover
                 current_time = len(times) * dt
                 times.append(current_time)
                 T_amb = example_inputs["T_amb_hot"]
+                # clamp logic in hot phase
+                Q_hold = example_inputs["heat_int"] + (T_amb - T) / R_tot
+                if example_inputs["Q_cooler"] >= Q_hold:
+                    Q_command = Q_hold
+                    temps.append(T)
+                    power_req.append(Q_command)
+                    continue
+                # Otherwise use full cooler power
                 Q_command = example_inputs["Q_cooler"]
                 dTdt = (example_inputs["heat_int"] + (T_amb - T) / R_tot - Q_command) / (example_inputs["m_int"] * example_inputs["c_p_int"])
                 T += dTdt * dt
@@ -226,151 +250,4 @@ if __name__ == '__main__':  # pragma: no cover
     plt.xlabel('Time (s)')
     plt.ylabel('Commanded Cooling Power (W)')
     plt.title('Cooling Power Demand Over Mission')
-    plt.savefig('DetailedDesign/subsystems/Plots/power_demand_cooler.png')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    #============================OLD CODE=============================
-
-
-
-
-    """
-class Thermal:
-
-    def __init__(self, inputs):
-        self.inputs = inputs
-        self.outputs = self.inputs.copy()
-
-        self.T_amb = inputs["T_amb"]                #External ambient temperature the UAV is exposed to (°C)
-        self.T_int_max = inputs["T_int_max"]        #Maximum allowable internal temperature for the electronics (°C)
-        self.T_int_init = inputs["T_int_init"]      #Initial internal temperature UAV
-        self.A_heat_shell = inputs["A_heat_shell"]      #Effective heat-transfer area of the shell or panel (m²)
-        self.t_shell = inputs["t_shell"]            #Thickness of the titanium shell (m)
-        self.k_Ti = inputs["k_Ti"]                 #Thermal conductivity of titanium (W/(m·K))
-        self.heat_coeff_ext = inputs["heat_coeff_ext"]            #External convective heat-transfer coefficient (airblast) on the shell (W/(m²·K))
-        self.heat_int = inputs["heat_int"]                 #Internal waste heat dissipation from electronics and systems (W)
-        self.m_int = inputs["m_int"]                         #Mass of the internal components / thermal mass (kg)
-        self.c_p_int = inputs["c_p_int"]                       #Effective specific heat capacity of the internal mass (J/(kg·K))
-        self.t_exposure = inputs["t_exposure"]          #Duration spent in the hot environment (s)
-        self.include_insulation = inputs["include_insulation"]      #Boolean flag: whether to include an insulation layer in the resistance network
-        self.t_insulation = inputs["t_insulation"]                     #Thickness of the insulation layer (m)
-        self.k_insulation = inputs["k_insulation"]                 #Thermal conductivity of the insulation material (W/(m·K))
-        
-
-
-
-
-    # ~~~ Intermediate Functions ~~~
-
-    def _compute_resistances(self):
-        """
-        ##Compute thermal resistances: conduction through titanium shell, optional insulation, and external convection.
-        ##Returns (R_Ti, R_ins, R_conv, R_tot) in K/W.
-"""
-
-        # Titanium conduction resistance
-
-        R_Ti = self.t_shell / (self.k_Ti * self.A_heat_shell)
-
-        # Insulation conduction resistance (if used)
-        if self.include_insulation:
-            R_ins = self.t_insulation / (self.k_insulation * self.A_heat_shell)
-        else:
-            R_ins = 0.0
-
-        # External convection resistance
-        R_conv = 1.0 / (self.heat_coeff_ext * self.A_heat_shell)
-
-        # Total resistance
-        R_tot = R_Ti + R_ins + R_conv
-
-        return R_Ti, R_ins, R_conv, R_tot
-
-    def _compute_steady_state_cooling(self) -> float:
-        """
-        ##Compute steady-state cooling power required (W) to hold internal at setpoint indefinitely.
-"""
-        R_Ti, R_ins, R_conv, R_tot = self._compute_resistances()
-
-        return self.heat_int + (self.T_amb - self.T_int_max) / R_tot
-
-    def _compute_transient_cooling(self) -> float:
-        """
-        ##Compute transient cooling power (W) for limited exposure time.
-"""
-        R_Ti, R_ins, R_conv, R_tot = self._compute_resistances()
-
-        delta_T_allowed = self.T_int_max - self.T_int_init
-        # Average internal temperature during transient
-        T_int_avg = self.T_int_max + 0.5 * delta_T_allowed
-        # Energy balance over exposure time
-        return (self.m_int * self.c_p_int * delta_T_allowed) / self.t_exposure + self.heat_int + (self.T_amb - T_int_avg) / R_tot
-
-    # ~~~ Output functions ~~~ 
-    """
-    ##def get_all(self) -> dict[str, float]:
-        
-        # These are all the required outputs for this class. Plz consult the rest if removing any of them!
-
-    ##    outputs["Thermal_mass"] = ...
-    ##    outputs["Thermal_power_required"] = ...
-
-    ##    return self.outputs
-"""
-
-
-    def get_all(self) -> dict[str, float]:
-        # These are all the required outputs for this class. Plz consult the rest if removing any of them!
-        # Compute thermal mass (J/K)
-        self.outputs["Thermal_mass"] = self.m_int * self.c_p_int
-
-        # Compute total thermal resistance
-        _, _, _, R_tot = self._compute_resistances()
-        delta_T_allowed = self.T_int_max - self.T_int_init
-        # Choose cooling calculation: transient if time and delta provided, else steady-state
-        if self.t_exposure > 0 and delta_T_allowed > 0:
-            Q_req = self._compute_transient_cooling()
-        else:
-            Q_req = self._compute_steady_state_cooling()
-
-        self.outputs["Thermal_power_required"] = Q_req
-        return self.outputs
-
-if __name__ == '__main__':
-    # Sanity checks:
-
-    sample_inputs = {
-        "T_amb": 140.0,            # °C
-        "T_int_max": 60.0,         # °C
-        "T_int_init": 30,          # °C 
-        "A_heat_shell": 0.5,                  # m^2
-        "t_shell": 0.002,             # m
-        "k_Ti": 22.0,              # W/(m·K)
-        "heat_coeff_ext": 50.0,             # W/(m^2·K)
-        "heat_int": 200.0,            # W
-        "m_int": 5.0,              # kg
-        "c_p_int": 900.0,              # J/(kg·K)
-        "t_exposure": 600.0,      # s
-        "include_insulation": False,
-        "t_insulation": 0.01,           # m
-        "k_insulation": 0.02           # W/(m·K)
-    }
-    thermal = Thermal(sample_inputs)
-    outputs = thermal.get_all()
-    print("Thermal_mass (J/K):", outputs["Thermal_mass"])
-    print("Thermal_power_required (W):", outputs["Thermal_power_required"])
-"""
-
+    plt.savefig('DetailedDesign/subsystems/Plots/power_demand_cooler.png')  
