@@ -112,13 +112,29 @@ stab_n_con_funny_inputs = {
     "delta_a_max": np.deg2rad(25),  # rad, maximum aileron deflection angle
     "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
     "roll_rate_req": 0.5,  # rad/s, guesstimate
+    "v_ref": 20.0,  # m/s, reference velocity for roll rate requirement
+    "x_cg_no_wing": 1,  # m, x-coordinate of the center of gravity without the wing
+    "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
+    "wing_mass": 3,  # kg, guesstimate for the mass of the wing
+    "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
+    "l_fus": 1.5,  # m, length of the fuselage
+    "lh": 0.5,  # m, horizontal distance from the wing ac to the horizontal tail ac
+    "mac": 0.333,  # m, mean aerodynamic chord of the wing
+    "x_ac_bar": 0.25,  # m, x-coordinate of the aerodynamic center relative to the leading edge of the wing
+    "CL_alpha_Ah": 5.0 * 180 / np.pi,  # Finite wing lift curve slope [1/rad]
+    "CL_alpha_h": -0.8,  # Horizontal tail lift curve slope [-]
+    "d_epsilon_d_alpha": 0.1,  # Downwash gradient [rad/(rad*m)]
+    "Vh_V": 0.5,  # Horizontal tail velocity to wing velocity ratio [-]
+    "Cm_ac": 0.3,  # Moment coefficient at the aerodynamic center of the wing [-]
 }
 
 funny_inputs.update(stab_n_con_funny_inputs)
 
 # ~~~ Structures ~~~
 
-structures_funny_inputs = {}
+structures_funny_inputs = {
+    "wing_span": 3.0,  # m, guesstimate
+}
 
 funny_inputs.update(structures_funny_inputs)
 
