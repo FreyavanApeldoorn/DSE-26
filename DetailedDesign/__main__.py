@@ -28,7 +28,7 @@ for _ in range(total_iterations):
     deployment = Deployment(outputs, strategy='perimeter', amt=outputs['mission_perimeter'])
     outputs = deployment.get_all()
 
-    mission = Mission(outputs)
+    mission = Mission(outputs, verbose=False)
     outputs = mission.get_all()
 
     uav = UAV(outputs, iterations=10, history=False, verbose=False)

@@ -132,9 +132,6 @@ class Mission:
         self.time_ascent = self.h_cruise / self.V_climb_v
         self.time_descent = self.h_cruise / self.V_descent
         self.time_cruise = self.R_max / self.V_cruise
-        self.time_transition = self.time_transition
-        self.time_scan = self.time_scan
-        self.time_deploy = self.time_deploy
 
         self.calc_time_turn_around()   # calculate time for turnaround
 
@@ -143,12 +140,14 @@ class Mission:
                          self.time_transition, self.time_cruise, self.time_transition, self.time_descent, self.time_turnaround])
         self.time_uav = np.sum(mission_times)
 
-        hover_times = np.array([self.time_ascent, self.time_transition, self.time_transition, self.time_scan, self.time_descent, 
-                                self.time_deploy, self.time_ascent, self.time_transition, self.time_transition, self.time_descent])
-        self.hover_time = np.sum(np.array(hover_times))
-
         cruise_times = np.array([self.time_cruise, self.time_cruise])
         self.cruise_time = np.sum(np.array(cruise_times))
+
+        ascent_times = np.array([self.time_ascent, self.time_ascent])
+        self.time_ascent = np.sum(np.array(ascent_times))
+
+        descent_times = np.array([self.time_descent, self.time_descent])
+        self.time_descent = np.sum(np.array(descent_times))
 
         if self.verbose:
             print(f"UAV Mission Time: {self.time_uav} seconds")
@@ -285,9 +284,12 @@ class Mission:
         self.calc_total_mission_time()
         self.true_mission_deployment_rate()
 
-        self.outputs["time_hover"] = self.hover_time
-        self.outputs["time_cruise"] = self.cruise_time
         self.outputs["time_uav"] = self.time_uav
+        self.outputs["time_cruise"] = self.cruise_time
+        self.outputs['time_ascent'] = self.time_ascent
+        self.outputs['time_descent'] = self.time_descent
+        self.outputs["time_turnaround"] = self.time_turnaround
+
 
         self.outputs["time_preparation"] = self.time_preparation
         self.outputs["time_operation"] = self.time_operation

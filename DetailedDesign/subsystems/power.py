@@ -19,16 +19,14 @@ class Power:
         self.DOD_fraction = self.inputs["DOD_fraction"]
         self.eta_battery = self.inputs["eta_battery"]
 
-        self.time_hover = inputs["time_hover"]
         self.time_cruise = inputs["time_cruise"]
         self.time_ascent = inputs["time_ascent"]
         self.time_descent = inputs["time_descent"]
         self.time_deploy = inputs["time_deploy"]
         self.time_transition = inputs["time_transition"]
         self.time_scan = inputs["time_scan"]
-        self.time_idle = inputs["time_idle"]
+        self.time_idle = inputs["time_turnaround"]
 
-        self.power_hover = inputs["power_hover"]
         self.power_cruise = inputs["power_cruise"]
         self.power_ascent = inputs["power_ascent"]
         self.power_descent = inputs["power_descent"]
@@ -43,7 +41,6 @@ class Power:
     def calculate_required_capacity(self) -> float:
         
         times = np.array([
-            self.time_hover,
             self.time_cruise,
             self.time_ascent,
             self.time_descent,
@@ -53,7 +50,6 @@ class Power:
             self.time_idle
         ])
         powers = np.array([
-            self.power_hover,
             self.power_cruise,
             self.power_ascent,
             self.power_descent,
@@ -109,23 +105,20 @@ if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
     
     inputs = {
-
-        "time_hover": 60*10,  # seconds
-        "time_cruise": 20*60,  # seconds
-        "time_ascent": 120,  # seconds
-        "time_descent": 120,  # seconds
-        "time_deploy": 180,  # seconds
-        "time_transition": 60,  # seconds
-        "time_scan": 240,  # seconds
-        "time_idle": 180,  # seconds
-        "power_hover": 100,  # Watts
-        "power_cruise": 80,  # Watts
-        "power_ascent": 120,  # Watts
-        "power_descent": 90,  # Watts
-        "power_deploy": 150,  # Watts
-        "power_transition": 110,  # Watts
-        "power_scan": 130,  # Watts
-        "power_idle": 50,  # Watts
+        "time_cruise": 1440.0,  # seconds
+        "time_ascent": 40.0,  # seconds
+        "time_descent": 80.0,  # seconds
+        "time_deploy": 130.0,  # seconds
+        "time_transition": 30,  # seconds
+        "time_scan": 60,  # seconds
+        "time_idle": 60.0,  # seconds
+        "power_cruise": 1849.5497559983473,  # Watts
+        "power_ascent": 3475.137999774786,  # Watts
+        "power_descent": 23186.135304507123,  # Watts
+        "power_deploy": 3475.137999774786+96.0,  # Watts
+        "power_transition": 3475.137999774786+1849.5497559983473,  # Watts
+        "power_scan": 23186.135304507123,  # Watts
+        "power_idle": 100,  # Watts
         "DOD_fraction": 0.8,  # Depth of discharge fraction
         "eta_battery": 0.9,  # Battery efficiency
         "M_to": 30,  # Maximum Takeoff Mass [kg]
