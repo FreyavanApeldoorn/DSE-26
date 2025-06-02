@@ -21,19 +21,28 @@ requirements_inputs = {
 inputs.update(requirements_inputs)
 
 
-# ~~~ Mission ~~~
+# ~~~ Mission ~~~ stuff that is mission-level 
 
 mission_inputs = {
-    'perimeter': 1000,  # Mission perimeter [m]
-    'V_cruise': 100 / 3.6,  # Cruise speed [m/s] (converted from 100 km/h)
-    'h_cruise': 120,  # Mission altitude [m]
-    'Rate_of_Climb': 6  # Rate of climb [m/s]
-
+    'mission_type': 'wildfire', 
+    'perimeter': 1 000,  # Mission perimeter [m]
+    'number_of_UAVs': 20,  # Number of UAVs in the swarm
+    'number_of_containers': 3, # Number of containers in the nest
+    'number_of_workers': 2,  # Number of workers per UAV
 }
-
 inputs.update(mission_inputs)
 
-# ~~~ Deployment ~~~~
+
+# ~~~ UAV ~~~ uav performance and design parameters
+uav_inputs = {
+    'V_cruise': 100 / 3.6,  # Cruise speed [m/s] (converted from 100 km/h)
+    'h_cruise': 120,  # Mission altitude [m]
+    'Rate_of_Climb': 6,  # Rate of climb [m/s]
+    'Rate_of_Descent': 3  # Rate of descent [m/s]
+}
+inputs.update(uav_inputs)
+
+# ~~~ Deployment ~~~~ deployment system parameters
 
 deployment_inputs = {
     'n_ferro_magnets' : 2, # nr
@@ -68,7 +77,7 @@ deployment_inputs = {
 inputs.update(deployment_inputs)
 
 
-# ~~~ Propulsion ~~~ 
+# ~~~ Propulsion ~~~ initial inputs for propulsion sizing
 
 propulsion_inputs = {
 
@@ -76,36 +85,36 @@ propulsion_inputs = {
 inputs.update(propulsion_inputs)
 
 
-
-# ~~~ Power ~~~ 
+# ~~~ Power ~~~ initial inputs for power sizing
 
 power_inputs = {
 
 }
 inputs.update(power_inputs)
 
-# ~~~ Stability and control ~~~ 
+# ~~~ Stability and control ~~~ initial inputs for stability and control sizing
 
 stab_n_con_inputs = {
 
 }
 inputs.update(stab_n_con_inputs)
 
-# ~~~ Aerodynamics ~~~
+# ~~~ Aerodynamics ~~~ initial inputs for aerodynamics sizing
 
 aerodynamics_inputs = {
 
 }
 inputs.update(aerodynamics_inputs)
 
-# ~~~ Structures ~~~ 
+# ~~~ Structures ~~~ initial inputs for structures sizing
 
 structures_inputs = {
 
 }
 inputs.update(structures_inputs)
 
-# ~~~ Thermal control ~~~
+
+# ~~~ Thermal control ~~~ initial inputs for thermal control sizing
 
 thermal_inputs = {
 

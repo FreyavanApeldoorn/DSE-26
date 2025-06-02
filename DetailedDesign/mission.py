@@ -13,10 +13,10 @@ class Mission:
         self.verbose = verbose
 
         #Nest
-        self.number_of_UAV = inputs["number_of_UAV"] #expected from nest per nest
+        self.number_of_UAV = inputs["number_of_UAV"] # mission input
         self.number_of_containers = inputs["number_of_containers"] #expected from nest
-        self.number_of_nests = inputs["number_of_nests"] #expected from nest
-        self.number_of_slaves = inputs["number_of_slaves"] #We define, per nest
+        #self.number_of_nests = inputs["number_of_nests"] # expected from nest
+        self.number_of_slaves = inputs["number_of_workers"] # 
 
         #Input Times
         self.time_wing_attachment = inputs["time_wing_attachment"] #
@@ -46,6 +46,7 @@ class Mission:
 
 
         #Mission Specifics
+        self.mission_type = inputs['mission_type']
         self.mission_perimeter = inputs["mission_perimeter"] #We define, mission perimeter [m] 
         self.R_max = inputs["R_max"] # Maximum range [m]: mission definition
 
@@ -315,13 +316,13 @@ if __name__ == '__main__':
         "time_between_UAV": 10.0,
         "time_startup_nest": 120.0,
         "time_battery_swapping": 10.0,
-        "h_cruise": 100.0,  # Mission altitude [m]
-        "V_climb_v": 5.0,  # Climb speed [m/s]
-        "V_descent": 5.0,  # Descent speed [m/s]
-        "V_cruise": 10.0,  # Cruise speed [m/s]
-        "time_transition": 10.0,  # Time for transition [s]
-        "time_deploy": 5.0,  # Time for deploying the UAV [s]
-        "time_scan": 15.0,  # Time for scanning [s]
+        "h_cruise": 120.0,  # Mission altitude [m]
+        "V_climb_v": 6.0,  # Climb speed [m/s]
+        "V_descent": 3.0,  # Descent speed [m/s]
+        "V_cruise": 100/3.6,  # Cruise speed [m/s]
+        "time_transition": 30.0,  # Time for transition [s]
+        "time_deploy": 5.0*60,  # Time for deploying the UAV [s]
+        "time_scan": 60,  # Time for scanning [s]
         "mission_perimeter": 10000.0,  # Mission perimeter [m]
         "R_max": 20000.0,  # Maximum range [m]
         "num_aerogels": 1000,  # Number of aerogels to deploy

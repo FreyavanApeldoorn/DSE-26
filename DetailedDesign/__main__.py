@@ -1,3 +1,10 @@
+from inputs import inputs
+from deployment import Deployment
+from mission import Mission
+from uav import UAV
+
+initial_inputs = inputs.copy()
+
 '''
 This is the file where the code actually gets executed.
 '''
@@ -12,6 +19,9 @@ if __name__ == '__main__':
     - MF_payload
     - n_drones
     """
+
+    inputs['mission_type'] = 'wildfire'
+    # inputs['mission_type'] = 'oil_spill'
 
     deployment = ...
 
