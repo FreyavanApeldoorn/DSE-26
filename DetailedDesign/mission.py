@@ -13,7 +13,7 @@ class Mission:
         self.verbose = verbose
 
         #Nest
-        self.number_of_UAV = inputs["number_of_UAV"] # mission input
+        self.number_of_UAV = inputs["number_of_UAVs"] # mission input
         self.number_of_containers = inputs["number_of_containers"] #expected from nest
         #self.number_of_nests = inputs["number_of_nests"] # expected from nest
         self.number_of_slaves = inputs["number_of_workers"] # 
@@ -36,8 +36,8 @@ class Mission:
 
         #UAV Inputs
         self.h_cruise = inputs["h_cruise"] # Mission altitude [m]: mission definition
-        self.V_climb_v = inputs["V_climb_v"] # Climb speed [m/s]: mission definition
-        self.V_descent = inputs["V_descent"] # Descent speed [m/s]: mission definition
+        self.V_climb_v = inputs["ROC_VTOL"] # Climb speed [m/s]: mission definition
+        self.V_descent = inputs["ROD_VTOL"] # Descent speed [m/s]: mission definition
         self.V_cruise = inputs["V_cruise"] # Cruise speed [m/s]: mission definition
 
         self.time_transition = inputs["time_transition"]
@@ -52,7 +52,7 @@ class Mission:
 
 
         #Aerogel Specifics
-        self.num_aerogels = inputs["num_aerogels"]
+        self.num_aerogels = inputs["nr_aerogels"]
         
     
 

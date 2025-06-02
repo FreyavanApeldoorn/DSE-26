@@ -7,9 +7,6 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from DetailedDesign.funny_inputs import funny_inputs
-from DetailedDesign.test.test_inputs import deployment_test_inputs
-
 def compute_outer_diameter(length: float, thickness:float, internal_diameter:float) -> float:
     '''
     Archimedes spiral
@@ -38,7 +35,7 @@ class Deployment:
     The deployment class contains the aerogel sizing and the deployment subsystem sizing. 
     '''
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], strategy, amt) -> None:
         self.inputs = inputs
 
         self.payload_mass = inputs['payload_mass']
@@ -75,6 +72,9 @@ class Deployment:
         self.firebreak_width = inputs['firebreak_width']
 
         self.fuselage_size = inputs['fuselage_size']
+
+        self.strategy = strategy
+        self.amt = amt
 
     # ~~~ Intermediate Functions ~~~
 
@@ -118,7 +118,7 @@ class Deployment:
     def cg_change(self):
         ...
 
-    def perimeter_creation(self, strategy: str, amt: float, verbose = False, test = False):
+    def perimeter_creation(self, verbose = False, test = False):
         '''
         
         Definitions:
@@ -169,15 +169,15 @@ class Deployment:
                       '\n effective length:', eff_length)
             method = 'w'
 
-        if strategy == 'nr_aerogels':
-            amt = amt - (amt % n_layers) # Round down to the nearest multiple of n_layers as only a complete layer acts as an effective firebreak
+        if self.strategy == 'nr_aerogels':
+            amt = self.amt - (self.amt % n_layers) # Round down to the nearest multiple of n_layers as only a complete layer acts as an effective firebreak
             per_length = ((eff_length)*(amt) / n_layers) + self.deployment_accuracy # Perimeter length based on the number of complete layers 
             if test:
                 return method, per_length
             return per_length
     
-        elif strategy == 'perimeter':
-            nr_aerogels = np.ceil(((amt - self.deployment_accuracy) / eff_length)* n_layers) # Number of aerogels needed to cover the required perimeter length, rounded up to the nearest whole number
+        elif self.strategy == 'perimeter':
+            nr_aerogels = np.ceil(((self.amt - self.deployment_accuracy) / eff_length)* n_layers) # Number of aerogels needed to cover the required perimeter length, rounded up to the nearest whole number
             if test:
                 return method, nr_aerogels
             return nr_aerogels
@@ -273,7 +273,14 @@ class Deployment:
         outputs['wire_mass'] = self.wire_mass()
         outputs['deployment_system_mass'] = self.deployment_system_mass()
 
-        outputs['deployment_duration'] = self.deployment_duration()
+        outputs['time_deploy'] = self.deployment_duration()
+        
+        if self.strategy == 'perimeter':
+            outputs['nr_aerogels'] = self.perimeter_creation(verbose=False, test=True)[1]
+        elif self.strategy == 'nr_aerogels':
+            outputs['per_length'] = self.perimeter_creation(verbose=False, test=True)[1]
+        else:
+            print('Not a valid strategy option')
 
         return outputs
     
@@ -282,5 +289,7 @@ class Deployment:
     
 if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
+    from funny_inputs import funny_inputs
+    from test.test_inputs import deployment_test_inputs
     dep = Deployment(deployment_test_inputs)
     print(dep.get_all())

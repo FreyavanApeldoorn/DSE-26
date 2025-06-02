@@ -2,7 +2,11 @@
 This is the file for the thermal subsystem. It contains a single class.
 '''
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
+import numpy as np
 import math
 import matplotlib.pyplot as plt
 

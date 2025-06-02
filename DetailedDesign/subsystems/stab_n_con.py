@@ -8,8 +8,6 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from DetailedDesign.funny_inputs import stab_n_con_funny_inputs as fi
-
 
 class StabCon:
 
@@ -123,6 +121,8 @@ class StabCon:
 
 if __name__ == "__main__":  # pragma: no cover
     # Perform sanity checks here
+    from funny_inputs import stab_n_con_funny_inputs as fi
+
     A = StabCon(fi)
 
     print(A.tau_from_ca_over_c())
