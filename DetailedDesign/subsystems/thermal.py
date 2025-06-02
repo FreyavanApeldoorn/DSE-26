@@ -43,6 +43,8 @@ class Thermal:
 
         # Exposure time in hot region (s)
         self.t_exposure = inputs["t_exposure"]
+        # Maximum cooler power available (W)
+        self.Q_cooler = inputs.get("Q_cooler", 0.0)       # Maximum cooler capacity (W)
 
     # ~~~ Intermediate Functions ~~~
 
@@ -60,39 +62,87 @@ class Thermal:
         R_tot = self._compute_resistances()
         return self.heat_int + (self.T_amb_cruise - self.T_int_cruise_set) / R_tot
 
-    def get_hot_region_cooling_power(self) -> float:
-        '''Steady-state cooling power (W) to maintain the initial internal temperature in hot ambient.'''
+    def simulate_hot_phase(self, Q_cool: float) -> float:
+        '''Simulate the 1-s iterative hot phase and return the exit internal temperature.'''
         R_tot = self._compute_resistances()
-        # Maintain T_int_init at T_amb_hot
-        return self.heat_int + (self.T_amb_hot - self.T_int_init) / R_tot
+        T_current = self.T_int_init
+        for _ in range(int(self.t_exposure)):
+            dTdt = (self.heat_int + (self.T_amb_hot - T_current) / R_tot - Q_cool) / (self.m_int * self.c_p_int)
+            T_current += dTdt
+        return T_current
+
+    def simulate_cruise_phase(self, T_start: float, Q_cool: float, duration: float) -> float:
+        '''Simulate cruise-phase (1-s steps) from T_start over given duration, return end T.'''
+        R_tot = self._compute_resistances()
+        T_current = T_start
+        for _ in range(int(duration)):
+            dTdt = (self.heat_int + (self.T_amb_cruise - T_current) / R_tot - Q_cool) / (self.m_int * self.c_p_int)
+            T_current += dTdt
+        return T_current
+
+    def get_hot_region_exit_temperature(self) -> float:
+        '''Compute exit temperature from hot-zone under fixed max cooler power.'''
+        return self.simulate_hot_phase(self.Q_cooler)
 
     def get_cooling_time_to_cruise_set(self) -> float:
-        '''Time (s) to cool from T_int_init to cruise set-point under cruise cooling.'''
-        Q_cruise = self.get_cruise_cooling_power()
+        '''Iteratively compute time (s) to cool from hot exit temp down to cruise set-point under Q_cooler.'''
+        T_exit = self.get_hot_region_exit_temperature()
         R_tot = self._compute_resistances()
-        Q_int = self.heat_int
-        T_ss = self.T_amb_cruise - R_tot * (Q_cruise - Q_int)
-        if self.T_int_init <= self.T_int_cruise_set:
+        T_current = T_exit
+        time_elapsed = 0.0
+        while T_current > self.T_int_cruise_set:
+            dTdt = (self.heat_int + (self.T_amb_cruise - T_current) / R_tot - self.Q_cooler) / (self.m_int * self.c_p_int)
+            if dTdt >= 0:
+                return math.inf
+            T_current += dTdt
+            time_elapsed += 1.0
+        return time_elapsed
+
+    def get_required_cooler_for_zero_gain(self, tol: float = 0.1) -> float:
+        '''
+        Find minimum cooler power (W) such that, with a mission profile:
+          - Cruise out uses cruise-set cooling (just enough to hold T_int_init)
+          - Hot region and cruise return both run at this cooler power
+        the final internal temperature equals the initial temperature.
+        '''
+        def mission_end_temp(Q_trial: float) -> float:
+            # 1) Cruise-out: hold initial temp at cruise ambient using just enough power
+            Q_cruise_hold = self.get_cruise_cooling_power()
+            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, 12*60)
+            # 2) Hot region: run at Q_trial
+            T_mid = self.simulate_hot_phase(Q_trial)
+            # 3) Cruise back: continue at Q_trial
+            T_end = self.simulate_cruise_phase(T_mid, Q_trial, 12*60)
+            return T_end
+
+        # Bounds: Q_low=0, Q_high large enough so T_end < T_int_init
+        Q_low, Q_high = 0.0, self.heat_int + (self.T_amb_hot - self.T_int_init) / self._compute_resistances() + 1000.0
+        T_low = mission_end_temp(Q_low)
+        T_high = mission_end_temp(Q_high)
+        if T_low <= self.T_int_init:
             return 0.0
-        if Q_cruise <= Q_int or T_ss >= self.T_int_cruise_set:
+        if T_high > self.T_int_init:
             return math.inf
-        tau = self.m_int * self.c_p_int * R_tot
-        ratio = (self.T_int_cruise_set - T_ss) / (self.T_int_init - T_ss)
-        return -tau * math.log(ratio)
+        while Q_high - Q_low > tol:
+            Q_mid = 0.5 * (Q_low + Q_high)
+            T_mid = mission_end_temp(Q_mid)
+            if T_mid > self.T_int_init:
+                Q_low = Q_mid
+            else:
+                Q_high = Q_mid
+        return 0.5 * (Q_low + Q_high)
 
     def get_all(self) -> dict[str, float]:
-        '''Compute and return all thermal outputs.'''
-        # Thermal mass (J/K)
+        '''Compute and return all thermal outputs (including required cooler power for zero net gain).'''
         self.outputs["Thermal_mass"] = self.m_int * self.c_p_int
-        # Cruise-phase cooling
         self.outputs["Cooling_power_cruise"] = self.get_cruise_cooling_power()
-        # Hot-region steady cooling to maintain initial internal temp
-        self.outputs["Cooling_power_hot"] = self.get_hot_region_cooling_power()
-        # Time to cool back to cruise set-point
+        self.outputs["Cooling_power_hot"] = self.Q_cooler
+        self.outputs["T_exit_hot"] = self.get_hot_region_exit_temperature()
         self.outputs["Cooling_time_to_cruise_set"] = self.get_cooling_time_to_cruise_set()
+        self.outputs["Required_cooler_zero_gain"] = self.get_required_cooler_for_zero_gain()
         return self.outputs
 
-if __name__ == '__main__': # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     # Sanity check with example inputs
     example_inputs = {
         "T_amb_hot": 140.0,
@@ -110,41 +160,57 @@ if __name__ == '__main__': # pragma: no cover
         "heat_int": 200.0,
         "m_int": 5.0,
         "c_p_int": 900.0,
-        "t_exposure": 600.0
+        "t_exposure": 600.0,
+        "Q_cooler": 300.0
     }
     thermal = Thermal(example_inputs)
     outputs = thermal.get_all()
-    print(outputs)
+    # Print each output on its own line
+    for key, value in outputs.items():
+        print(f"{key}: {value}")
 
     # --- Simulation and plotting ---
-
-    # Mission phases: cruise out (12 min), hot region, cruise back (12 min)
     dt = 1.0  # s interval
     phases = [("cruise", 12*60), ("hot", example_inputs["t_exposure"]), ("cruise", 12*60)]
     times, temps, power_req = [], [], []
     T = example_inputs["T_int_init"]
     R_tot = thermal._compute_resistances()
-    Q_cruise = outputs["Cooling_power_cruise"]
-    Q_hot = outputs["Cooling_power_hot"]
+    Q_cruise_hold = outputs["Cooling_power_cruise"]
 
     for phase, duration in phases:
-        for _ in range(int(duration/dt)):
-            current_time = len(times) * dt
-            times.append(current_time)
-            # select ambient and commanded cooling
-            if phase == "hot":
+        if phase == "cruise":
+            # Determine if outbound or inbound based on time index
+            for _ in range(int(duration / dt)):
+                current_time = len(times) * dt
+                times.append(current_time)
+
+                if current_time < 12*60:
+                    # Outbound cruise: hold at initial temp
+                    T_amb = example_inputs["T_amb_cruise"]
+                    Q_command = Q_cruise_hold
+                else:
+                    # Inbound cruise: run max cooler until back to initial temp, then hold
+                    T_amb = example_inputs["T_amb_cruise"]
+                    if T > example_inputs["T_int_init"]:
+                        Q_command = example_inputs["Q_cooler"]
+                    else:
+                        Q_command = Q_cruise_hold
+
+                dTdt = (example_inputs["heat_int"] + (T_amb - T) / R_tot - Q_command) / (example_inputs["m_int"] * example_inputs["c_p_int"])
+                T += dTdt * dt
+                temps.append(T)
+                power_req.append(Q_command)
+
+        elif phase == "hot":
+            for _ in range(int(duration / dt)):
+                current_time = len(times) * dt
+                times.append(current_time)
                 T_amb = example_inputs["T_amb_hot"]
-                Q_command = Q_hot
-            else:
-                T_amb = example_inputs["T_amb_cruise"]
-                Q_command = Q_cruise
-            # update internal temperature
-            dTdt = (example_inputs["heat_int"] + (T_amb - T)/R_tot - Q_command) / (example_inputs["m_int"] * example_inputs["c_p_int"])
-            T += dTdt * dt
-            temps.append(T)
-            # compute instantaneous required cooling (for plotting), floored at cruise level
-            Q_inst = example_inputs["heat_int"] + (T_amb - T) / R_tot
-            power_req.append(max(Q_inst, Q_cruise))
+                Q_command = example_inputs["Q_cooler"]
+                dTdt = (example_inputs["heat_int"] + (T_amb - T) / R_tot - Q_command) / (example_inputs["m_int"] * example_inputs["c_p_int"])
+                T += dTdt * dt
+                temps.append(T)
+                power_req.append(Q_command)
 
     # Plot internal temperature
     plt.figure()
@@ -152,15 +218,19 @@ if __name__ == '__main__': # pragma: no cover
     plt.xlabel('Time (s)')
     plt.ylabel('Internal Temperature (°C)')
     plt.title('Internal Temperature Over Mission')
-    plt.savefig('DetailedDesign\subsystems\Plots\internal_temperature.png')
+    plt.savefig('DetailedDesign/subsystems/Plots/internal_temperature.png')
 
-    # Plot cooling power required
+    # Plot commanded cooling power over mission
     plt.figure()
     plt.plot(times, power_req)
     plt.xlabel('Time (s)')
-    plt.ylabel('Cooling Power Required (W)')
-    plt.title('Cooling Power Over Mission')
-    plt.savefig('DetailedDesign\subsystems\Plots\power_required_cooling.png')
+    plt.ylabel('Commanded Cooling Power (W)')
+    plt.title('Cooling Power Demand Over Mission')
+    plt.savefig('DetailedDesign/subsystems/Plots/power_demand_cooler.png')
+
+
+
+
 
 
 
