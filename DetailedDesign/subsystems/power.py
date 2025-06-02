@@ -97,7 +97,7 @@ class Power:
 
         self.outputs["Battery_mass"] = self.calculate_battery_mass()
         self.outputs["Battery_volume"] = ...
-        self.outputs["Battery_capacity"] = ...   # updated true capacity (might increase after choosing a battery)
+        self.outputs["Battery_capacity"] = self.required_capacity_wh   # updated true capacity (might increase after choosing a battery)
 
         return self.outputs
     
@@ -111,7 +111,7 @@ if __name__ == '__main__': # pragma: no cover
         "time_deploy": 130.0,  # seconds
         "time_transition": 30,  # seconds
         "time_scan": 60,  # seconds
-        "time_idle": 60.0,  # seconds
+        "time_turnaround": 60.0,  # seconds
         "power_cruise": 1849.5497559983473,  # Watts
         "power_ascent": 3475.137999774786,  # Watts
         "power_descent": 23186.135304507123,  # Watts
