@@ -287,5 +287,3 @@ class Deployment:
     
 if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
-    dep = Deployment(funny_inputs)
-    print(dep.get_all())
