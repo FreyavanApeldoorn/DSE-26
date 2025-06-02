@@ -123,7 +123,7 @@ class Structures:
     # ~~~ Output functions ~~~
 
     def get_all(self) -> dict[str, float]:
-        """
+        
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         
@@ -140,7 +140,7 @@ class Structures:
 
         return self.outputs
 
-        """
+        
 
 
 if __name__ == "__main__":  # pragma: no cover
