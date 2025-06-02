@@ -6,7 +6,7 @@ This is the file for the mission. It contains a single class.
 
 class Mission:
 
-    def __init__(self, inputs: dict[str, float], verbose: bool = True) -> None:
+    def __init__(self, inputs: dict[str, float], verbose: bool = False) -> None:
         
         self.inputs = inputs
         self.outputs = self.inputs.copy() # Copy inputs to outputs
