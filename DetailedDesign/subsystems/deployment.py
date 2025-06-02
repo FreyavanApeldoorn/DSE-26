@@ -276,11 +276,9 @@ class Deployment:
         outputs['deployment_duration'] = self.deployment_duration()
 
         return outputs
-    
-    def __str__(self):
-        return 'Its the deployment system!'
+
     
 if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
-    dep = Deployment(deployment_test_inputs)
+    dep = Deployment(funny_inputs)
     print(dep.get_all())
