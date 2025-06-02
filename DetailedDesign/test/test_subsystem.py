@@ -6,7 +6,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from DetailedDesign.subsystems.deployment import Deployment
+from DetailedDesign.deployment import Deployment
 
 from test_inputs import test_inputs, deployment_test_inputs
 

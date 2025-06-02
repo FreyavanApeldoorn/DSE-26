@@ -2,6 +2,12 @@
 This is the file for the aerodynamics subsystem. It contains a single class.
 '''
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+import numpy as np
+
 class Aerodynamics:
 
     def __init__(self, inputs: dict[str, float]) -> None:

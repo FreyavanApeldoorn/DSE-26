@@ -7,7 +7,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 import math 
-from DetailedDesign.subsystems.deployment import Deployment
+from DetailedDesign.deployment import Deployment
 from DetailedDesign.subsystems.propulsion import Propulsion
 from DetailedDesign.subsystems.constraints import Constraints
 

@@ -8,9 +8,6 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from DetailedDesign.funny_inputs import funny_inputs as fi
-from propulsion import Propulsion
-
 
 class StabCon:
 
@@ -146,10 +143,8 @@ class StabCon:
 
 if __name__ == "__main__":  # pragma: no cover
     # Perform sanity checks here
-    
-    P = Propulsion(fi)
-    fi_prop = P.get_all()
-    print(fi_prop)
-    A = StabCon(fi_prop)
+    from funny_inputs import stab_n_con_funny_inputs as fi
+
+    A = StabCon(fi)
 
     print(A.size_VTOL_arms())
