@@ -35,7 +35,7 @@ class Nest:
         self.power_generator = 1000 # in W, assumed power output of the generator
 
         # Nest contraints
-        self.number_of_trips = inputs["number_of_trips"]
+        self.number_of_trips = inputs["trips_for_mission"]
         self.required_energy = inputs["required_capacity_wh"]
         self.nest_energy = self.required_energy * self.number_of_trips
         self.nest_length = inputs["nest_length"]
@@ -267,8 +267,7 @@ class Nest:
         self.volume_sizing()
 
         self.outputs["number_of_nests"] = self.n_nests
-        self.outputs["number_of_UAVs"] = self.n_drones
-
+        #self.outputs["number_of_UAVs"] = self.n_drones
 
         self.outputs["nests_volume"] = self.nests_volume
         self.outputs["volume_fueltank"] = self.fuel_tank_volume
@@ -281,16 +280,21 @@ class Nest:
 if __name__ == '__main__':
     # Example usage
     inputs = {
-        "b_wing": 3.0, 
-        "S_wing": 1.8,
+        "wing_span": 3.0, 
+        "wing_area": 1.8,
         "FW_height": 0.3,
         "FW_width": 2.25,
+
+        "trips_for_mission": 10,
+        "required_capacity_wh": 1000,  # in Wh
+        "nest_empty_mass": 100.0,  #
+
 
         "uav_length": 2.5,
         "uav_width": 2.5,
         "uav_height": 0.5,
         "M_to": 30.0,
-        "Number_of_UAVs": 20,
+        "number_of_UAVs": 20,
         "generator_efficiency": 0.3,
         "diesel_energy_density": 9.94,
         "nest_energy": 4000*20,  # in Wh
@@ -304,4 +308,6 @@ if __name__ == '__main__':
     }
     nest = Nest(inputs, verbose=True)
     outputs = nest.get_all()
+    for key, value in outputs.items():
+        print(f"{key}: {value}")
     

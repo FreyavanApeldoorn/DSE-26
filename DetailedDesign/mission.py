@@ -185,6 +185,7 @@ class Mission:
 
         self.uav_mission_time()
 
+        self.num_trips = self.num_aerogels
         num_cycles = np.ceil(self.num_aerogels / self.number_of_UAV)
         self.time_operation = num_cycles * self.time_uav
 
@@ -283,6 +284,8 @@ class Mission:
 
         self.calc_total_mission_time()
         self.true_mission_deployment_rate()
+
+        self.outputs["trips_for_mission"] = self.num_trips
 
         self.outputs["time_uav"] = self.time_uav
         self.outputs["time_cruise"] = self.cruise_time

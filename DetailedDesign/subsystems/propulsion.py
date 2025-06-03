@@ -103,7 +103,7 @@ class Propulsion:
 
     def power_required_hover(self): 
         vtol_power , S_prop, prop_disk_loading, total_thrust = self.power_required_vtol()
-        P_hov = (2/(self.rho*S_prop))*(self.mtow)**(3/2)/self.eff_prop
+        P_hov = np.sqrt(2/(self.rho*S_prop*4))*(self.mtow)**(3/2)/self.eff_prop
         self.P_hov = P_hov
     
     def power_transition(self):
@@ -145,8 +145,9 @@ class Propulsion:
     
 if __name__ == '__main__': # pragma: no cover
     from DetailedDesign.funny_inputs import funny_inputs
+    from DetailedDesign.inputs import initial_inputs
     # Perform sanity checks here
-    propulsion = Propulsion(funny_inputs)
+    propulsion = Propulsion(initial_inputs)
     res = propulsion.get_all()
 
     print(math.isclose(res['Power_required_cruise'], 2000, rel_tol=1000))
