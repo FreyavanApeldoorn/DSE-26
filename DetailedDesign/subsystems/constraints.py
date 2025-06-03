@@ -30,6 +30,7 @@ class Constraints:
         self.R_C_service = inputs ['ROC_service']
         self.mtow = inputs['MTOW']
 
+        self.rho_0 = inputs["rho_0"]
         self.rho_service = inputs["rho_service"]
         self.r_c = inputs["ROC_cruise"]
 
@@ -125,7 +126,7 @@ class Constraints:
 
     
 if __name__ == '__main__': # pragma: no cover
-    from funny_inputs import funny_inputs
+    from DetailedDesign.funny_inputs import funny_inputs
     # Perform sanity checks here
     constraints = Constraints(funny_inputs)
     W_S, P_W_cruise, P_W_climb, P_W_service, W_S_stall, optimal_cruise_power = constraints.form_variable_lists()
