@@ -45,11 +45,13 @@ class Thermal:
         self.c_p_int = inputs["c_p_int"]  # Specific heat capacity (J/(kg·K))
 
         # Exposure time in deploy region (s)
-        self.t_exposure = inputs["t_exposure"]
+        self.t_exposure = inputs["time_deploy"] + inputs["time_ascent"] + inputs["time_descent"]  # assuming exposure includes ascent and descent phases
         # Cruise leg duration (s) for both outbound and return
-        self.t_cruise = inputs.get("t_cruise", 12*60)  
+        self.t_cruise = inputs["time_uav"] - self.t_exposure  
+        self.t_cruise_min = inputs["time_uav_min"] - self.t_exposure
         # Maximum thermal power available (positive = heating, negative = cooling) (W)
-        self.Q_therm = inputs.get("Q_therm", 0.0)       # Maximum heating/cooling capacity (W)
+        self.Q_therm = - inputs["power_thermal_required"]     # Maximum heating/cooling capacity (W)
+
 
     # ~~~ Intermediate Functions ~~~
 
@@ -163,11 +165,11 @@ class Thermal:
         def mission_end_temp(Q_trial: float) -> float:
             # 1) Outbound cruise: hold initial temp at cruise using just enough power
             Q_cruise_hold = self.get_cruise_thermal_power()
-            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, self.t_cruise)
+            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, self.t_cruise_min)
             # 2) deploy zone: run at Q_trial
             T_mid = self.simulate_deploy_phase(Q_trial)
             # 3) Return cruise: run at Q_trial
-            T_end = self.simulate_cruise_phase(T_mid, Q_trial, self.t_cruise)
+            T_end = self.simulate_cruise_phase(T_mid, Q_trial, self.t_cruise_min)
             return T_end
 
         # We search Q_trial between Q_low=0 (no active heating/cooling) and Q_high negative (strong cooling)
@@ -203,10 +205,18 @@ class Thermal:
         self.outputs["T_exit_deploy"] = self.get_deploy_region_exit_temperature()
         self.outputs["Time_to_cruise_set"] = self.get_time_to_cruise_set()
         self.outputs["Required_thermal_zero_gain"] = self.get_required_thermal_for_zero_gain()
+        
+        # self.outputs["thickness_insulation"] = None
+
+
+
+        self.outputs["power_thermal_required"] = self.get_required_thermal_for_zero_gain()  # Maximum thermal power rating (W)
+        self.outputs["max_required_energy_thermal"] = None  # max required energy for thermal at max range (Wh)
+
         return self.outputs
 
 
-if __name__ == '__main__':  # pragma: no cover
+if __name__ == '__main__':
     # Sanity check with example inputs:
     example_inputs = {
         "T_amb_deploy": 140.0,
@@ -223,8 +233,9 @@ if __name__ == '__main__':  # pragma: no cover
         "heat_int": 200.0,
         "m_int": 10.0,
         "c_p_int": 500.0,
-        "t_exposure": 600.0,
+        "t_exposure": 250.0,
         "t_cruise": 12*60,
+        "t_cruise_min": 2*60,
         "Q_therm": -300.0   # Negative = cooling ; Positive = heating
     } 
     thermal = Thermal(example_inputs)
