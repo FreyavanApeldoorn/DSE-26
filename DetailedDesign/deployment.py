@@ -283,9 +283,7 @@ class Deployment:
             print('Not a valid strategy option')
 
         return outputs
-    
-    def __str__(self):
-        return 'Its the deployment system!'
+
     
 if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
