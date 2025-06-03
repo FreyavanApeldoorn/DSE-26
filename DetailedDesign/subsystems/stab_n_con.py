@@ -20,6 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT))
 
 from DetailedDesign.funny_inputs import structures_funny_inputs as fi
+from DetailedDesign.funny_inputs import hardware_funny_inputs as hi
 
 
 class StabCon:
@@ -120,6 +121,92 @@ class StabCon:
         )
 
         return minimum_boom_arm
+    
+    # ~~~ C.G Calculation ~~~
+    
+    def calculate_UAV_cg(self) -> None:
+        """Calculate the center of gravity (CG) of the UAV."""
+
+        # Calculate the c.g of the fuselage group
+        numerator_x_fuselage = (
+            self.wildfire_sensor_mass * self.wildfire_sensor_x +
+            self.oil_sensor_mass * self.oil_sensor_x +
+            self.gymbal_connection_mass * self.gymbal_connection_x +
+            self.flight_controller_mass * self.flight_controller_x +
+            self.OBC_mass * self.OBC_x +
+            self.GPS_mass * self.GPS_x +
+            self.Mesh_network_module_mass * self.Mesh_network_module_x +
+            self.SATCOM_module_mass * self.SATCOM_module_x +
+            self.Winch_motor_mass * self.Winch_motor_x +
+            self.PDB_mass * self.PDB_x +
+            self.motor_mass_cruise * self.motor_cruise_x +
+            self.propeller_mass_cruise * self.propeller_cruise_x 
+        )
+
+        numerator_y_fuselage = (
+            self.wildfire_sensor_mass * self.wildfire_sensor_y +
+            self.oil_sensor_mass * self.oil_sensor_y +
+            self.gymbal_connection_mass * self.gymbal_connection_y +
+            self.flight_controller_mass * self.flight_controller_y +
+            self.OBC_mass * self.OBC_y +
+            self.GPS_mass * self.GPS_y +
+            self.Mesh_network_module_mass * self.Mesh_network_module_y +
+            self.SATCOM_module_mass * self.SATCOM_module_y +
+            self.Winch_motor_mass * self.Winch_motor_y +
+            self.PDB_mass * self.PDB_y + 
+            self.motor_mass_cruise * self.motor_cruise_y +
+            self.propeller_mass_cruise * self.propeller_cruise_y
+        )
+
+        numerator_z_fuselage = (
+            self.wildfire_sensor_mass * self.wildfire_sensor_z +
+            self.oil_sensor_mass * self.oil_sensor_z +
+            self.gymbal_connection_mass * self.gymbal_connection_z +
+            self.flight_controller_mass * self.flight_controller_z +
+            self.OBC_mass * self.OBC_z +
+            self.GPS_mass * self.GPS_z +
+            self.Mesh_network_module_mass * self.Mesh_network_module_z +
+            self.SATCOM_module_mass * self.SATCOM_module_z +
+            self.Winch_motor_mass * self.Winch_motor_z +
+            self.PDB_mass * self.PDB_z + 
+            self.motor_mass_cruise * self.motor_cruise_z +
+            self.propeller_mass_cruise * self.propeller_cruise_z
+        )
+
+
+        denominator_fuselage = (
+            self.wildfire_sensor_mass +
+            self.oil_sensor_mass +
+            self.gymbal_connection_mass +
+            self.flight_controller_mass +
+            self.OBC_mass +
+            self.GPS_mass +
+            self.Mesh_network_module_mass +
+            self.SATCOM_module_mass +
+            self.Winch_motor_mass +
+            self.PDB_mass
+        )
+
+        fuselage_x_cg = numerator_x_fuselage / denominator_fuselage
+        fuselage_y_cg = numerator_y_fuselage / denominator_fuselage
+        fuselage_z_cg = numerator_z_fuselage / denominator_fuselage
+
+        #calculate the c.g. of the wing group
+        
+        numerator_x_wing = (
+            (self.motor_mass_VTOL+ self.propeller_mass_VTOL) * self.motor_front_VTOL_x +
+            (self.motor_mass_VTOL+ self.propeller_mass_VTOL) * self.motor_rear_VTOL_x +
+            self.battery_mass * self.battery_x 
+        
+        )
+
+        denominator_wing = (
+
+        )
+        
+        wing_x_cg = numerator_x_wing/denominator_wing
+
+        return fuselage_x_cg, fuselage_y_cg
 
     # ~~~ Scissor plot ~~~
 
