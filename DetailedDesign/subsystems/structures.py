@@ -33,12 +33,13 @@ class Structures:
         self.rho = self.inputs['rho']
         self.V_max = self.inputs['V_max']
 
-        self.M_to = inputs["M_to"]
+        # self.M_to = inputs["M_to"]
 
         self.mass_payload = inputs["payload_mass"]
-        self.mass_hardware = inputs["mass_hardware"]
-        self.mass_battery = inputs["mass_battery"]
-        self.mass_propulsion = inputs["mass_propulsion"]
+        # # self.mass_hardware = inputs["mass_hardware"]
+        # self.mass_battery = inputs["mass_battery"]
+        # self.battery_length = inputs['battery length']
+        # self.mass_propulsion = inputs["mass_propulsion"]
         
         self.wing_span = inputs["wing_span"]
                 
@@ -71,24 +72,28 @@ class Structures:
         half_span = self.span / 2.0
         y = np.linspace(0.0, half_span, 500)  # 0 (root) to b/2 (tip)
 
-        # L_y = (self.mtow / (np.pi/4 * self.rho * self.V_max *self.span)) * np.sqrt(1 - (2*y / self.span)**2)
-        L = ((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span))
+        # Defining Lift distribution
 
-        L_y = integrate.cumulative_simpson(L, x=y)
-        V = integrate.cumulative_simpson(L_y, x=y[:-1])
-        M = integrate.cumulative_simpson(V, x=y[:-2])
+        # L = (self.mtow / (np.pi/4 * self.rho * self.V_max *self.span)) * np.sqrt(1 - (2*y / self.span)**2)
+        L_y = ((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span)**2)
 
-        print(len(y), len(M))
+        V = integrate.cumulative_simpson(L_y, x=y)
+        M = integrate.cumulative_simpson(
+            ((4*self.mtow) / np.pi*self.span)*np.sqrt(1-(2*y / self.span)**2), x=y) - integrate.cumulative_simpson()
+        M = -integrate.cumulative_simpson(V, x=y[:-1])
 
         V = V - V[-1]
         M = M - M[-1]
 
+        # Adding weights
+        W_batt = ...
+
 
         # Plot Lift, Shear and Moment on the same axes
         plt.figure(figsize=(10, 6))
-        plt.plot(y[:-1], L_y, label="Lift Distribution $L(y)$ [N/m]")
-        plt.plot(y[:-2], V, label="Shear Force $V(y)$ [N]")
-        plt.plot(y[:-3], M, label="Bending Moment $M(y)$ [N·m]")
+        plt.plot(y, L_y, label="Lift Distribution $L(y)$ [N/m]")
+        plt.plot(y[:-1], V, label="Shear Force $V(y)$ [N]")
+        plt.plot(y[:-2], M, label="Bending Moment $M(y)$ [N·m]")
         plt.title("NVM for UAV Wing")
         plt.xlabel("Spanwise Position $y$ (m, 0=root to $b/2$=tip)")
         plt.ylabel("Magnitude (N or N·m)")
