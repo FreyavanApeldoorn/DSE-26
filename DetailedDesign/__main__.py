@@ -52,6 +52,13 @@ for key, value in outputs.items():
     print(f"{key}: {value}")
 
 
+if True:
+    print("\nCopy-pasteable final outputs dictionary:\n")
+    print("final_outputs = {")
+    for key, value in outputs.items():
+        print(f"    {repr(key)}: {repr(value)},")
+    print("}")
+
 print(f"Payload mass: {outputs['payload_mass']} kg")
 print(f'Deployment rate {outputs["true_deployment_rate"]*3600} m/h')
 
