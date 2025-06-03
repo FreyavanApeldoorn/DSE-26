@@ -12,6 +12,7 @@ funny_inputs = {}
 constants_funny_inputs = {
     "g": 9.81,  # Gravitational constant [m/s2]
     "rho": 0.9093,  # Density at 3000m [kg/m^3]
+    "rho_0": 1.225,  # Density at sea level [kg/m^3]
     "rho_sea": 1.225,  # Density at sea level [kg/m^3]
     "mtow": 30 * 9.81,  # maximum takeoff weight [kg]
 }
@@ -86,6 +87,7 @@ prop_n_pow_funny_inputs = {
     "s_tot_sw": 0.003,  # m
     "n_prop_vtol": 4,  # number of propellers in VTOL mode
     "vtol_roc": 6,  # m/s
+    "ROC_VTOL": 6,  # m/s, rate of climb in VTOL mode
     "eff_prop": 0.83,  # -
     "K_p": 0.0938,  # propeller constant (kg/W^E1 * V^E2)
     "n_props_cruise": 1,  # number of propellers in cruise
