@@ -106,9 +106,9 @@ class Propulsion:
         P_hov = np.sqrt(2/(self.rho*S_prop*4))*(self.mtow)**(3/2)/self.eff_prop
         self.P_hov = P_hov
     
-    def power_transition(self):
+    def power_transition(self, vtol_power):
         
-        self.transition_power = self.optimal_cruise_power + self.P_hov
+        self.transition_power = self.optimal_cruise_power + vtol_power # self.P_hov
         
 
     # ~~~ Output functions ~~~ 
@@ -120,12 +120,12 @@ class Propulsion:
         self.power_required_hover() 
         propulsion_system_mass = self.motor_mass_cruise  + self.motor_mass_VTOL * 4 + self.propeller_mass_cruise + self.propeller_mass_VTOL * 4
 
-        self.power_transition()
+        self.power_transition(vtol_power)
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         self.outputs["power_required_VTOL"] = vtol_power
         self.outputs["power_required_cruise"] = optimal_cruise_power
-        self.outputs["power_required_hover"] = self.P_hov
+        self.outputs["power_required_hover"] = vtol_power # self.P_hov
     
         self.outputs["power_available_VTOL"] = self.power_available_VTOL
         self.outputs["power_available_cruise"] = self.power_available_cruise

@@ -117,7 +117,8 @@ inputs.update(propulsion_inputs)
 
 power_inputs = {
     "DOD_fraction": 0.8,  # Depth of discharge fraction
-    "eta_battery": 0.9,  # Battery efficiency
+    "eta_battery": 0.8,  # Battery efficiency
+    "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
 }
 inputs.update(power_inputs)
 
@@ -150,6 +151,8 @@ inputs.update(structures_inputs)
 # ~~~ Thermal control ~~~ initial inputs for thermal control sizing
 
 thermal_inputs = {
+    
+
 }
 inputs.update(thermal_inputs)
 

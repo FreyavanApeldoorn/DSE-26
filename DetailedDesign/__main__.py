@@ -52,7 +52,7 @@ for key, value in outputs.items():
     print(f"{key}: {value}")
 
 
-if True:
+if False:
     print("\nCopy-pasteable final outputs dictionary:\n")
     print("final_outputs = {")
     for key, value in outputs.items():
