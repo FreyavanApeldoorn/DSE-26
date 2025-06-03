@@ -221,11 +221,11 @@ if __name__ == '__main__':  # pragma: no cover
         "k_insulation": 0.017,
         "heat_coeff_ext": 45.0,
         "heat_int": 200.0,
-        "m_int": 5.0,
+        "m_int": 10.0,
         "c_p_int": 500.0,
         "t_exposure": 600.0,
         "t_cruise": 12*60,
-        "Q_therm": -300.0   # Negative = 300 W of cooling capacity
+        "Q_therm": -300.0   # Negative = cooling ; Positive = heating
     } 
     thermal = Thermal(example_inputs)
     outputs = thermal.get_all()
