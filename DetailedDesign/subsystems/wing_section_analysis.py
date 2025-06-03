@@ -1,5 +1,5 @@
 #wing section analysis
-
+#import necessary libraries
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -135,29 +135,49 @@ print(f"Skin area: {skin_area:.6f}")
 print(f"Spar area: {spar_area:.6f}")
 print(f"Total structural area (skin + spars): {total_structural_area:.6f}")
 
-# Example loads (replace with your actual values)
-N = 294.3      # Axial force in N
-M_x = 70        # Bending moment about x-axis (N·m)
-M_y = 50     # Bending moment about y-axis (N·m)
+# Loads (replace with actual values)
+N = 294.3           # Axial force in N
+M_x = 50            # Bending moment about x-axis (N·m)
+M_y = 0            # Bending moment about y-axis (N·m)
 
-# Calculate normal stress at each boom (point)
+# Calculate axial stress
 sigma_normal = []
+sigma_axial = N / total_structural_area
+
 for x, y in zip(x_coords, y_coords):
-    sigma_axial = N / total_structural_area
     sigma_bending = (M_y / Ixx) * (y - y_centroid) - (M_x / Iyy) * (x - x_centroid)
     sigma_total = sigma_axial + sigma_bending
     sigma_normal.append(sigma_total)
+    
 
-# Plot normal stress distribution
+# Visualization
 plt.figure(figsize=(10, 4))
-sc = plt.scatter(x_coords, y_coords, c=sigma_normal, cmap='coolwarm', s=40)
+sc = plt.scatter(x_coords, y_coords, c=sigma_normal, cmap='coolwarm', s=50, edgecolor='k')
 plt.colorbar(sc, label='Normal Stress (Pa)')
 plt.plot(x_centroid, y_centroid, 'r*', markersize=12, label='Centroid')
-plt.axis("equal")
-plt.grid(True)
 plt.title("Normal Stress Distribution in Airfoil Section")
 plt.xlabel("x")
 plt.ylabel("y")
+plt.axis('equal')
+plt.grid(True)
+plt.legend()
+plt.show()
+
+# Plot bending stress only
+sigma_bending_list = []
+for x, y in zip(x_coords, y_coords):
+    sigma_bending = (M_y / Ixx) * (y - y_centroid) - (M_x / Iyy) * (x - x_centroid)
+    sigma_bending_list.append(sigma_bending)
+
+plt.figure(figsize=(10, 4))
+sc2 = plt.scatter(x_coords, y_coords, c=sigma_bending_list, cmap='RdYlGn', s=50, edgecolor='k')
+plt.colorbar(sc2, label='Bending Stress (Pa)')
+plt.plot(x_centroid, y_centroid, 'r*', markersize=12, label='Centroid')
+plt.title("Bending Stress Distribution in Airfoil Section")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.axis('equal')
+plt.grid(True)
 plt.legend()
 plt.show()
 
@@ -167,8 +187,8 @@ def polygon_area(x, y):
 
 enclosed_area = polygon_area(combined_df["x"].values, combined_df["y"].values)
 
-# Example torsional moment (Nm)
-T = 100  # Replace with your actual torque
+# Torsional moment (Nm)
+T = 100  # Torsional moment [Nm]
 
 # Shear flow in the skin (Bredt-Batho theory)
 if enclosed_area > 0:
