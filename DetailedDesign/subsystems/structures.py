@@ -37,11 +37,13 @@ class Structures:
 
         self.mass_payload = inputs["payload_mass"]
         # # self.mass_hardware = inputs["mass_hardware"]
-        # self.mass_battery = inputs["mass_battery"]
-        # self.battery_length = inputs['battery length']
+        self.mass_battery = inputs["mass_battery"]
+        self.battery_length = inputs['battery_length']
         # self.mass_propulsion = inputs["mass_propulsion"]
+        self.taper_ratio = inputs['taper_ratio']
         
         self.wing_span = inputs["wing_span"]
+        self.mass_wing = inputs['mass_wing']
                 
 
     # ~~~ Intermediate Functions ~~~
@@ -74,19 +76,20 @@ class Structures:
 
         # Defining Lift distribution
 
-        # L = (self.mtow / (np.pi/4 * self.rho * self.V_max *self.span)) * np.sqrt(1 - (2*y / self.span)**2)
-        L_y = ((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span)**2)
+        W_batt = np.array([-2*self.mass_battery*9.81 / half_span if i < self.battery_length*2 else 0 for i in y])
+
+        # x_0 = self.mass_wing*9.81 / (half_span*(0.5*self.taper_ratio + (1-self.taper_ratio)))
+        # print(x_0)
+        # W_wing = [((1-self.taper_ratio) / half_span)* i + x_0 for i in y]
+        
+
+        L_y = ((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span)**2) + W_batt
 
         V = integrate.cumulative_simpson(L_y, x=y)
-        M = integrate.cumulative_simpson(
-            ((4*self.mtow) / np.pi*self.span)*np.sqrt(1-(2*y / self.span)**2), x=y) - integrate.cumulative_simpson()
-        M = -integrate.cumulative_simpson(V, x=y[:-1])
+        M = integrate.cumulative_simpson(V, x=y[:-1])
 
         V = V - V[-1]
         M = M - M[-1]
-
-        # Adding weights
-        W_batt = ...
 
 
         # Plot Lift, Shear and Moment on the same axes
@@ -94,6 +97,7 @@ class Structures:
         plt.plot(y, L_y, label="Lift Distribution $L(y)$ [N/m]")
         plt.plot(y[:-1], V, label="Shear Force $V(y)$ [N]")
         plt.plot(y[:-2], M, label="Bending Moment $M(y)$ [N·m]")
+        plt.plot(y, W_wing, label='Battery weight')
         plt.title("NVM for UAV Wing")
         plt.xlabel("Spanwise Position $y$ (m, 0=root to $b/2$=tip)")
         plt.ylabel("Magnitude (N or N·m)")

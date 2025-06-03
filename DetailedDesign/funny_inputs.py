@@ -138,6 +138,10 @@ funny_inputs.update(stab_n_con_funny_inputs)
 
 structures_funny_inputs = {
     "wing_span": 3.0,  # m, guesstimate
+    "mass_battery": 2.800 , # kg
+    "battery_length": 0.182, # m 
+    "mass_wing": 3, #kg
+    "taper_ratio": 0.83, #-
 }
 
 funny_inputs.update(structures_funny_inputs)
