@@ -58,7 +58,7 @@ class Power:
             self.power_transition,
             self.power_scan,
             self.power_idle
-            
+
         ])
 
         self.trip_capacity = np.sum(times * powers)
@@ -101,7 +101,7 @@ class Power:
 
 
     def calculate_max_power(self) -> float:
-
+        pass
 
 
 
