@@ -33,9 +33,9 @@ class Structures:
         self.mtow = self.inputs['MTOW']
         self.span = self.inputs['wing_span']
         self.rho = self.inputs['rho_0']
-        self.V_max = self.inputs['V_cruise']
+        # self.V_max = self.inputs['V_cruise']
 
-        self.M_to = inputs["M_to"]
+        # self.M_to = inputs["M_to"]
 
         self.mass_payload = inputs["payload_mass"]
         # # self.mass_hardware = inputs["mass_hardware"]
@@ -76,9 +76,11 @@ class Structures:
 
         W_batt = np.array([-2*self.mass_battery*9.81 / half_span if i < self.battery_length*2 else 0 for i in y])
 
-        # x_0 = self.mass_wing*9.81 / (half_span*(0.5*self.taper_ratio + (1-self.taper_ratio)))
+        x_0 = self.mass_wing*9.81 / (half_span*(0.5*self.taper_ratio + (1-self.taper_ratio)))
         # print(x_0)
         # W_wing = [((1-self.taper_ratio) / half_span)* i + x_0 for i in y]
+        a = (1 - self.taper_ratio) / half_span
+        W_wing = [x_0 - a * i for i in y]
         
 
         L_y = ((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span)**2) + W_batt
