@@ -124,12 +124,24 @@ class StabCon:
     
     # ~~~ C.G Calculation ~~~
     
-    def calculate_UAV_cg(self) -> None:
+    def calculate_UAV_cg(self, configuration="wildfire") -> float:
         """Calculate the center of gravity (CG) of the UAV."""
+        if configuration == "wildfire":
+            sensor_mass = self.wildfire_sensor_mass
+            sensor_x = self.wildfire_sensor_x
+            sensor_y = self.wildfire_sensor_y   
+            sensor_z = self.wildfire_sensor_z
+            buoy_mass = 0
+        else:
+            sensor_mass = self.oil_sensor_mass
+            sensor_x = self.oil_sensor_x
+            sensor_y = self.oil_sensor_y   
+            sensor_z = self.oil_sensor_z
+            buoy_mass = self.buoy_mass
 
         # Calculate the c.g of the fuselage group
         numerator_x_fuselage = (
-            self.wildfire_sensor_mass * self.wildfire_sensor_x +
+            sensor_mass * sensor_x +
             self.oil_sensor_mass * self.oil_sensor_x +
             self.gymbal_connection_mass * self.gymbal_connection_x +
             self.flight_controller_mass * self.flight_controller_x +
@@ -138,13 +150,17 @@ class StabCon:
             self.Mesh_network_module_mass * self.Mesh_network_module_x +
             self.SATCOM_module_mass * self.SATCOM_module_x +
             self.Winch_motor_mass * self.Winch_motor_x +
-            self.PDB_mass * self.PDB_x +
             self.motor_mass_cruise * self.motor_cruise_x +
-            self.propeller_mass_cruise * self.propeller_cruise_x 
+            self.propeller_mass_cruise * self.propeller_cruise_x +
+            self.payload_mass * self.payload_x +
+            buoy_mass * self.buoy_x 
+            # need to add mass of the fuselage structure here
+            # need to add mass of the tail here
+            # need to add mass of the landing gear here
         )
 
         numerator_y_fuselage = (
-            self.wildfire_sensor_mass * self.wildfire_sensor_y +
+            sensor_mass * sensor_y +
             self.oil_sensor_mass * self.oil_sensor_y +
             self.gymbal_connection_mass * self.gymbal_connection_y +
             self.flight_controller_mass * self.flight_controller_y +
@@ -153,13 +169,18 @@ class StabCon:
             self.Mesh_network_module_mass * self.Mesh_network_module_y +
             self.SATCOM_module_mass * self.SATCOM_module_y +
             self.Winch_motor_mass * self.Winch_motor_y +
-            self.PDB_mass * self.PDB_y + 
+            
             self.motor_mass_cruise * self.motor_cruise_y +
-            self.propeller_mass_cruise * self.propeller_cruise_y
+            self.propeller_mass_cruise * self.propeller_cruise_y +
+            self.payload_mass * self.payload_y +
+            buoy_mass * self.buoy_y 
+            # need to add mass of the fuselage structure here
+            # need to add mass of the tail here
+            # need to add mass of the landing gear here
         )
 
         numerator_z_fuselage = (
-            self.wildfire_sensor_mass * self.wildfire_sensor_z +
+            sensor_mass * sensor_z +
             self.oil_sensor_mass * self.oil_sensor_z +
             self.gymbal_connection_mass * self.gymbal_connection_z +
             self.flight_controller_mass * self.flight_controller_z +
@@ -167,15 +188,18 @@ class StabCon:
             self.GPS_mass * self.GPS_z +
             self.Mesh_network_module_mass * self.Mesh_network_module_z +
             self.SATCOM_module_mass * self.SATCOM_module_z +
-            self.Winch_motor_mass * self.Winch_motor_z +
-            self.PDB_mass * self.PDB_z + 
+            self.Winch_motor_mass * self.Winch_motor_z +             
             self.motor_mass_cruise * self.motor_cruise_z +
-            self.propeller_mass_cruise * self.propeller_cruise_z
+            self.propeller_mass_cruise * self.propeller_cruise_z +
+            self.payload_mass * self.payload_z + 
+            buoy_mass * self.buoy_z
+            # need to add mass of the fuselage structure here
+            # need to add mass of the tail here
+            # need to add mass of the landing gear here
         )
 
-
-        denominator_fuselage = (
-            self.wildfire_sensor_mass +
+        fuselage_mass = (
+            sensor_mass +
             self.oil_sensor_mass +
             self.gymbal_connection_mass +
             self.flight_controller_mass +
@@ -184,29 +208,38 @@ class StabCon:
             self.Mesh_network_module_mass +
             self.SATCOM_module_mass +
             self.Winch_motor_mass +
-            self.PDB_mass
+            self.payload_mass +
+            buoy_mass
+            # need to add mass of the fuselage structure here
+            # need to add mass of the tail here
+            # need to add mass of the landing gear here
         )
 
-        fuselage_x_cg = numerator_x_fuselage / denominator_fuselage
-        fuselage_y_cg = numerator_y_fuselage / denominator_fuselage
-        fuselage_z_cg = numerator_z_fuselage / denominator_fuselage
+        fuselage_x_cg = numerator_x_fuselage / fuselage_mass
+        fuselage_y_cg = numerator_y_fuselage / fuselage_mass
+        fuselage_z_cg = numerator_z_fuselage / fuselage_mass
 
         #calculate the c.g. of the wing group
         
         numerator_x_wing = (
-            (self.motor_mass_VTOL+ self.propeller_mass_VTOL) * self.motor_front_VTOL_x +
-            (self.motor_mass_VTOL+ self.propeller_mass_VTOL) * self.motor_rear_VTOL_x +
-            self.battery_mass * self.battery_x 
-        
+            2 * (self.motor_mass_VTOL+ self.propeller_mass_VTOL) * self.motor_front_VTOL_x +
+            2 * (self.motor_mass_VTOL+ self.propeller_mass_VTOL) * self.motor_rear_VTOL_x +
+            self.battery_mass * self.battery_x +
+            self.PDB_mass * self.PDB_x 
+            #need to add mass of the wing structure here
         )
 
-        denominator_wing = (
-
+        wing_mass = (
+            4* self.motor_mass_VTOL +
+            self.battery_mass + 
+            self.PDB_mass
+            #need to add mass of the wing structure here
         )
         
-        wing_x_cg = numerator_x_wing/denominator_wing
+        wing_x_cg = numerator_x_wing/wing_mass
 
-        return fuselage_x_cg, fuselage_y_cg
+
+        return fuselage_mass, wing_mass, fuselage_x_cg, fuselage_y_cg, fuselage_z_cg, wing_x_cg
 
     # ~~~ Scissor plot ~~~
 
