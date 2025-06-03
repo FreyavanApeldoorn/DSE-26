@@ -285,7 +285,7 @@ final_outputs = {
     'volume_fueltank': 1.8296442000000004,
     'refills_for_mission': 0,
 }
-funny_inputs.update(final_outputs)
+# funny_inputs.update(final_outputs)
 
 
 funny_inputs.update()
