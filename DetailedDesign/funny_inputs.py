@@ -15,6 +15,7 @@ constants_funny_inputs = {
     "rho_0": 1.225,  # Density at sea level [kg/m^3]
     "rho_sea": 1.225,  # Density at sea level [kg/m^3]
     "mtow": 30 * 9.81,  # maximum takeoff weight [kg]
+    "MTOW": 30 * 9.81,  # maximum takeoff weight [N]
 }
 
 funny_inputs.update(constants_funny_inputs)
@@ -97,6 +98,8 @@ prop_n_pow_funny_inputs = {
     "propeller_mass_cruise": 0.0100,  # kg
     "power_available_VTOL": 1418,  # W
     "power_available_cruise": 2552,  # W
+    "power_required_cruise": 1849.5497559983473,  # W
+    "propeller_diameter_cruise": 0.5,  # m, guesstimate	
 }
 
 funny_inputs.update(prop_n_pow_funny_inputs)
