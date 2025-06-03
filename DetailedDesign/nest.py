@@ -13,13 +13,13 @@ class Nest:
         self.outputs = self.inputs.copy()
         
         # Mission parameters
-        self.n_drones = inputs["Number_of_UAVs"]
+        self.n_drones = inputs["number_of_UAVs"]
 
         # UAV Dimensions 
-        self.uav_span = inputs["b_wing"]
-        self.uav_wing_area = inputs["S_wing"]
-        self.FW_height = inputs["FW_height"]  # height of the fuselage
-        self.FW_width = inputs["FW_width"]  # width of the fuselage
+        self.uav_span = inputs["wing_span"]
+        self.uav_wing_area = inputs["wing_area"]
+        self.FW_height = 0.3 # inputs["FW_height"]  # NEEDS TO BE UPDATED
+        self.FW_width = 2.25 # inputs["FW_width"]  # NEEDS TO BE UPDATED
         self.uav_chord = self.uav_wing_area / self.uav_span if self.uav_span != 0 else 0 
 
         self.uav_mass = inputs["M_to"]
@@ -35,11 +35,13 @@ class Nest:
         self.power_generator = 1000 # in W, assumed power output of the generator
 
         # Nest contraints
-        self.nest_energy = inputs["nest_energy"]
+        self.number_of_trips = inputs["number_of_trips"]
+        self.required_energy = inputs["required_capacity_wh"]
+        self.nest_energy = self.required_energy * self.number_of_trips
         self.nest_length = inputs["nest_length"]
         self.nest_width = inputs["nest_width"]
         self.nest_height = inputs["nest_height"]
-        #self.nest_mass = inputs["nest_mass"]
+        self.nest_mass = inputs["nest_empty_mass"]
 
         self.available_volume_per_nest = self.nest_length * self.nest_width * self.nest_height
 
@@ -231,6 +233,9 @@ class Nest:
 
         self.n_nests = n_containers
         self.n_extra = empty_slots
+        self.n_drones = self.n_drones + empty_slots
+
+        self.nests_volume = self.n_nests * available_volume_per_nest
 
         if self.verbose:
             print(f"Number of nests needed: {self.n_nests}")
@@ -261,14 +266,15 @@ class Nest:
 
         self.volume_sizing()
 
-        self.outputs["Number_of_nests"] = ...
-        self.outputs["Number_of_UAVs"]
+        self.outputs["number_of_nests"] = self.n_nests
+        self.outputs["number_of_UAVs"] = self.n_drones
 
 
-        self.outputs["Nest_volume"] = ...
-        self.outputs["Nest_mass"] = ...
-
-        self.outputs["Volume_fueltank"] = ...
+        self.outputs["nests_volume"] = self.nests_volume
+        self.outputs["volume_fueltank"] = self.fuel_tank_volume
+        self.outputs["refills_for_mission"] = self.refills_for_mission
+        
+        #self.outputs["Nest_mass"] = ...
 
         return self.outputs
     

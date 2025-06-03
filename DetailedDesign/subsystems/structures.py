@@ -42,18 +42,14 @@ class Structures:
 
     # ~~~ Intermediate Functions ~~~
 
-    def example_function(self):
-        """
-        This is an example intermediate function
-        """
-        return True
-    
+    def mass_fractions(self):
+        pass
 
 
     
     def total_mass(self) -> float:
 
-        self.mass_structure = 10 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+        self.mass_structure = 14.95 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
         
         masses_nopay = np.array([self.mass_hardware, self.mass_battery, self.mass_propulsion, self.mass_structure])
         mass_nopay = np.sum(masses_nopay)
