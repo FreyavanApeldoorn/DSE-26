@@ -149,6 +149,6 @@ if __name__ == '__main__': # pragma: no cover
     propulsion = Propulsion(funny_inputs)
     res = propulsion.get_all()
 
-    print(math.isclose(res['Power_required_cruise'], 2000, rel_tol=1000))
-    print(math.isclose(res['Propeller_diameter_cruise'], 0.45, rel_tol=0.5))
+    print(math.isclose(res['power_required_cruise'], 2000, rel_tol=1000))
+    print(math.isclose(res['propeller_diameter_cruise'], 0.45, rel_tol=0.5))
     
