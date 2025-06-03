@@ -165,11 +165,11 @@ class Thermal:
         def mission_end_temp(Q_trial: float) -> float:
             # 1) Outbound cruise: hold initial temp at cruise using just enough power
             Q_cruise_hold = self.get_cruise_thermal_power()
-            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, self.t_cruise)
+            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, self.t_cruise_min)
             # 2) deploy zone: run at Q_trial
             T_mid = self.simulate_deploy_phase(Q_trial)
             # 3) Return cruise: run at Q_trial
-            T_end = self.simulate_cruise_phase(T_mid, Q_trial, self.t_cruise)
+            T_end = self.simulate_cruise_phase(T_mid, Q_trial, self.t_cruise_min)
             return T_end
 
         # We search Q_trial between Q_low=0 (no active heating/cooling) and Q_high negative (strong cooling)
@@ -235,6 +235,7 @@ if __name__ == '__main__':
         "c_p_int": 500.0,
         "t_exposure": 250.0,
         "t_cruise": 12*60,
+        "t_cruise_min": 2*60,
         "Q_therm": -300.0   # Negative = cooling ; Positive = heating
     } 
     thermal = Thermal(example_inputs)
