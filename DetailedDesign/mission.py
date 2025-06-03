@@ -49,6 +49,7 @@ class Mission:
         self.mission_type = inputs['mission_type']
         self.mission_perimeter = inputs["mission_perimeter"] #We define, mission perimeter [m] 
         self.R_max = inputs["R_max"] # Maximum range [m]: mission definition
+        self.R_min = inputs["R_min"]
 
 
         #Aerogel Specifics

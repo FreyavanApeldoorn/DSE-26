@@ -17,7 +17,8 @@ inputs.update(constants_inputs)
 requirements_inputs = {
     'M_to': 30,  # Maximum Takeoff Mass [kg]
     'MTOW': 30 * constants_inputs['g'],  # Maximum Takeoff Weight [N]
-    'R_max': 20000    # Maximum Range [m]
+    'R_max': 20000,    # Maximum Range [m]
+    'R_min': 1000
 
 }    
 inputs.update(requirements_inputs)
