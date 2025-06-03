@@ -167,7 +167,15 @@ nest_inputs = {
     "time_between_UAV": 10.0,
     "time_startup_nest": 120.0,
     "time_battery_swapping": 10.0, 
-    "margin": 5.0
+    "margin": 5.0,
+    
+    "nest_length": 5.9,
+    "nest_width": 2.35,
+    "nest_height": 2.39,
+    "nest_empty_mass": 100.0,
+    "generator_efficiency": 0.85,
+    "diesel_energy_density": 9.94
+
 }
 inputs.update(nest_inputs)
 

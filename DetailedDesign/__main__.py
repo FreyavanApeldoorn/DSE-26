@@ -38,8 +38,8 @@ for _ in range(total_iterations):
     uav = UAV(outputs, iterations=10, history=False, verbose=False)
     outputs = uav.get_all()
 
-    #nest = Nest(outputs)
-    #outputs = nest.get_all()
+    nest = Nest(outputs)
+    outputs = nest.get_all()
 
     print(f"Iteration percentage: {(_ + 1) / total_iterations * 100:.2f}%")
 
@@ -51,6 +51,13 @@ print("\nFinal outputs after sizing:")
 for key, value in outputs.items():
     print(f"{key}: {value}")
 
+
+if True:
+    print("\nCopy-pasteable final outputs dictionary:\n")
+    print("final_outputs = {")
+    for key, value in outputs.items():
+        print(f"    {repr(key)}: {repr(value)},")
+    print("}")
 
 print(f"Payload mass: {outputs['payload_mass']} kg")
 print(f'Deployment rate {outputs["true_deployment_rate"]*3600} m/h')
