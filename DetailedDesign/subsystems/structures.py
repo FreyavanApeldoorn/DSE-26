@@ -27,13 +27,15 @@ class Structures:
 
     def __init__(self, inputs: dict[str, float]) -> None:
         self.inputs = inputs
-        self.wing_span = inputs["wing_span"]
-        self.mtow = self.inputs['mtow']
-        self.span = self.inputs['wing_span']
-        self.rho = self.inputs['rho']
-        self.V_max = self.inputs['V_max']
+        self.outputs = self.inputs.copy()
 
-        # self.M_to = inputs["M_to"]
+        self.wing_span = inputs["wing_span"]
+        self.mtow = self.inputs['MTOW']
+        self.span = self.inputs['wing_span']
+        self.rho = self.inputs['rho_0']
+        self.V_max = self.inputs['V_cruise']
+
+        self.M_to = inputs["M_to"]
 
         self.mass_payload = inputs["payload_mass"]
         # # self.mass_hardware = inputs["mass_hardware"]
@@ -48,18 +50,14 @@ class Structures:
 
     # ~~~ Intermediate Functions ~~~
 
-    def example_function(self):
-        """
-        This is an example intermediate function
-        """
-        return True
-    
+    def mass_fractions(self):
+        pass
 
 
     
     def total_mass(self) -> float:
 
-        self.mass_structure = 10 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+        self.mass_structure = 9.95 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
         
         masses_nopay = np.array([self.mass_hardware, self.mass_battery, self.mass_propulsion, self.mass_structure])
         mass_nopay = np.sum(masses_nopay)

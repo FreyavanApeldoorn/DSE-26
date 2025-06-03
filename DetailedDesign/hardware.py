@@ -23,11 +23,25 @@ class Hardware:
 
     # ~~~ Intermediate Functions ~~~
 
-    def example_function(self):
-        '''
-        This is an example intermediate function
-        '''
-        return True
+    def sensors(self):
+    
+        self.wildfire_sensor = {
+            "name": "Wildfire Sensor",
+            "mass": 0.1,  # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+            "power": 0.5,  # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+            "length": 0.2,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+            "width": 0.1,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+            "height": 0.05,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+        }
+
+        self.oil_sensor = {
+            "name": "Oil Sensor",
+            "mass": 0.2,  # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+            "power": 0.3,  # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+            "length": 0.15,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+            "width": 0.1,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+            "height": 0.05,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+        }
 
     # ~~~ Output functions ~~~ 
 

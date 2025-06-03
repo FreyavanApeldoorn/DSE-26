@@ -22,12 +22,7 @@ class Aerodynamics:
 
 
     # ~~~ Intermediate Functions ~~~
-
-    def example_function(self):
-        '''
-        This is an example intermediate function
-        '''
-        return True
+    
     
     def wing_3D(self) -> float:
         

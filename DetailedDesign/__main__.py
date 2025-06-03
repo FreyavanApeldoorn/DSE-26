@@ -38,8 +38,8 @@ for _ in range(total_iterations):
     uav = UAV(outputs, iterations=10, history=False, verbose=False)
     outputs = uav.get_all()
 
-    #nest = Nest(outputs)
-    #outputs = nest.get_all()
+    nest = Nest(outputs)
+    outputs = nest.get_all()
 
     print(f"Iteration percentage: {(_ + 1) / total_iterations * 100:.2f}%")
 

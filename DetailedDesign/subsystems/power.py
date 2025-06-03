@@ -98,6 +98,7 @@ class Power:
 
         self.outputs["mass_battery"] = self.calculate_battery_mass()
         #self.outputs["Battery_volume"] = ...
+        self.outputs["required_capacity_wh"] = self.required_capacity_wh
         self.outputs["battery_capacity"] = self.required_capacity_wh   # updated true capacity (might increase after choosing a battery)
 
         return self.outputs
