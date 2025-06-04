@@ -160,7 +160,6 @@ stab_n_con_funny_inputs = {
     "wind_speed": 30.0 / 3.6,  # m/s, design gust/wind speed requirement
     "rpm_max": 4200,  # rpm, maximum motor speed (not directly used here)
     "T_max": 17.6 * 9.81,  # N, maximum thrust per VTOL motor
-    "rho_sea": 1.225,  # kg/m^3, sea‐level air density
     "Propeller_diameter_VTOL": 0.30,  # m, diameter of each VTOL propeller
     "mtow": 25.0,  # kg, maximum take‐off mass of one UAV
     "n_prop_vtol": 4,  # number of VTOL propulsors per UAV
