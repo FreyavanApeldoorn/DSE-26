@@ -471,7 +471,6 @@ class StabCon:
         """Return the control & stability curves and the non-dimensional CG track."""
         # Create an array with positions for lemac.
         x_lemac = np.linspace(0.0, self.l_fus - self.mac, 5)
-        print(x_lemac)
 
         x_cg = (
             self.x_cg_no_wing * self.mass_no_wing
@@ -538,33 +537,7 @@ if __name__ == "__main__":  # pragma: no cover
     inputs.update(sci)
     stabcon = StabCon(inputs)
 
-    stabcon.size_ailerons()
-    print("Ailerons sized successfully.")
-    p_achieved, bo = stabcon.size_ailerons()
-    print(
-        f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
-    )
-
-    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[0], label="Control")
-    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[1], label="Stability")
-    plt.xlabel("Non-dimensional CG position (x_cg_bar)")
-    plt.ylabel("Sh/S")
-    plt.title("Scissor Plot")
-    plt.axhline(0, color="black", linestyle="--", linewidth=0.5)
-    plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
-    plt.legend()
-    plt.grid()
-    plt.show()
-    print("Scissor plot generated successfully.")
-
-    print(stabcon.size_vertical_tailplane())
-    print("Vertical tailplane area: ", stabcon.size_vertical_tailplane()[0])
-    print("Vertical tailplane span: ", stabcon.size_vertical_tailplane()[1])
-    print("Vertical tailplane MAC: ", stabcon.size_vertical_tailplane()[2])
-    print("Vertical tailplane root chord: ", stabcon.size_vertical_tailplane()[3])
-    print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
-
-    # CG calculation
+    #calculate c.g.
     cg_results = stabcon.calculate_UAV_cg()
     for config, result in cg_results.items():
         setattr(stabcon, f"{config}_fuselage_x_cg", result["fuselage_x_cg"])
@@ -614,4 +587,40 @@ if __name__ == "__main__":  # pragma: no cover
     plt.title("Loading Diagram for Both Configurations")
     plt.legend()
     plt.grid(True)
+    plt.xlim(0, 1)
     plt.show()
+
+    #Size ailerons
+    
+    stabcon.size_ailerons()
+    print("Ailerons sized successfully.")
+    p_achieved, bo = stabcon.size_ailerons()
+    print(
+        f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
+    )
+
+    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[0], label="Control")
+    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[1], label="Stability")
+    plt.xlabel("Non-dimensional CG position (x_cg_bar)")
+    plt.ylabel("Sh/S")
+    plt.title("Scissor Plot")
+    plt.axhline(0, color="black", linestyle="--", linewidth=0.5)
+    plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
+    plt.legend()
+    plt.grid()
+    plt.ylim(0,1)
+    plt.xlim(0, 1)
+    plt.show()
+    print("Scissor plot generated successfully.")
+
+    print(stabcon.size_vertical_tailplane())
+    print("Vertical tailplane area: ", stabcon.size_vertical_tailplane()[0])
+    print("Vertical tailplane span: ", stabcon.size_vertical_tailplane()[1])
+    print("Vertical tailplane MAC: ", stabcon.size_vertical_tailplane()[2])
+    print("Vertical tailplane root chord: ", stabcon.size_vertical_tailplane()[3])
+    print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
+
+
+    
+    # CG calculation
+    
