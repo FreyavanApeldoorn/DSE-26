@@ -180,7 +180,8 @@ structures_funny_inputs = {
     "VTOL_boom_length": 0.66 * 2, #m, based on 1 propeller diameter between propellers
     "titanium_density": 4.43 * 1000, #kg/m3
     "titanium_E": 110 * 10**9, #kg/m3
-    "max_deflection_VTOL_boom": 0.05, #m, guesstimate
+    "max_deflection_VTOL_boom": 0.02, #m, guesstimate
+    "load_factor": 3.5, #due to gusts
 }
 
 funny_inputs.update(structures_funny_inputs)
