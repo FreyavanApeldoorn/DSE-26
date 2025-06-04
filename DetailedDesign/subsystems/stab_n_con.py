@@ -305,8 +305,7 @@ class StabCon:
         )
 
     def size_rudder(self):
-
-        return
+        return None
 
     # ~~~ VTOL sizing ~~~
 
