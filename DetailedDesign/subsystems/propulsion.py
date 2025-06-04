@@ -125,7 +125,7 @@ class Propulsion:
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         self.outputs["power_required_VTOL"] = vtol_power
         self.outputs["power_required_cruise"] = optimal_cruise_power
-        self.outputs["power_required_hover"] = vtol_power # self.P_hov
+        self.outputs["power_required_hover"] = vtol_power # self.P_hov - this was changed as hover power is incorrect (apparently)
     
         self.outputs["power_available_VTOL"] = self.power_available_VTOL
         self.outputs["power_available_cruise"] = self.power_available_cruise
