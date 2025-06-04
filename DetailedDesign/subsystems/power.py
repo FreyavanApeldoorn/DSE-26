@@ -16,10 +16,11 @@ class Power:
         self.outputs = self.inputs.copy()
 
         self.M_to = inputs["M_to"]
-        self.DOD_fraction = self.inputs["DOD_fraction"]
-        self.eta_battery = self.inputs["eta_battery"]
+        self.DOD_fraction = self.inputs["DOD_fraction"] 
+        self.specific_energy = inputs["battery_specific_energy"] 
+        self.eta_battery = self.inputs["eta_battery"]  # battery efficiency
 
-        self.time_cruise = inputs["time_cruise"]
+        self.time_cruise = inputs["time_cruise_max"]
         self.time_ascent = inputs["time_ascent"]
         self.time_descent = inputs["time_descent"]
         self.time_deploy = inputs["time_deploy"]
@@ -57,13 +58,14 @@ class Power:
             self.power_transition,
             self.power_scan,
             self.power_idle
+
         ])
 
-        self.required_capacity = np.sum(times * powers)
-        self.required_capacity_wh = self.required_capacity / 3600
+        self.trip_capacity = np.sum(times * powers)
+        self.trip_capacity_wh = self.trip_capacity / 3600
 
 
-    def calculate_battery_mass(self) -> float:
+    def old_calculate_battery_mass(self) -> float:
         '''
         This calculates the required battery mass given mission energy and constraints
         '''
@@ -89,6 +91,19 @@ class Power:
         battery_mass = min(M_battery, max_battery_mass) 
 
         return battery_mass
+    
+    def calculate_battery_mass(self) -> float:
+        
+        MF_battery = self.trip_capacity_wh / (self.specific_energy * self.eta_battery * self.DOD_fraction * self.M_to)
+        self.battery_mass = MF_battery * self.M_to
+
+
+
+
+    def calculate_max_power(self) -> float:
+        pass
+
+
 
     # ~~~ Output functions ~~~ 
 
@@ -96,10 +111,12 @@ class Power:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
 
-        self.outputs["mass_battery"] = self.calculate_battery_mass()
-        #self.outputs["Battery_volume"] = ...
-        self.outputs["required_capacity_wh"] = self.required_capacity_wh
-        self.outputs["battery_capacity"] = self.required_capacity_wh   # updated true capacity (might increase after choosing a battery)
+        self.calculate_required_capacity()
+        self.calculate_battery_mass()
+
+        self.outputs["mass_battery"] = (self.battery_mass if self.outputs.get("mass_battery") is None else self.outputs["mass_battery"])
+        self.outputs["required_capacity_wh"] = self.trip_capacity_wh
+        self.outputs["battery_capacity"] = self.trip_capacity_wh   # updated true capacity (might increase after choosing a battery)
 
         return self.outputs
     

@@ -35,14 +35,14 @@ class Structures:
         self.rho = self.inputs['rho_0']
         # self.V_max = self.inputs['V_cruise']
 
-        # self.M_to = inputs["M_to"]
+        self.M_to = inputs["M_to"]
 
         self.mass_payload = inputs["payload_mass"]
-        # # self.mass_hardware = inputs["mass_hardware"]
+        self.mass_hardware = inputs["mass_hardware"]
         self.mass_battery = inputs["mass_battery"]
         self.battery_length = inputs['battery_length']
-        # self.mass_propulsion = inputs["mass_propulsion"]
-        self.taper_ratio = inputs['taper_ratio']
+        self.mass_propulsion = inputs["mass_propulsion"]
+        #self.taper_ratio = inputs['taper_ratio']
         
         self.wing_span = inputs["wing_span"]
         self.mass_wing = inputs['mass_wing']
