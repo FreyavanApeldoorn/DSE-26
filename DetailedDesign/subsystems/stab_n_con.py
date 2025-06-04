@@ -25,6 +25,7 @@ from DetailedDesign.inputs import hardware_inputs as hi
 from DetailedDesign.inputs import component_locations as pi
 from DetailedDesign.inputs import deployment_inputs as di
 from DetailedDesign.inputs import propulsion_inputs as propi
+from DetailedDesign.inputs import stab_n_con_inputs as sci
 
 
 class StabCon:
@@ -166,6 +167,16 @@ class StabCon:
         self.buoy_x = inputs["buoy_x"]
         self.buoy_y = inputs["buoy_y"]
         self.buoy_z = inputs["buoy_z"]
+        self.wildfire_fuselage_x_cg = inputs["wildfire_fuselage_x_cg"]
+        self.oil_spill_fuselage_x_cg = inputs["oil_spill_fuselage_x_cg"]
+        self.wildfire_wing_x_cg = inputs["wildfire_wing_x_cg"]
+        self.oil_spill_wing_x_cg = inputs["oil_spill_wing_x_cg"]
+        self.wildfire_fuselage_mass = inputs["wildfire_fuselage_mass"]
+        self.oil_spill_fuselage_mass = inputs["oil_spill_fuselage_mass"]
+        self.wildfire_wing_mass = inputs["wildfire_wing_mass"]
+        self.oil_spill_wing_mass = inputs["oil_spill_wing_mass"]
+        self.mac = inputs["mac"]
+        self.l_fus = inputs["l_fus"]
 
     # ---------------------------------------------------------------------#
     # Main Functions                                                       #
@@ -454,6 +465,36 @@ class StabCon:
 
         return results
 
+    # ~~~ Loading diagram ~~~
+    def loading_diagram(self) -> tuple[np.ndarray, np.ndarray]:
+        x_lemac = np.linspace(0.0, self.l_fus - self.mac, 10)
+
+        results = {}
+        for configuration in ["wildfire", "oil_spill"]:
+            if configuration == "wildfire":
+                fuselage_x_cg = self.wildfire_fuselage_x_cg
+                wing_x_cg = self.wildfire_wing_x_cg
+                fuselage_mass = self.wildfire_fuselage_mass
+                wing_mass = self.wildfire_wing_mass
+            else:
+                fuselage_x_cg = self.oil_spill_fuselage_x_cg
+                wing_x_cg = self.oil_spill_wing_x_cg
+                fuselage_mass = self.oil_spill_fuselage_mass
+                wing_mass = self.oil_spill_wing_mass
+
+            x_cg = (
+                fuselage_x_cg * fuselage_mass + (wing_x_cg + x_lemac) * wing_mass
+            ) / (fuselage_mass + wing_mass)
+
+            x_cg_bar = (x_cg - x_lemac) / self.mac
+
+            results[configuration] = {
+                "x_lemac": x_lemac,
+                "x_cg": x_cg,
+                "x_cg_bar": x_cg_bar,
+            }
+        return results
+
     # ~~~ Scissor plot ~~~
 
     def scissor_plot(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -544,17 +585,61 @@ if __name__ == "__main__":  # pragma: no cover
     print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
 
     inputs = {}
-    inputs.update(hi)  # Your hardware dict
+    inputs.update(hi)
     inputs.update(pi)
     inputs.update(di)
-    inputs.update(propi)  # Your component locations dict
+    inputs.update(propi)
+    inputs.update(sci)
     stabcon = StabCon(inputs)
 
     # CG calculation
     cg_results = stabcon.calculate_UAV_cg()
     for config, result in cg_results.items():
+        setattr(stabcon, f"{config}_fuselage_x_cg", result["fuselage_x_cg"])
+        setattr(stabcon, f"{config}_wing_x_cg", result["wing_x_cg"])
+        setattr(stabcon, f"{config}_fuselage_mass", result["fuselage_mass"])
+        setattr(stabcon, f"{config}_wing_mass", result["wing_mass"])
+
         print(f"\n{config.upper()} configuration:")
         print(f"  Fuselage mass: {result['fuselage_mass']:.3f} kg")
         print(f"  Fuselage CG (x): {result['fuselage_x_cg']:.3f} m")
         print(f"  Wing mass: {result['wing_mass']:.3f} kg")
         print(f"  Wing CG (x): {result['wing_x_cg']:.3f} m")
+
+    loading_results = stabcon.loading_diagram()
+
+    for configuration in ["wildfire", "oil_spill"]:
+        if configuration == "wildfire":
+            print("wildfire_fuselage_x_cg:", stabcon.wildfire_fuselage_x_cg)
+            print("wildfire_wing_x_cg:", stabcon.wildfire_wing_x_cg)
+            print("wildfire_fuselage_mass:", stabcon.wildfire_fuselage_mass)
+            print("wildfire_wing_mass:", stabcon.wildfire_wing_mass)
+        else:
+            print("oil_spill_fuselage_x_cg:", stabcon.oil_spill_fuselage_x_cg)
+            print("oil_spill_wing_x_cg:", stabcon.oil_spill_wing_x_cg)
+            print("oil_spill_fuselage_mass:", stabcon.oil_spill_fuselage_mass)
+            print("oil_spill_wing_mass:", stabcon.oil_spill_wing_mass)
+
+    for config in loading_results:
+        print(
+            f"{config} x_cg_bar: min={np.min(loading_results[config]['x_cg_bar'])}, max={np.max(loading_results[config]['x_cg_bar'])}"
+        )
+        print(
+            f"{config} x_lemac / l_fus: min={np.min(loading_results[config]['x_lemac'] / stabcon.l_fus)}, max={np.max(loading_results[config]['x_lemac'] / stabcon.l_fus)}"
+        )
+
+    for config in loading_results:
+        x_vals = loading_results[config][
+            "x_cg_bar"
+        ]  # x-axis: non-dimensional CG position
+        y_vals = (
+            loading_results[config]["x_lemac"] / stabcon.l_fus
+        )  # y-axis: LEMAC / fuselage length
+        plt.plot(x_vals, y_vals, label=f"{config} config")
+
+    plt.ylabel("LEMAC / l_fus")
+    plt.xlabel("Non-dimensional CG position")
+    plt.title("Loading Diagram for Both Configurations")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
