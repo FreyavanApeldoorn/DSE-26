@@ -178,8 +178,30 @@ funny_inputs.update(structures_funny_inputs)
 
 # ~~~ Thermal control ~~~
 
-thermal_funny_inputs = {}
+thermal_funny_inputs = {
+    "T_amb_deploy": 140.0,
+    "T_amb_cruise": 45.0,
+    "T_int_init": 30.0,
+    "T_int_cruise_set": 30.0,
+    "A_heat_shell": 0.5,
+    "t_shell": 0.002,
+    "k_Ti": 6.7,
+    "include_insulation": True,
+    "t_insulation": 0.01,
+    "k_insulation": 0.017,
+    "heat_coeff_ext": 45.0,
+    "heat_int": 200.0,
+    "m_int": 10.0,
+    "c_p_int": 500.0,
+    #"time_deploy": 250.0, > get from deployment
+    #"time_ascent": 20.0,
+    #"time_descent": 40.0,
+    #"time_uav": 12*60,
+    "time_uav_min": 996.0,
+    "power_thermal_required": -300.0   # Negative = cooling ; Positive = heating
+}
 
+funny_inputs.update(thermal_funny_inputs)
 
 final_outputs = {
     'g': 9.81,
