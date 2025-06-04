@@ -203,3 +203,44 @@ L = Y0 + (0.5 * rho_0 * V_wind**2 * S_wing * c_y)  # Total lift in VTOL mode
 # Torsional moment (torque) about the aerodynamic center
 T = L * (x_centroid - x_ac)
 print(f"Torsional moment about aerodynamic center: {T:.2f} Nm")
+
+# wing parameters
+wing_loading = 217 # wing loading in N/m^2
+b_wing = 3 # wing span in m
+mac = 0.42 # mean aerodynamic chord in m
+c_root = 0.458 # root chord in m
+c_tip = 0.39 # tip chord in m
+aspect_ratio = 7.1 # aspect ratio of the wing
+taper_ratio = c_tip / c_root  # taper ratio of the wing
+
+# distributed lift (per unit span)
+q_lift = L / b_wing  # lift per unit span (N/m)
+
+# Calculate shear force and bending moment along the span
+x_span = np.linspace(0, b_wing, 100)  # spanwise locations 
+shear_force = np.zeros_like(x_span)
+bending_moment = np.zeros_like(x_span)  
+for i, x in enumerate(x_span):
+    if x < b_wing / 2:
+        shear_force[i] = q_lift * x  # Shear force increases linearly
+    else:
+        shear_force[i] = q_lift * (b_wing - x)  # Shear force decreases linearly
+
+    bending_moment[i] = np.trapz(shear_force[:i+1], x_span[:i+1])  # Cumulative bending moment
+plt.figure(figsize=(12, 6))
+plt.subplot(2, 1, 1)
+plt.plot(x_span, shear_force, label='Shear Force', color='blue')
+plt.title('Shear Force Distribution along Wing Span')
+plt.xlabel('Spanwise Location (m)')
+plt.ylabel('Shear Force (N)')
+plt.grid(True)
+plt.legend()
+plt.subplot(2, 1, 2)
+plt.plot(x_span, bending_moment, label='Bending Moment', color='orange')
+plt.title('Bending Moment Distribution along Wing Span')
+plt.xlabel('Spanwise Location (m)')
+plt.ylabel('Bending Moment (N·m)')
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()
