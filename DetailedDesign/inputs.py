@@ -2,6 +2,7 @@
 This is the inputs file, these should not be changed without communicating with the entire group. 
 Only do this when your code is finished and verified, while working, use funny_inputs
 '''
+import numpy as np
 inputs = {}
 
 # ~~~ Constants ~~~ 
