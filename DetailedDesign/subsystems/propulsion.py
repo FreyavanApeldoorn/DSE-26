@@ -147,9 +147,11 @@ if __name__ == '__main__': # pragma: no cover
     from DetailedDesign.funny_inputs import funny_inputs
     from DetailedDesign.inputs import initial_inputs
     # Perform sanity checks here
-    propulsion = Propulsion(initial_inputs)
+    #propulsion = Propulsion(initial_inputs)
+    propulsion = Propulsion(funny_inputs)
     res = propulsion.get_all()
 
     print(math.isclose(res['power_required_cruise'], 2000, rel_tol=1000))
     print(math.isclose(res['propeller_diameter_cruise'], 0.45, rel_tol=0.5))
+    print(res)
     
