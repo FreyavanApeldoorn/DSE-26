@@ -51,7 +51,8 @@ class StabCon:
         self.inputs = inputs.copy()  # Copy to avoid mutating caller's data
 
         self.wing_span = inputs["wing_span"]
-        self.wing_chord = inputs["wing_chord"]
+        self.wing_root_chord = inputs["wing_root_chord"]
+        self.wing_tip_chord = inputs["wing_tip_chord"]
         self.wing_area = inputs["wing_area"]
         self.cl_alpha = inputs["cl_alpha"]
         self.cd_0 = inputs["cd_0"]
@@ -68,7 +69,7 @@ class StabCon:
 
         self.rho_sea = inputs["rho_sea"]
         self.wind_speed = inputs["wind_speed"]
-        self.Propeller_diameter_VTOL = inputs["Propeller_diameter_VTOL"]
+        # self.Propeller_diameter_VTOL = inputs["Propeller_diameter_VTOL"]
         self.T_max = inputs["T_max"]
         self.mtow = inputs["mtow"]
         self.n_prop_vtol = inputs["n_prop_vtol"]
@@ -89,20 +90,6 @@ class StabCon:
         self.Cm_ac = inputs["Cm_ac"]
 
         self.ca_c = inputs["ca_c"]
-
-        self.lvt = inputs["lvt"]
-        self.Vv = inputs["Vv"]
-        self.ARvt = inputs["ARvt"]
-        self.taper_ratio_vt = inputs["taper_ratio_vt"]
-
-        # Prepare an outputs dictionary for later use
-        self._outputs: dict[str, Any] = self.inputs.copy()
-        self.inputs = inputs
-        # A simple `.get` keeps the attribute block short while still failing
-        # loudly if the key is missing.
-        for key, value in inputs.items():
-            setattr(self, key, value)
-
         # Make a *copy* of the inputs dict so we do not mutate the caller’s data.
         self._outputs: dict[str, Any] = inputs.copy()
 
@@ -218,8 +205,15 @@ class StabCon:
             raise ValueError(f"Invalid aileron stations: bi={self.bi}, bo={self.bo}")
 
         # Precompute arrays that stay constant
-        spanwise_stations = np.linspace(0.0, half_span, 1000)
-        chord = np.full_like(spanwise_stations, self.wing_chord)
+        spanwise_stations = np.linspace(0.0, half_span, 100)
+        chord = (
+            self.wing_root_chord
+            - ((self.wing_root_chord - self.wing_tip_chord) / half_span)
+            * spanwise_stations
+        )
+        print("spanwise_stations =", spanwise_stations)
+        print("chord =", chord)
+        print("roll_rate_req =", self.roll_rate_req)
 
         # Compute Cl_p once (unchanging with bo)
         Cl_p = -(
@@ -545,6 +539,8 @@ if __name__ == "__main__":  # pragma: no cover
         f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
     )
 
+    """
+
     plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[0], label="Control")
     plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[1], label="Stability")
     plt.xlabel("Non-dimensional CG position (x_cg_bar)")
@@ -615,3 +611,4 @@ if __name__ == "__main__":  # pragma: no cover
     plt.legend()
     plt.grid(True)
     plt.show()
+    """
