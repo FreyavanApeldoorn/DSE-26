@@ -465,7 +465,6 @@ class StabCon:
         """Return the control & stability curves and the non-dimensional CG track."""
         # Create an array with positions for lemac.
         x_lemac = np.linspace(0.0, self.l_fus - self.mac, 5)
-        print(x_lemac)
 
         x_cg = (
             self.x_cg_no_wing * self.mass_no_wing
@@ -610,5 +609,6 @@ if __name__ == "__main__":  # pragma: no cover
     plt.title("Loading Diagram for Both Configurations")
     plt.legend()
     plt.grid(True)
+    plt.xlim(0, 1)
     plt.show()
     """

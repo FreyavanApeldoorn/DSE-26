@@ -16,7 +16,7 @@ def test_Aerodynamics():
 def test_Deployment():
     # Verified using a hand calculation
 
-    dep = Deployment(deployment_test_inputs)
+    dep = Deployment(deployment_test_inputs, 'n_aerogels', 5)
     res = dep.get_all()
 
     # Sanity checks

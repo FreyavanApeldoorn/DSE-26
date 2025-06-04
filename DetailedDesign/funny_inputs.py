@@ -151,15 +151,26 @@ stab_n_con_funny_inputs = {
     "l_fus": 1.5,  # m, length of the fuselage
     "lh": 0.5,  # m, horizontal distance from the wing ac to the horizontal tail ac
     "mac": 0.333,  # m, mean aerodynamic chord of the wing
-    "x_ac_bar": 0.25,  # m, x-coordinate of the aerodynamic center relative to the leading edge of the wing
-    "CL_alpha_Ah": 5.0 * 180 / np.pi,  # Finite wing lift curve slope [1/rad]
-    "CL_alpha_h": -0.8,  # Horizontal tail lift curve slope [-]
-    "d_epsilon_d_alpha": 0.1,  # Downwash gradient [rad/(rad*m)]
-    "Vh_V": 0.5,  # Horizontal tail velocity to wing velocity ratio [-]
-    "Cm_ac": 0.3,  # Moment coefficient at the aerodynamic center of the wing [-]
-    "wind_speed": 30 / 3.6,  # m/s, wind speed from requirement
-    "rpm_max": 4200,  # rpm
-    "T_max": 17.6 * 9.81,  # N, maximum thrust per motor.
+    "x_ac_bar": 0.25,  # nondimensional (×MAC) aerodynamic centre position of the wing
+    "CL_alpha_Ah": 0.08,  # finite-wing lift-curve slope [1/rad] based on XFLR5 values
+    "CL_alpha_h": 0.065,  # tailplane lift-curve slope [1/rad] based on XFLR5 values
+    "d_epsilon_d_alpha": 0.1,  # downwash gradient [–]
+    "Vh_V": 0.85,  # ratio of tailplane to wing freestream velocity [–] based on ADSEE slides
+    "Cm_ac": 0.3,  # wing moment coefficient about the aerodynamic centre [–]
+    "wind_speed": 30.0 / 3.6,  # m/s, design gust/wind speed requirement
+    "rpm_max": 4200,  # rpm, maximum motor speed (not directly used here)
+    "T_max": 17.6 * 9.81,  # N, maximum thrust per VTOL motor
+    "Propeller_diameter_VTOL": 0.30,  # m, diameter of each VTOL propeller
+    "mtow": 25.0,  # kg, maximum take‐off mass of one UAV
+    "n_prop_vtol": 4,  # number of VTOL propulsors per UAV
+    "lvt": 6.0,  # m, distance from wing AC to AC of vertical tailplane
+    "Vv": 0.6,  # Tail volume coefficient [–]
+    "ARvt": 2,  # Aspect ratio of the vertical tailplane [–]
+    "taper_ratio_vt": 0.5,  # Taper ratio of the vertical tailplane [–]
+    "sweep_vt": np.deg2rad(5),  # Sweep angle of the vertical tailplane [rad]
+    "br_bv": 0.7,  # Ratio of the rudder span to the vertical tailplane span[–]
+    "delta_r_max": np.deg2rad(30),  # Maximum rudder deflection angle [rad]
+    "cr_cv": 0.3,  # Ratio of the rudder chord to the vertical tailplane chord [–]
 }
 
 funny_inputs.update(stab_n_con_funny_inputs)
