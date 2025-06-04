@@ -233,10 +233,13 @@ if __name__ == '__main__':
         "heat_int": 200.0,
         "m_int": 10.0,
         "c_p_int": 500.0,
-        "t_exposure": 250.0,
-        "t_cruise": 12*60,
-        "t_cruise_min": 2*60,
-        "Q_therm": -300.0   # Negative = cooling ; Positive = heating
+        "time_deploy": 250.0,
+        "time_ascent": 20.0,
+        "time_descent": 40.0,
+        "time_uav": 12*60,
+        "time_uav_min": 996.0,
+        
+        "power_thermal_required": -300.0   # Negative = cooling ; Positive = heating
     } 
     thermal = Thermal(example_inputs)
     outputs = thermal.get_all()
