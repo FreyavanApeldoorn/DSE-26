@@ -85,7 +85,7 @@ y_coords = combined_df["y"].values
 A_boom = 10  # Area of each boom (assumed constant for simplicity)
 
 # Total area is sum of all boom areas
-total_area = A_boom * (len(x_coords) + len(y_coords))
+total_area = A_boom * len(x_coords)
 # Calculate centroid for discrete booms (points)
 x_centroid = np.mean(x_coords)
 y_centroid = np.mean(y_coords)
