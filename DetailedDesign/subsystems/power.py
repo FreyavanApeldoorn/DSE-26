@@ -20,7 +20,7 @@ class Power:
         self.specific_energy = inputs["battery_specific_energy"] 
         self.eta_battery = self.inputs["eta_battery"]  # battery efficiency
 
-        self.time_cruise = inputs["time_cruise"]
+        self.time_cruise = inputs["time_cruise_max"]
         self.time_ascent = inputs["time_ascent"]
         self.time_descent = inputs["time_descent"]
         self.time_deploy = inputs["time_deploy"]
