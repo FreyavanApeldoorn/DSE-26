@@ -46,13 +46,15 @@ class UAV:
             outputs = power.get_all()
 
             #stab_n_con = StabnCon()
+            
             aerodynamics = Aerodynamics(outputs)
             outputs = aerodynamics.get_all()
 
             structures = Structures(outputs)
             outputs = structures.get_all()
 
-            # thermal = Thermal()
+            thermal = Thermal(outputs)
+            outputs = thermal.get_all()
 
             if self.history:
                 self.history_data.update(outputs)  

@@ -49,6 +49,7 @@ class Mission:
         self.mission_type = inputs['mission_type']
         self.mission_perimeter = inputs["mission_perimeter"] #We define, mission perimeter [m] 
         self.R_max = inputs["R_max"] # Maximum range [m]: mission definition
+        self.R_min = inputs["R_min"]
 
 
         #Aerogel Specifics
@@ -132,6 +133,7 @@ class Mission:
         self.time_ascent = self.h_cruise / self.V_climb_v
         self.time_descent = self.h_cruise / self.V_descent
         self.time_cruise = self.R_max / self.V_cruise
+        self.time_cruise_min = self.R_min / self.V_cruise
 
         self.calc_time_turn_around()   # calculate time for turnaround
 
@@ -139,6 +141,7 @@ class Mission:
                          self.time_scan, self.time_descent, self.time_deploy, self.time_ascent, 
                          self.time_transition, self.time_cruise, self.time_transition, self.time_descent, self.time_turnaround])
         self.time_uav = np.sum(mission_times)
+        self.time_uav_min = self.time_uav - self.time_cruise + self.time_cruise_min
 
         cruise_times = np.array([self.time_cruise, self.time_cruise])
         self.cruise_time = np.sum(np.array(cruise_times))
@@ -292,6 +295,9 @@ class Mission:
         self.outputs['time_ascent'] = self.time_ascent
         self.outputs['time_descent'] = self.time_descent
         self.outputs["time_turnaround"] = self.time_turnaround
+
+
+        self.outputs["time_uav_min"] = self.time_uav_min
 
 
         self.outputs["time_preparation"] = self.time_preparation
