@@ -35,7 +35,7 @@ class Structures:
         self.rho = self.inputs['rho_0']
         # self.V_max = self.inputs['V_cruise']
 
-        # self.M_to = inputs["M_to"]
+        self.M_to = inputs["M_to"]
 
         self.mass_payload = inputs["payload_mass"]
         # self.mass_hardware = inputs["mass_hardware"]
@@ -45,7 +45,7 @@ class Structures:
         self.taper_ratio = inputs['taper_ratio']
         
         self.wing_span = inputs["wing_span"]
-        self.mass_wing = inputs['mass_wing']
+        self.mass_wing = 3
 
         self.motor_mass_VTOL = inputs['motor_mass_VTOL']
         self.propeller_mass_VTOL = inputs['propeller_mass_VTOL']
@@ -67,10 +67,14 @@ class Structures:
         pass
 
 
+    def calc_wing_mass(self) -> float:
+        pass
+
     
     def total_mass(self) -> float:
 
-        self.mass_structure = 9.95 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+        self.mass_structure = 5 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+        self.mass_hardware = 3
         
         masses_nopay = np.array([self.mass_hardware, self.mass_battery, self.mass_propulsion, self.mass_structure])
         mass_nopay = np.sum(masses_nopay)
@@ -238,7 +242,7 @@ class Structures:
 
         I_circle = (np.pi / 64)*self.VTOL_boom_thickness**4
         boom_weight = (0.5*self.VTOL_boom_thickness)**2 * np.pi * self.VTOL_boom_length * self.titanium_density *9.81
-        print('boom_mass', boom_weight / 9.81)
+        #print('boom_mass', boom_weight / 9.81)
         W_boom = np.array([boom_weight / self.VTOL_boom_length for _ in y])
 
         # Point load from the propeller

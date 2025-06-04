@@ -19,8 +19,10 @@ import matplotlib.pyplot as plt
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT))
 
+from DetailedDesign.funny_inputs import constants_funny_inputs as constantsi
 from DetailedDesign.funny_inputs import stab_n_con_funny_inputs as fi
-from DetailedDesign.funny_inputs import structures_funny_inputs as fi
+
+# from DetailedDesign.funny_inputs import structures_funny_inputs as fi
 from DetailedDesign.inputs import hardware_inputs as hi
 from DetailedDesign.inputs import component_locations as pi
 from DetailedDesign.inputs import deployment_inputs as di
@@ -92,6 +94,14 @@ class StabCon:
         self.Vv = inputs["Vv"]
         self.ARvt = inputs["ARvt"]
         self.taper_ratio_vt = inputs["taper_ratio_vt"]
+
+        # Prepare an outputs dictionary for later use
+        self._outputs: dict[str, Any] = self.inputs.copy()
+        self.inputs = inputs
+        # A simple `.get` keeps the attribute block short while still failing
+        # loudly if the key is missing.
+        for key, value in inputs.items():
+            setattr(self, key, value)
 
         # Make a *copy* of the inputs dict so we do not mutate the caller’s data.
         self._outputs: dict[str, Any] = inputs.copy()
@@ -517,7 +527,17 @@ class StabCon:
 # Basic sanity check                                                         #
 # ---------------------------------------------------------------------------#
 if __name__ == "__main__":  # pragma: no cover
-    stabcon = StabCon(fi)
+
+    inputs = {}
+    inputs.update(constantsi)
+    inputs.update(fi)
+    inputs.update(hi)
+    inputs.update(pi)
+    inputs.update(di)
+    inputs.update(propi)
+    inputs.update(sci)
+    stabcon = StabCon(inputs)
+
     stabcon.size_ailerons()
     print("Ailerons sized successfully.")
     p_achieved, bo = stabcon.size_ailerons()
@@ -543,14 +563,6 @@ if __name__ == "__main__":  # pragma: no cover
     print("Vertical tailplane MAC: ", stabcon.size_vertical_tailplane()[2])
     print("Vertical tailplane root chord: ", stabcon.size_vertical_tailplane()[3])
     print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
-
-    inputs = {}
-    inputs.update(hi)
-    inputs.update(pi)
-    inputs.update(di)
-    inputs.update(propi)
-    inputs.update(sci)
-    stabcon = StabCon(inputs)
 
     # CG calculation
     cg_results = stabcon.calculate_UAV_cg()
