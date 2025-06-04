@@ -46,6 +46,19 @@ class Structures:
         
         self.wing_span = inputs["wing_span"]
         self.mass_wing = inputs['mass_wing']
+
+        self.motor_mass_VTOL = inputs['motor_mass_VTOL']
+        self.propeller_mass_VTOL = inputs['propeller_mass_VTOL']
+        self.propeller_diameter_VTOL = inputs['propeller_diameter_VTOL']
+        self.y_prop = inputs['y_prop']
+
+        self.VTOL_boom_length = inputs['VTOL_boom_length']
+        self.titanium_density = inputs['titanium_density']
+        self.titanium_E = inputs['titanium_E']
+        self.max_deflection_VTOL_boom = inputs['max_deflection_VTOL_boom']
+
+        self.VTOL_boom_thickness = self.determine_VTOL_boom_thickness()
+
                 
 
     # ~~~ Intermediate Functions ~~~
@@ -64,49 +77,236 @@ class Structures:
 
         self.leftover_for_payload = self.M_to - mass_nopay
 
-    def NVM(self):
+    def NVM_cruise(self):
         """
-        This function creates NVM plots for the UAV wing (hard-coded values).
+        This function calculates the NVM (Normal, Shear, and Bending Moment) for the UAV wing during cruise flight.
+        It considers the distributed loads from the wing weight, battery weight and lift, and the point loads from the propellers.
+        It then plots the distributed load, shear force, and bending moment along the span of the wing.
+
+        Down is considered positive in this context, as per the provided reference and convention for aircraft coordinate systems.
+
+        The load factor is 1
         """
+
+        # https://uotechnology.edu.iq/dep-MechanicsandEquipment/Lectures%20and%20Syllabus/Lectures/Aircraft/Foruth%20Grade/Aircraft%20Design3.pdf
+
+        # DOWN IS POSITIVE
 
         half_span = self.span / 2.0
-        y = np.linspace(0.0, half_span, 500)  # 0 (root) to b/2 (tip)
+        y = np.linspace(0, half_span, 500)  # 0 (root) to b/2 (tip)
 
-        # Defining Lift distribution
-        print(self.mass_battery, self.battery_length)
+        # Distributed load from the battery
 
-        W_batt = np.array([-2*self.mass_battery*9.81 / (2*self.battery_length) if i < self.battery_length*2 else 0 for i in y])
-        print(W_batt)
+        W_batt = np.array([2*self.mass_battery*9.81 / (2*self.battery_length) if i < self.battery_length*2 else 0 for i in y])
+
+        # Distributed load from the wing weight
 
         x_0 = self.mass_wing*9.81 / (half_span*(self.taper_ratio + 0.5*(1-self.taper_ratio)))
-        # print(x_0)
-        W_wing = [(-(1-self.taper_ratio)*x_0 / half_span)* i + x_0 for i in y]
-        
+        W_wing = [-(((1-self.taper_ratio)*x_0 / half_span)* i - x_0) for i in y]
 
-        L_y = ((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span)**2)
+        # Point load from the propellers
 
-        V = integrate.cumulative_simpson(L_y, x=y)
-        M = integrate.cumulative_simpson(V, x=y[:-1])
+        F_prop = 9.81*2*(self.propeller_mass_VTOL + self.motor_mass_VTOL)
 
-        V = V - V[-1]
-        M = M - M[-1]
+        V_prop = [F_prop if i < self.y_prop else 0 for i in y]
 
+        # Distributed lift load from the lift assuming elliptical lift distribution
+        L_y = -((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span)**2)
+        total_forces = W_wing + L_y + W_batt
+        forces_rev = total_forces[::-1]
 
-        # Plot Lift, Shear and Moment on the same axes
-        plt.figure(figsize=(10, 6))
-        plt.plot(y, L_y, label="Lift Distribution $L(y)$ [N/m]")
-        plt.plot(y[:-1], V, label="Shear Force $V(y)$ [N]")
-        plt.plot(y[:-2], M, label="Bending Moment $M(y)$ [N·m]")
-        plt.plot(y, W_batt, label='Battery weight')
-        plt.title("NVM for UAV Wing")
-        plt.xlabel("Spanwise Position $y$ (m, 0=root to $b/2$=tip)")
-        plt.ylabel("Magnitude (N or N·m)")
-        plt.legend()
-        plt.grid(True)
-        plt.tight_layout()
-        plt.savefig("DetailedDesign\subsystems\Plots\Try.png", dpi=300)
+        V_rev = integrate.cumulative_simpson(forces_rev, x=y)  + V_prop[::-1][:-1]
+        M_rev = integrate.cumulative_simpson(V_rev, x=y[:-1])
+
+        V = V_rev[::-1]
+        M = -M_rev[::-1]
+                
+        fig, axs = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+
+        axs[0].plot(y, total_forces, color='tab:blue', linewidth=2, label="Distributed Load")
+        axs[0].fill_between(y, total_forces, color='tab:blue', alpha=0.3)
+        axs[0].set_ylabel("Load [N/m]")
+        axs[0].set_xlabel("Spanwise Position $y$ (m)")
+        axs[0].grid(True)
+
+        axs[1].plot(y[:-1], V, color='tab:orange', linewidth=2, label="Shear Force")
+        axs[1].fill_between(y[:-1], V, color='tab:orange', alpha=0.3)
+        axs[1].set_ylabel("Shear [N]")
+        axs[1].set_xlabel("Spanwise Position $y$ (m)")
+        axs[1].grid(True)
+
+        axs[2].plot(y[:-2], M, color='tab:green', linewidth=2, label="Bending Moment")
+        axs[2].fill_between(y[:-2], M, color='tab:green', alpha=0.3)
+        axs[2].set_ylabel("Moment [N·m]")
+        axs[2].set_xlabel("Spanwise Position $y$ (m)")
+        axs[2].grid(True)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.97])
+        plt.savefig("DetailedDesign/subsystems/Plots/NVM_plot_cruise.png", dpi=300)
         plt.show()
 
+        return None
+    
+    def NVM_VTOL(self):
+        """
+        This function calculates the NVM (Normal, Shear, and Bending Moment) for the UAV during cruise hover.
+        It considers the distributed loads from the wing weight, battery weight and lift, which is now generated by the propellers.
+        It then plots the distributed load, shear force, and bending moment along the span of the wing.
+
+        Down is considered positive in this context, as per the provided reference and convention for aircraft coordinate systems.
+
+        The load factor is 1
+        """
+
+        # https://uotechnology.edu.iq/dep-MechanicsandEquipment/Lectures%20and%20Syllabus/Lectures/Aircraft/Foruth%20Grade/Aircraft%20Design3.pdf
+
+        # DOWN IS POSITIVE
+
+        half_span = self.span / 2.0
+        y = np.linspace(0, half_span, 500)  # 0 (root) to b/2 (tip)
+
+        W_batt = np.array([2*self.mass_battery*9.81 / (2*self.battery_length) if i < self.battery_length*2 else 0 for i in y])
+
+        # Distributed load from the wing weight
+
+        x_0 = self.mass_wing*9.81 / (half_span*(self.taper_ratio + 0.5*(1-self.taper_ratio)))
+        W_wing = [-(((1-self.taper_ratio)*x_0 / half_span)* i - x_0) for i in y]
+
+        # Point load from the propellers
+
+        F_prop = 9.81*2*(self.propeller_mass_VTOL + self.motor_mass_VTOL) - 0.5*self.mtow
+
+
+        V_prop = [F_prop if i < self.y_prop else 0 for i in y]
+
+        total_forces = W_wing + W_batt
+        forces_rev = total_forces[::-1]
+
+        # V = integrate.cumulative_simpson(total_forces, x=y)
+        # M = integrate.cumulative_simpson(V, x=y[:-1])
+
+        V_rev = integrate.cumulative_simpson(forces_rev, x=y)  + V_prop[::-1][:-1]
+        # V_rev = V_prop[::-1][:-1]
+        M_rev = integrate.cumulative_simpson(V_rev, x=y[:-1])
+
+        V = V_rev[::-1]
+        M = -M_rev[::-1]
+                
+        fig, axs = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+
+        axs[0].plot(y, total_forces, color='tab:blue', linewidth=2, label="Distributed Load")
+        axs[0].fill_between(y, total_forces, color='tab:blue', alpha=0.3)
+        axs[0].set_ylabel("Load [N/m]")
+        axs[0].set_xlabel("Spanwise Position $y$ (m)")
+        axs[0].grid(True)
+
+        axs[1].plot(y[:-1], V, color='tab:orange', linewidth=2, label="Shear Force")
+        axs[1].fill_between(y[:-1], V, color='tab:orange', alpha=0.3)
+        axs[1].set_ylabel("Shear [N]")
+        axs[1].set_xlabel("Spanwise Position $y$ (m)")
+        axs[1].grid(True)
+
+        axs[2].plot(y[:-2], M, color='tab:green', linewidth=2, label="Bending Moment")
+        axs[2].fill_between(y[:-2], M, color='tab:green', alpha=0.3)
+        axs[2].set_ylabel("Moment [N·m]")
+        axs[2].set_xlabel("Spanwise Position $y$ (m)")
+        axs[2].grid(True)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.97])
+        plt.savefig("DetailedDesign/subsystems/Plots/NVM_plot_hover.png", dpi=300)
+        plt.show()
+
+        return None
+    
+    def NVM_propeller_boom(self, size_thickness = False):
+        """
+        This function calculates the NVM (Normal, Shear, and Bending Moment) for the boom that supports the VTOL propellers.
+        It considers the distributed loads from the boom weight, the weight from the propellers and motors and the lift that those generate.
+        It then plots the distributed load, shear force, and bending moment along the span of the wing.
+
+        Down is considered positive in this context, as per the provided reference and convention for aircraft coordinate systems.
+
+        The load factor is 1
+        """
+
+        # https://uotechnology.edu.iq/dep-MechanicsandEquipment/Lectures%20and%20Syllabus/Lectures/Aircraft/Foruth%20Grade/Aircraft%20Design3.pdf
+
+        # DOWN IS POSITIVE
+        y = np.linspace(-0.5*self.VTOL_boom_length, 0.5*self.VTOL_boom_length, 500)
+
+        # Distributed load from the boom weight
+
+        I_circle = (np.pi / 64)*self.VTOL_boom_thickness**4
+        boom_weight = (0.5*self.VTOL_boom_thickness)**2 * np.pi * self.VTOL_boom_length * self.titanium_density *9.81
+        print('boom_mass', boom_weight / 9.81)
+        W_boom = np.array([boom_weight / self.VTOL_boom_length for _ in y])
+
+        # Point load from the propeller
+
+        F_prop = 9.81*(self.propeller_mass_VTOL + self.motor_mass_VTOL) - 0.25*self.mtow
+
+        V_prop = [-F_prop if i < 0 else F_prop for i in y]
+
+        total_forces = W_boom
+        forces_rev = W_boom[::-1]
+
+        V_left = integrate.cumulative_simpson(total_forces, x=y) - V_prop[:-1]
+
+        V_rev = integrate.cumulative_simpson(forces_rev, x=y) + V_prop[::-1][:-1]
+        V = np.concatenate((-V_left[:len(y)//2], V_rev[::-1][len(y)//2:]))
+
+        M_left = integrate.cumulative_simpson(V_left, x=y[:-1])  
+        M_rev = integrate.cumulative_simpson(V_rev, x=y[:-1])
+
+        M = np.concatenate((-M_left[:len(y)//2], -M_rev[::-1][len(y)//2:]))
+
+        deflection_left = -(1/(self.titanium_E*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_left, x=y[:-2]), x=y[:-3])
+        deflection_rev = -(1/(self.titanium_E*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_rev, x=y[:-2]), x=y[:-3])
+
+        deflection = np.concatenate((deflection_rev[::-1][len(y)//2:], deflection_left[:len(y)//2]))
+
+        if size_thickness:
+            return max(deflection)
+
+        fig, axs = plt.subplots(4, 1, figsize=(10, 10), sharex=True)
+
+        axs[0].plot(y, total_forces, color='tab:blue', linewidth=2, label="Distributed Load")
+        axs[0].fill_between(y, total_forces, color='tab:blue', alpha=0.3)
+        axs[0].set_ylabel("Load [N/m]")
+        axs[0].set_xlabel("Spanwise Position $y$ (m)")
+        axs[0].grid(True)
+
+        axs[1].plot(y[:-1], V, color='tab:orange', linewidth=2, label="Shear Force")
+        axs[1].fill_between(y[:-1], V, color='tab:orange', alpha=0.3)
+        axs[1].set_ylabel("Shear [N]")
+        axs[1].set_xlabel("Spanwise Position $y$ (m)")
+        axs[1].grid(True)
+
+        axs[2].plot(y[:-2], M, color='tab:green', linewidth=2, label="Bending Moment")
+        axs[2].fill_between(y[:-2], M, color='tab:green', alpha=0.3)
+        axs[2].set_ylabel("Moment [N·m]")
+        axs[2].set_xlabel("Spanwise Position $y$ (m)")
+        axs[2].grid(True)
+
+        axs[3].plot(y[:len(deflection)], deflection, color='tab:pink', linewidth=2, label="Bending Moment")
+        axs[3].fill_between(y[:len(deflection)], deflection, color='tab:pink', alpha=0.3)
+        axs[3].set_ylabel("deflection [m]")
+        axs[3].set_xlabel("Spanwise Position $y$ (m)")
+        axs[3].grid(True)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.97])
+        plt.savefig("DetailedDesign/subsystems/Plots/NVM_plot_propeller_bom.png", dpi=300)
+        plt.show()
+
+        return None
+    
+    def determine_VTOL_boom_thickness(self):
+        t_range = np.linspace(00.001, 0.1, 100)
+        for t in t_range:
+            self.VTOL_boom_thickness = t
+            deflection = self.NVM_propeller_boom(size_thickness=True)
+            if deflection <= self.max_deflection_VTOL_boom:
+                return t
         return None
 
     # ~~~ Output functions ~~~
@@ -134,5 +334,7 @@ class Structures:
 
 if __name__ == "__main__":  # pragma: no cover
     a = Structures(fi)
-    a.NVM()
+    a.NVM_VTOL()
+    a.NVM_cruise()
+    a.NVM_propeller_boom()
     # Perform sanity checks here
