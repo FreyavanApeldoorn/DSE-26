@@ -390,10 +390,19 @@ stab_n_con_inputs = {
     "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
     "roll_rate_req": 0.5,  # rad/s, guesstimate
     "v_ref": 20.0,  # m/s, reference velocity for roll rate requirement
-    "x_cg_no_wing": 1,  # m, x-coordinate of the center of gravity without the wing
-    "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
-    "wing_mass": 3,  # kg, guesstimate for the mass of the wing
-    "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
+    
+    "wildfire_fuselage_x_cg": 0,  #m, initially set to 0 and updated later 
+    "oil_spill_fuselage_x_cg": 0, #m, initially set to 0 and updated later
+    "wildfire_wing_x_cg":0, #m, initially set to 0 and updated later
+    "oil_spill_wing_x_cg": 0, #m, initially set to 0 and updated later 
+    "wildfire_fuselage_mass": 0, #kg, initially set to 0 and updated later
+    "oil_spill_fuselage_mass": 0, #kg, initially set to 0 and updated later
+    "wildfire_wing_mass": 0, #kg, initially set to 0 and updated later
+    "oil_spill_wing_mass": 0, #kg, initially set to 0 and updated later
+
+    # "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
+    # "wing_mass": 3,  # kg, guesstimate for the mass of the wing
+    # "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
     "l_fus": 1.5,  # m, length of the fuselage
     "lh": 0.5,  # m, horizontal distance from the wing ac to the horizontal tail ac
     "mac": 0.333,  # m, mean aerodynamic chord of the wing
