@@ -2,6 +2,7 @@
 This is the inputs file, these should not be changed without communicating with the entire group. 
 Only do this when your code is finished and verified, while working, use funny_inputs
 '''
+import numpy as np
 inputs = {}
 
 # ~~~ Constants ~~~ 
@@ -31,7 +32,8 @@ mission_inputs = {
     'mission_perimeter': 1000,  # Mission perimeter [m]
     'number_of_UAVs': 20,  # Number of UAVs in the swarm
     'number_of_containers': 3, # Number of containers in the nest
-    'number_of_workers': 2  # Number of workers per UAV
+    'number_of_workers': 2,  # Number of workers per UAV
+    'wind_speed': 30 / 3.6  # Wind speed [m/s]
 }
 inputs.update(mission_inputs)
 
@@ -169,7 +171,7 @@ thermal_inputs = {
     "heat_coeff_ext": 45.0,
     "heat_int": 200.0,
     "m_int": 10.0, # COMES FROM HARDWARE
-    "c_p_int": 500.0,
+    "c_p_int": 500.0
 }
 inputs.update(thermal_inputs)
 
@@ -265,7 +267,7 @@ hardware_inputs = {
     "battery_height": 0.05,                        # m, height of the battery
 
     #buoy
-    "buoy_mass": None,                             # kg, mass of the buoy
+    "buoy_mass": 0.5,                             # kg, mass of the buoy
 
 }
 inputs.update(hardware_inputs)
@@ -302,12 +304,12 @@ component_locations = {
     "GPS_z": None,               # m, z-location w.r.t. front of fuselage
 
     # Mesh Network Module
-    "Mesh_network_module_x": 431.3,  # m, x-location w.r.t. front of fuselage
+    "Mesh_network_module_x": 0.4313,  # m, x-location w.r.t. front of fuselage
     "Mesh_network_module_y": None,  # m, y-location w.r.t. front of fuselage
     "Mesh_network_module_z": None,  # m, z-location w.r.t. front of fuselage
 
     # SATCOM Module
-    "SATCOM_module_x": 431.3,        # m, x-location w.r.t. front of fuselage
+    "SATCOM_module_x": 0.4313,        # m, x-location w.r.t. front of fuselage
     "SATCOM_module_y": None,        # m, y-location w.r.t. front of fuselage
     "SATCOM_module_z": None,        # m, z-location w.r.t. front of fuselage
 
@@ -330,6 +332,7 @@ component_locations = {
     "motor_left_VTOL_y": None,      # m, y-location w.r.t. root of the wing
     "motor_right_VTOL_y": None,     # m, y-location w.r.t. root of the wing
     "motor_VTOL_z": None,           # m, z-location
+    
 
     # Battery
     "battery_x": 0.056,              # m, x-location w.r.t. leading edge of the wing
@@ -337,11 +340,48 @@ component_locations = {
     "battery_z": None,              # m, z-location w.r.t. leading edge of the wing
 
     # Buoy
-    "buoy_x": 0.95,                 # m, x-location w.r.t. front of fuselage
+    "buoy_x": 0.5,                 # m, x-location w.r.t. front of fuselage
     "buoy_y": None,                 # m, y-location w.r.t. front of fuselage
     "buoy_z": None,                 # m, z-location w.r.t. front of fuselage
+
+    # Payload
+    "payload_x": 0.95,              # m, x-location w.r.t. front of fuselage
+    "payload_y": None,              # m, y-location w.r.t. front of fuselage    
+    "payload_z": None,              # m, z-location w.r.t. front of fuselage
 }
 inputs.update(component_locations)
+
+stab_n_con_inputs = {
+    "ca_c": 0.4,  # Aileron chord to wing chord ratio
+    "cl_alpha": 5.0 * 180 / np.pi,  # Wing airfoil (E1210) lift curve slope [1/rad]
+    "cd_0": 0.02,  # Wing airfoil (E1210)Zero-lift drag coefficient
+    "wing_area": 1.0,  # m^2, guesstimate
+    "wing_span": 3.0,  # m, guesstimate
+    "wing_chord": 0.333,  # m, guesstimate
+    "bi": 0.1,  # m, location to the innermost point of the aileron
+    "bo": 0.9,  # m, location to the outermost point of the aileron
+    "delta_a_max": np.deg2rad(25),  # rad, maximum aileron deflection angle
+    "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
+    "roll_rate_req": 0.5,  # rad/s, guesstimate
+    "v_ref": 20.0,  # m/s, reference velocity for roll rate requirement
+    "x_cg_no_wing": 1,  # m, x-coordinate of the center of gravity without the wing
+    "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
+    "wing_mass": 3,  # kg, guesstimate for the mass of the wing
+    "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
+    "l_fus": 1.5,  # m, length of the fuselage
+    "lh": 0.5,  # m, horizontal distance from the wing ac to the horizontal tail ac
+    "mac": 0.333,  # m, mean aerodynamic chord of the wing
+    "x_ac_bar": 0.25,  # m, x-coordinate of the aerodynamic center relative to the leading edge of the wing
+    "CL_alpha_Ah": 5.0 * 180 / np.pi,  # Finite wing lift curve slope [1/rad]
+    "CL_alpha_h": -0.8,  # Horizontal tail lift curve slope [-]
+    "d_epsilon_d_alpha": 0.1,  # Downwash gradient [rad/(rad*m)]
+    "Vh_V": 0.5,  # Horizontal tail velocity to wing velocity ratio [-]
+    "Cm_ac": 0.3,  # Moment coefficient at the aerodynamic center of the wing [-]
+    "wind_speed": 30 / 3.6,  # m/s, wind speed from requirement
+    "rpm_max": 4200,  # rpm
+    "T_max": 17.6 * 9.81,  # N, maximum thrust per motor.
+}
+inputs.update(stab_n_con_inputs)
 
 
 # ===========================================

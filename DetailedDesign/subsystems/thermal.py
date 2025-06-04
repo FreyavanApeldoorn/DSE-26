@@ -211,7 +211,7 @@ class Thermal:
 
 
 
-        self.outputs["power_thermal_required"] = self.get_required_thermal_for_zero_gain()  # Maximum thermal power rating (W)
+        self.outputs["power_thermal_required"] = - self.get_required_thermal_for_zero_gain()  # Maximum thermal power rating (W)
         self.outputs["max_required_energy_thermal"] = None  # max required energy for thermal at max range (Wh)
 
         return self.outputs

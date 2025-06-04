@@ -42,11 +42,11 @@ class Aerodynamics:
         # manoeuvre inputs
         self.max_load_factor = inputs["max_load_factor"]  # Maximum load factor for maneuvering
         self.min_load_factor = inputs["min_load_factor"]  # Minimum load factor for maneuvering
-        self.density_sea = inputs["density_sea"]  # Air density in kg/m^3
-        self.density_3000 = inputs["density_3000"]  # Air density at 3000m in kg/m^3
+        self.density_sea = inputs["rho_0"]  # Air density in kg/m^3
+        self.density_3000 = inputs["rho_service"]  # Air density at 3000m in kg/m^3
         self.CL_max = inputs["CL_max"]  # Maximum lift coefficient
         self.wing_loading = inputs["wing_loading"]  # Wing loading in N/m^2
-        self.cruise_velocity = inputs["cruise_velocity"]  # Cruise velocity in m/s
+        self.cruise_velocity = inputs["V_cruise"]  # Cruise velocity in m/s
 
 
     # ~~~ Intermediate Functions ~~~

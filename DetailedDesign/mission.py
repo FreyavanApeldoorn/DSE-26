@@ -39,6 +39,7 @@ class Mission:
         self.V_climb_v = inputs["ROC_VTOL"] # Climb speed [m/s]: mission definition
         self.V_descent = inputs["ROD_VTOL"] # Descent speed [m/s]: mission definition
         self.V_cruise = inputs["V_cruise"] # Cruise speed [m/s]: mission definition
+        self.wind_speed = inputs["wind_speed"] # Wind speed [m/s]: mission definition
 
         self.time_transition = inputs["time_transition"]
         self.time_deploy = inputs["time_deploy"] # Time for deploying the UAV [s]: From UAV design
@@ -132,8 +133,8 @@ class Mission:
         
         self.time_ascent = self.h_cruise / self.V_climb_v
         self.time_descent = self.h_cruise / self.V_descent
-        self.time_cruise = self.R_max / self.V_cruise
-        self.time_cruise_min = self.R_min / self.V_cruise
+        self.time_cruise = self.R_max / (self.V_cruise - self.wind_speed) # Slowest-case scenario, wind against the UAV
+        self.time_cruise_min = self.R_min / (self.V_cruise + self.wind_speed) # Fastest-case scenario, wind with the UAV
 
         self.calc_time_turn_around()   # calculate time for turnaround
 
@@ -252,7 +253,7 @@ class Mission:
         self.calc_time_wrapup()
 
         if self.time_uav < self.time_preparation - self.time_startup_nest:
-            raise ValueError("UAV mission time is less than preparation time, so UAVs will overlap. Check inputs.")
+            raise ValueError(f"UAV mission time ({self.time_uav}) is less than preparation time, so UAVs will overlap. Check inputs.")
         else:
             total_mission_time = self.time_preparation + self.time_operation + self.time_wrapup
             self.total_mission_time = total_mission_time
@@ -290,14 +291,15 @@ class Mission:
 
         self.outputs["trips_for_mission"] = self.num_trips
 
-        self.outputs["time_uav"] = self.time_uav
-        self.outputs["time_cruise"] = self.cruise_time
+        self.outputs["time_uav_max"] = self.time_uav
+        self.outputs["time_uav_min"] = self.time_uav_min
+        self.outputs["time_cruise_max"] = self.cruise_time
+        self.outputs["time_cruise_min"] = self.time_cruise_min
         self.outputs['time_ascent'] = self.time_ascent
         self.outputs['time_descent'] = self.time_descent
         self.outputs["time_turnaround"] = self.time_turnaround
 
 
-        self.outputs["time_uav_min"] = self.time_uav_min
 
 
         self.outputs["time_preparation"] = self.time_preparation
@@ -309,13 +311,16 @@ class Mission:
         return self.outputs
     
 
+
+# ==========================================================
+
 if __name__ == '__main__':
     # Perform sanity checks here
     test_inputs_mission = {
-        "number_of_UAV": 20,
+        "number_of_UAVs": 20,
         "number_of_nests": 2,
         "number_of_containers": 2,
-        "number_of_slaves": 2,
+        "number_of_workers": 2,
         "time_wing_attachment": 10.0,
         "time_aerogel_loading": 20.0,
         "time_startup_UAV": 20.0,
@@ -338,6 +343,39 @@ if __name__ == '__main__':
         "R_max": 20000.0,  # Maximum range [m]
         "num_aerogels": 1000,  # Number of aerogels to deploy
         "margin": 5.0  # Margin for overlap check [s]   
+    }
+
+    test_inputs_mission = {
+        "number_of_UAVs": 20,
+        "number_of_nests": 2,
+        "number_of_containers": 2,
+        "number_of_workers": 2,
+        "time_wing_attachment": 10.0,
+        "time_aerogel_loading": 20.0,
+        "time_startup_UAV": 20.0,
+        "time_between_containers": 30.0,
+        "time_UAV_wrapup_check": 30.0,
+        "time_UAV_turnaround_check": 30.0,
+        "time_put_back_UAV": 10.0,
+        "time_final_wrapup": 300.0,
+        "time_between_UAV": 10.0,
+        "time_startup_nest": 120.0,
+        "time_battery_swapping": 10.0,
+        "h_cruise": 120.0,
+        "ROC_VTOL": 6.0,
+        "ROD_VTOL": 3.0,
+        "V_cruise": 100/3.6,
+        "wind_speed": 0.0,
+        "time_transition": 30.0,
+        "time_deploy": 5.0*60,
+        "time_scan": 60,
+        "mission_type": "firebreak",
+        "mission_perimeter": 10000.0,
+        "R_max": 20000.0,
+        "R_min": 10000.0,
+        "nr_aerogels": 1000,
+        "margin": 5.0,
+
     }
 
     mission = Mission(test_inputs_mission)
