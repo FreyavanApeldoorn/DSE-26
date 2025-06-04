@@ -38,6 +38,8 @@ class Aerodynamics:
         self.relative_vertical_tail_aspect_ratio = inputs["relative_vertical_tail_aspect_ratio"]  # Relative aspect ratio of the vertical tail to the wing
 
         #Gust inputs
+        self.stall_speed = inputs["V_stall"]  # Stall speed in m/s
+        self.CL_alpha = inputs["CL_alpha"]  # Lift coefficient slope in 1/rad
 
         # manoeuvre inputs
         self.max_load_factor = inputs["max_load_factor"]  # Maximum load factor for maneuvering
@@ -79,16 +81,13 @@ class Aerodynamics:
         self.vertical_tail_tip_chord = self.taper_ratio_vertical_tail * self.vertical_tail_root_chord  # Tip chord length for vertical tail m
         self.vertical_tail_MAC = (2 / 3) * self.vertical_tail_root_chord * ((1 + self.taper_ratio_vertical_tail + self.taper_ratio_vertical_tail**2) / (1 + self.taper_ratio_vertical_tail))  # Mean Aerodynamic Chord for vertical tail m
 
-    def gust_diagram(self) -> dict[str, float]:
-
-        raise NotImplementedError("Gust diagram calculation is not implemented yet.")
     
-    def manoeuvre_diagram(self, dive_factor) -> dict[str, float]:
+    def manoeuvre_diagram(self, dive_factor: float) -> dict[str, float]:
         dive_velocity = self.cruise_velocity * dive_factor
         total_velocity_range = np.arange(0, dive_velocity, 0.1)
 
-        n_0A_sea = (0.5 * self.density_sea * total_velocity_range **2 * self.CL_max)/ self.wing_loading  # Load factor for maneuvering
-        n_0A_3000 = (0.5 * self.density_3000 * total_velocity_range **2 * self.CL_max)/ self.wing_loading  # Load factor for maneuvering at 3000m
+        n_0A_sea = (0.5 * self.density_sea * total_velocity_range **2 * self.CL_max)/ self.wing_loading
+        n_0A_3000 = (0.5 * self.density_3000 * total_velocity_range **2 * self.CL_max)/ self.wing_loading
 
         n_0H_sea = -1 * (0.5 * self.density_sea * total_velocity_range **2 * self.CL_max)/ self.wing_loading
         n_0H_3000 = -1 * (0.5 * self.density_3000 * total_velocity_range **2 * self.CL_max)/ self.wing_loading
@@ -107,6 +106,14 @@ class Aerodynamics:
         idx_min_3000 = np.argmax(n_0H_3000 <= self.min_load_factor)
         v_min_3000 = total_velocity_range[idx_min_3000] if np.any(n_0H_3000 <= self.min_load_factor) else dive_velocity
 
+        # Find where to start horizontal lines (after last intersection at sea level)
+        v_horiz_start = v_max_sea
+        v_horiz_end = dive_velocity
+        v_horiz_range = np.arange(v_horiz_start, v_horiz_end + 0.1, 0.1)
+
+        v_horiz_start_min = v_min_sea
+        v_horiz_range_min = np.arange(v_horiz_start_min, v_horiz_end + 0.1, 0.1)
+
         plt.figure(figsize=(10, 6))
         # Plot only up to intersection points
         plt.plot(total_velocity_range[:idx_max_sea+1], n_0A_sea[:idx_max_sea+1], label='Load Factor vs Velocity (Sea)')
@@ -115,15 +122,92 @@ class Aerodynamics:
         plt.plot(total_velocity_range[:idx_min_sea+1], n_0H_sea[:idx_min_sea+1], label='Negative Load Factor vs Velocity (Sea)')
         plt.plot(total_velocity_range[:idx_min_3000+1], n_0H_3000[:idx_min_3000+1], label='Negative Load Factor vs Velocity at 3000m')
 
-        plt.plot(total_velocity_range, self.max_load_factor * np.ones_like(total_velocity_range), 'r--', label='Max Load Factor')
-        plt.plot(total_velocity_range, self.min_load_factor * np.ones_like(total_velocity_range), 'g--', label='Min Load Factor')
+        # Plot horizontal lines only after sea level intersection up to dive velocity
+        plt.plot(v_horiz_range, self.max_load_factor * np.ones_like(v_horiz_range), 'r--', label='Max Load Factor')
+        plt.plot(v_horiz_range_min, self.min_load_factor * np.ones_like(v_horiz_range_min), 'g--', label='Min Load Factor')
 
-        plt.axvline(x=dive_velocity, color='k', linestyle='--', label='Dive Velocity')
-        plt.title('manoeuvre Diagram')
+        # Plot vertical dive velocity line only between min and max load factor
+        plt.vlines(
+            dive_velocity,
+            ymin=self.min_load_factor,
+            ymax=self.max_load_factor,
+            color='k',
+            linestyle='--',
+            label='Dive Velocity'
+        )
+        plt.title('Manoeuvre Diagram')
         plt.xlabel('Velocity (m/s)')
         plt.ylabel('Load Factor (n)')
         plt.xlim(0, dive_velocity * 1.1)
         plt.ylim(-self.max_load_factor * 1.3, self.max_load_factor * 1.3)
+        plt.yticks(np.arange(
+            int(np.floor(-self.max_load_factor * 1.3)),
+            int(np.ceil(self.max_load_factor * 1.3)) + 1,
+            1
+        ))
+        #plt.yticks(np.arange(-self.max_load_factor * 1.3, self.max_load_factor * 1.3 + 0.5, 0.5))
+
+        plt.grid(True)
+        plt.legend()
+        plt.show()
+
+    def gust_diagram(self, dive_factor: float, gust: float) -> dict[str, float]:
+        n = 1
+        # Calculate delta n for each case
+        delta_n_sea_stall = 0.5 * self.density_sea * gust * self.stall_speed * self.CL_alpha / self.wing_loading
+        delta_n_sea_cruise = 0.5 * self.density_sea * gust * self.cruise_velocity * self.CL_alpha / self.wing_loading
+        delta_n_sea_dive = 0.5 * self.density_sea * gust * self.cruise_velocity * dive_factor * 0.5 * self.CL_alpha / self.wing_loading
+
+        delta_n_3000_stall = 0.5 * self.density_3000 * gust * self.stall_speed * self.CL_alpha / self.wing_loading
+        delta_n_3000_cruise = 0.5 * self.density_3000 * gust * self.cruise_velocity * self.CL_alpha / self.wing_loading
+        delta_n_3000_dive = 0.5 * self.density_3000 * gust * self.cruise_velocity * dive_factor * 0.5 * self.CL_alpha / self.wing_loading
+
+        v_stall = self.stall_speed
+        v_cruise = self.cruise_velocity
+        v_dive = self.cruise_velocity * dive_factor
+
+        # Sea level envelope (include (0,1) at start and end)
+        v_sea = [0, v_stall, v_cruise, v_dive, v_dive, v_cruise, v_stall, 0]
+        n_sea = [
+            1,
+            n + delta_n_sea_stall,
+            n + delta_n_sea_cruise,
+            n + delta_n_sea_dive,
+            n - delta_n_sea_dive,
+            n - delta_n_sea_cruise,
+            n - delta_n_sea_stall,
+            1
+        ]
+
+        # 3000m envelope (include (0,1) at start and end)
+        v_3000 = [0, v_stall, v_cruise, v_dive, v_dive, v_cruise, v_stall, 0]
+        n_3000 = [
+            1,
+            n + delta_n_3000_stall,
+            n + delta_n_3000_cruise,
+            n + delta_n_3000_dive,
+            n - delta_n_3000_dive,
+            n - delta_n_3000_cruise,
+            n - delta_n_3000_stall,
+            1
+        ]
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(v_sea, n_sea, 'r-', label='Sea Level Gust Envelope')
+        plt.plot(v_3000, n_3000, 'b-', label='3000m Gust Envelope')
+
+        # Mark points for clarity
+        for vx, ny in zip(v_sea[1:-1], n_sea[1:-1]):
+            plt.plot(vx, ny, 'ro')
+        for vx, ny in zip(v_3000[1:-1], n_3000[1:-1]):
+            plt.plot(vx, ny, 'bo')
+
+        plt.plot(0, 1, 'ko')
+
+        plt.title('Gust Diagram')
+        plt.xlabel('Velocity (m/s)')
+        plt.ylabel('Load Factor (n)')
+        plt.xlim(0, v_dive * 1.1)
         plt.grid(True)
         plt.legend()
         plt.show()
@@ -178,5 +262,6 @@ if __name__ == '__main__':
     from DetailedDesign.funny_inputs import aerodynamics_funny_inputs
     aerodynamics = Aerodynamics(aerodynamics_funny_inputs)
     aerodynamics.manoeuvre_diagram(1.4) # Example dive factor
+    aerodynamics.gust_diagram(1.4, 8.33) # Example gust speed of 30 km/h
     # Perform sanity checks here
     ...

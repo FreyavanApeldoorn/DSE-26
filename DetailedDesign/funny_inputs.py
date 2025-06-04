@@ -41,12 +41,14 @@ aerodynamics_funny_inputs = {
     "relative_vertical_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the vertical tail to the wing
     "max_load_factor": 3.5,  # Maximum load factor for maneuvering
     "min_load_factor": -1.0,  # Minimum load factor for maneuvering
-    "density_sea": 1.225,  # Air density in kg/m^3
-    "density_3000": 0.9093,  # Air density at 3000m in kg/m^3
+    "rho_0": 1.225,  # Air density in kg/m^3
+    "rho_service": 0.9093,  # Air density at 3000m in kg/m^3
     "CL_max": 1.34,  # Maximum lift coefficient
     "wing_loading": 217,  # Wing loading in N/m^2
-    "cruise_velocity": 100 / 3.6,  # Cruise speed in m/s
-    "MTOW": 30 * 9.81,  # Maximum takeoff weight in N
+    "V_cruise": 100/3.6,  # Cruise speed in m/s
+    "MTOW": 30 * 9.81,  # Maximum takeoff weight in N  
+    "V_stall": 19,  # Stall speed in m/s
+    "CL_alpha": 0.09 * 180/np.pi * 0.85,  # Lift curve slope in 1/deg
 }
 
 funny_inputs.update(aerodynamics_funny_inputs)
