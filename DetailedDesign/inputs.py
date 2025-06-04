@@ -31,7 +31,8 @@ mission_inputs = {
     'mission_perimeter': 1000,  # Mission perimeter [m]
     'number_of_UAVs': 20,  # Number of UAVs in the swarm
     'number_of_containers': 3, # Number of containers in the nest
-    'number_of_workers': 2  # Number of workers per UAV
+    'number_of_workers': 2,  # Number of workers per UAV
+    'wind_speed': 30 / 3.6  # Wind speed [m/s]
 }
 inputs.update(mission_inputs)
 
@@ -169,7 +170,7 @@ thermal_inputs = {
     "heat_coeff_ext": 45.0,
     "heat_int": 200.0,
     "m_int": 10.0, # COMES FROM HARDWARE
-    "c_p_int": 500.0,
+    "c_p_int": 500.0
 }
 inputs.update(thermal_inputs)
 
@@ -265,7 +266,7 @@ hardware_inputs = {
     "battery_height": 0.05,                        # m, height of the battery
 
     #buoy
-    "buoy_mass": None,                             # kg, mass of the buoy
+    "buoy_mass": None                             # kg, mass of the buoy
 
 }
 inputs.update(hardware_inputs)

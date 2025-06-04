@@ -22,7 +22,32 @@ funny_inputs.update(constants_funny_inputs)
 
 # ~~~ Aerodynamics ~~~
 
-aerodynamics_funny_inputs = {}
+aerodynamics_funny_inputs = {
+    "AR": 7,  # Aspect ratio of the wing
+    "wing_area": 1.27, # [m^2], Wing area
+    "taper_ratio": 0.85,  # Taper ratio of the wing
+    "sweep_angle": 0.0,  # Sweep angle of the wing in degrees
+    "thickness_to_chord_ratio": 0.12,  # Thickness to chord ratio for the wing max
+    "span_position": 0.3,  # Span position of interest main wing
+    "tail_length": 1.06,  # Length betweem ac tail horizontal and wing ac in m
+    "horizontal_tail_coefficient": 0.7,  # Coefficient for horizontal tail area calculation
+    "taper_ratio_horizontal_tail": 0,  # Taper ratio for horizontal tail
+    "sweep_angle_horizontal_tail": 0.0,  # Sweep angle of the horizontal tail in degrees
+    "relative_horizontal_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the horizontal tail to the wing
+    "vertical_tail_length": 1.06,  # Length betweem ac tail vertical and wing ac in m
+    "vertical_tail_coefficient": 0.032,  # Coefficient for vertical tail area calculation
+    "taper_ratio_vertical_tail": 0.58,  # Taper ratio for vertical tail
+    "sweep_angle_vertical_tail": 0.0,  # Sweep angle of the vertical tail in degrees
+    "relative_vertical_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the vertical tail to the wing
+    "max_load_factor": 3.5,  # Maximum load factor for maneuvering
+    "min_load_factor": -1.0,  # Minimum load factor for maneuvering
+    "density_sea": 1.225,  # Air density in kg/m^3
+    "density_3000": 0.9093,  # Air density at 3000m in kg/m^3
+    "CL_max": 1.34,  # Maximum lift coefficient
+    "wing_loading": 217,  # Wing loading in N/m^2
+    "cruise_velocity": 100/3.6,  # Cruise speed in m/s
+
+}
 
 funny_inputs.update(aerodynamics_funny_inputs)
 
