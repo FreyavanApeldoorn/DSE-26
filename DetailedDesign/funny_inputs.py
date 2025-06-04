@@ -46,7 +46,7 @@ aerodynamics_funny_inputs = {
     "CL_max": 1.34,  # Maximum lift coefficient
     "wing_loading": 217,  # Wing loading in N/m^2
     "cruise_velocity": 100/3.6,  # Cruise speed in m/s
-
+    "MTOW": 30 * 9.81,  # Maximum takeoff weight in N
 }
 
 funny_inputs.update(aerodynamics_funny_inputs)

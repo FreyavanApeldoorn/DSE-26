@@ -39,7 +39,7 @@ class Aerodynamics:
 
         #Gust inputs
 
-        # Maneuver inputs
+        # manoeuvre inputs
         self.max_load_factor = inputs["max_load_factor"]  # Maximum load factor for maneuvering
         self.min_load_factor = inputs["min_load_factor"]  # Minimum load factor for maneuvering
         self.density_sea = inputs["density_sea"]  # Air density in kg/m^3
@@ -83,25 +83,47 @@ class Aerodynamics:
 
         raise NotImplementedError("Gust diagram calculation is not implemented yet.")
     
-    def maneuver_diagram(self, dive_factor) -> dict[str, float]:
-        maneuver_velocity_0A = np.arange(0, self.cruise_velocity, 0.1)
-        total_velocity_range = np.arange(0, self.cruise_velocity * dive_factor, 0.1)
+    def manoeuvre_diagram(self, dive_factor) -> dict[str, float]:
+        dive_velocity = self.cruise_velocity * dive_factor
+        total_velocity_range = np.arange(0, dive_velocity, 0.1)
 
-        n_0A_sea = (0.5 * self.density_sea * maneuver_velocity_0A**2 * self.CL_max)/ self.wing_loading  # Load factor for maneuvering
-        n_0A_3000 = (0.5 * self.density_3000 * maneuver_velocity_0A**2 * self.CL_max)/ self.wing_loading  # Load factor for maneuvering at 3000m
+        n_0A_sea = (0.5 * self.density_sea * total_velocity_range **2 * self.CL_max)/ self.wing_loading  # Load factor for maneuvering
+        n_0A_3000 = (0.5 * self.density_3000 * total_velocity_range **2 * self.CL_max)/ self.wing_loading  # Load factor for maneuvering at 3000m
 
-        n_0H_sea = -1 * (0.5 * self.density_sea * maneuver_velocity_0A**2 * self.CL_max)/ self.wing_loading
-        n_0H_3000 = -1 * (0.5 * self.density_3000 * maneuver_velocity_0A**2 * self.CL_max)/ self.wing_loading
+        n_0H_sea = -1 * (0.5 * self.density_sea * total_velocity_range **2 * self.CL_max)/ self.wing_loading
+        n_0H_3000 = -1 * (0.5 * self.density_3000 * total_velocity_range **2 * self.CL_max)/ self.wing_loading
+
+        # Find where n_0A_sea crosses max_load_factor
+        idx_max_sea = np.argmax(n_0A_sea >= self.max_load_factor)
+        v_max_sea = total_velocity_range[idx_max_sea] if np.any(n_0A_sea >= self.max_load_factor) else dive_velocity
+
+        idx_max_3000 = np.argmax(n_0A_3000 >= self.max_load_factor)
+        v_max_3000 = total_velocity_range[idx_max_3000] if np.any(n_0A_3000 >= self.max_load_factor) else dive_velocity
+
+        # Find where n_0H_sea crosses min_load_factor
+        idx_min_sea = np.argmax(n_0H_sea <= self.min_load_factor)
+        v_min_sea = total_velocity_range[idx_min_sea] if np.any(n_0H_sea <= self.min_load_factor) else dive_velocity
+
+        idx_min_3000 = np.argmax(n_0H_3000 <= self.min_load_factor)
+        v_min_3000 = total_velocity_range[idx_min_3000] if np.any(n_0H_3000 <= self.min_load_factor) else dive_velocity
 
         plt.figure(figsize=(10, 6))
-        plt.plot(maneuver_velocity_0A, n_0A_sea, label='Load Factor vs Velocity')
-        plt.plot(maneuver_velocity_0A, n_0A_3000, label='Load Factor vs Velocity at 3000m')
+        # Plot only up to intersection points
+        plt.plot(total_velocity_range[:idx_max_sea+1], n_0A_sea[:idx_max_sea+1], label='Load Factor vs Velocity (Sea)')
+        plt.plot(total_velocity_range[:idx_max_3000+1], n_0A_3000[:idx_max_3000+1], label='Load Factor vs Velocity at 3000m')
 
-        plt.plot(total_velocity_range, )
+        plt.plot(total_velocity_range[:idx_min_sea+1], n_0H_sea[:idx_min_sea+1], label='Negative Load Factor vs Velocity (Sea)')
+        plt.plot(total_velocity_range[:idx_min_3000+1], n_0H_3000[:idx_min_3000+1], label='Negative Load Factor vs Velocity at 3000m')
 
-        plt.plot(maneuver_velocity_0A, n_0H_sea, label='Negative Load Factor vs Velocity')
-        plt.plot(maneuver_velocity_0A, n_0H_3000, label='Negative Load Factor vs Velocity at 3000m')
+        plt.plot(total_velocity_range, self.max_load_factor * np.ones_like(total_velocity_range), 'r--', label='Max Load Factor')
+        plt.plot(total_velocity_range, self.min_load_factor * np.ones_like(total_velocity_range), 'g--', label='Min Load Factor')
 
+        plt.axvline(x=dive_velocity, color='k', linestyle='--', label='Dive Velocity')
+        plt.title('manoeuvre Diagram')
+        plt.xlabel('Velocity (m/s)')
+        plt.ylabel('Load Factor (n)')
+        plt.xlim(0, dive_velocity * 1.1)
+        plt.ylim(-self.max_load_factor * 1.3, self.max_load_factor * 1.3)
         plt.grid(True)
         plt.legend()
         plt.show()
@@ -155,6 +177,6 @@ class Aerodynamics:
 if __name__ == '__main__':
     from DetailedDesign.funny_inputs import aerodynamics_funny_inputs
     aerodynamics = Aerodynamics(aerodynamics_funny_inputs)
-    aerodynamics.maneuver_diagram(1.4) # Example dive factor
+    aerodynamics.manoeuvre_diagram(1.4) # Example dive factor
     # Perform sanity checks here
     ...
