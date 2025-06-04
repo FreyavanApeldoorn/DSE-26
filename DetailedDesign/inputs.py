@@ -2,6 +2,7 @@
 This is the inputs file, these should not be changed without communicating with the entire group. 
 Only do this when your code is finished and verified, while working, use funny_inputs
 '''
+import numpy as np
 inputs = {}
 
 # ~~~ Constants ~~~ 
@@ -17,7 +18,8 @@ inputs.update(constants_inputs)
 requirements_inputs = {
     'M_to': 30,  # Maximum Takeoff Mass [kg]
     'MTOW': 30 * constants_inputs['g'],  # Maximum Takeoff Weight [N]
-    'R_max': 20000    # Maximum Range [m]
+    'R_max': 20000,    # Maximum Range [m]
+    'R_min': 1000
 
 }    
 inputs.update(requirements_inputs)
@@ -30,7 +32,8 @@ mission_inputs = {
     'mission_perimeter': 1000,  # Mission perimeter [m]
     'number_of_UAVs': 20,  # Number of UAVs in the swarm
     'number_of_containers': 3, # Number of containers in the nest
-    'number_of_workers': 2  # Number of workers per UAV
+    'number_of_workers': 2,  # Number of workers per UAV
+    'wind_speed': 30 / 3.6  # Wind speed [m/s]
 }
 inputs.update(mission_inputs)
 
@@ -117,7 +120,8 @@ inputs.update(propulsion_inputs)
 
 power_inputs = {
     "DOD_fraction": 0.8,  # Depth of discharge fraction
-    "eta_battery": 0.9,  # Battery efficiency
+    "eta_battery": 0.8,  # Battery efficiency
+    "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
 }
 inputs.update(power_inputs)
 
@@ -150,6 +154,24 @@ inputs.update(structures_inputs)
 # ~~~ Thermal control ~~~ initial inputs for thermal control sizing
 
 thermal_inputs = {
+    "power_thermal_required": 10,  # W, power required for thermal control (initialized to a small value)
+    "mass_thermal": 0.5,
+    
+    # inputs to be added to structures:
+    "T_amb_deploy": 140.0,
+    "T_amb_cruise": 45.0,
+    "T_int_init": 30.0,
+    "T_int_cruise_set": 30.0,
+    "A_heat_shell": 0.5,
+    "t_shell": 0.002,
+    "k_Ti": 6.7,
+    "include_insulation": True,
+    "t_insulation": 0.01,   # THIS SHOULD BE MOVED TO SIZING IN THERMAL
+    "k_insulation": 0.017,
+    "heat_coeff_ext": 45.0,
+    "heat_int": 200.0,
+    "m_int": 10.0, # COMES FROM HARDWARE
+    "c_p_int": 500.0
 }
 inputs.update(thermal_inputs)
 
@@ -178,6 +200,188 @@ nest_inputs = {
 
 }
 inputs.update(nest_inputs)
+
+# ~~~ Hardware ~~~
+
+hardware_inputs = {
+    # Wildfire Sensor
+    "wildfire_sensor_mass": 0.92,                  # kg, mass of the wildfire sensor
+    "wildfire_sensor_length": 0.169,               # m, length of the wildfire sensor
+    "wildfire_sensor_width": 0.152,                # m, width of the wildfire sensor
+    "wildfire_sensor_height": 0.110,               # m, height of the wildfire sensor
+    
+    # Oil Sensor
+    "oil_sensor_mass": 0.905,                      # kg, mass of the oil sensor
+    "oil_sensor_length": 0.155,                    # m, length of the oil sensor
+    "oil_sensor_width": 0.128,                     # m, width of the oil sensor
+    "oil_sensor_height": 0.176,                    # m, height of the oil sensor
+    
+    # Gimbal Connection
+    "gymbal_connection_mass": 0.07,                # kg, mass of the gimbal connection
+    "gymbal_connection_diameter": 0.05,            # m, diameter of the gimbal connection
+    "gymbal_connection_height": 0.044,             # m, height of the gimbal connection
+   
+    # Flight Controller
+    "flight_controller_mass": 0.100,               # kg, mass of the flight controller
+    "flight_controller_length": 0.0923,            # m, length of the flight controller
+    "flight_controller_width": 0.0402,             # m, width of the flight controller
+    "flight_controller_height": 0.02343,           # m, height of the flight controller
+    
+    # OBC (On-Board Computer)
+    "OBC_mass": 0.2270,                            # kg, mass of the OBC
+    "OBC_length": 0.1651,                          # m, length of the OBC
+    "OBC_width": 0.13716,                          # m, width of the OBC
+    "OBC_height": 0.06985,                         # m, height of the OBC
+    
+    # GPS
+    "GPS_mass": 0.117,                             # kg, mass of the GPS
+    "GPS_diameter": 0.078,                         # m, diameter of the GPS
+    "GPS_height": 0.022,                           # m, height of the GPS
+    
+    # Mesh Network Module
+    "Mesh_network_module_mass": 0.060,             # kg, mass of the mesh network module
+    "Mesh_network_module_length": 0.123,           # m, length of the mesh network module
+    "Mesh_network_module_width": 0.077,            # m, width of the mesh network module
+    "Mesh_network_module_height": 0.03,            # m, height of the mesh network module
+
+    # SATCOM Module
+    "SATCOM_module_mass": 0.036,                   # kg, mass of the SATCOM module
+    "SATCOM_module_length": 0.045,                 # m, length of the SATCOM module
+    "SATCOM_module_width": 0.045,                  # m, width of the SATCOM module
+    "SATCOM_module_height": 0.017,                 # m, height of the SATCOM module
+
+    "Winch_motor_mass": 1.117,
+    "Winch_motor_length": 0.17,
+    "Winch_motor_width": 0.142,
+    "Winch_motor_height": 0.11,
+
+    "PDB_mass": 0.015,
+    "PDB_length": 0.116,
+    "PDB_width": 0.11,
+    "PDB_height": 0.025,
+
+    #battery
+    "battery_mass": 0.5,                           # kg, mass of the battery
+    "battery_length": 0.2,                         # m, length of the battery
+    "battery_width": 0.1,                          # m, width of the battery
+    "battery_height": 0.05,                        # m, height of the battery
+
+    #buoy
+    "buoy_mass": 0.5,                             # kg, mass of the buoy
+
+}
+inputs.update(hardware_inputs)
+
+component_locations = {
+    # Wildfire Sensor
+    "wildfire_sensor_x": 0.08458,  # m, x-location w.r.t. front of fuselage
+    "wildfire_sensor_y": None,  # m, y-location w.r.t. front of fuselage
+    "wildfire_sensor_z": None,  # m, z-location w.r.t. front of fuselage
+
+    # Oil Sensor
+    "oil_sensor_x": 0.08458,       # m, x-location w.r.t. front of fuselage
+    "oil_sensor_y": None,       # m, y-location w.r.t. front of fuselage
+    "oil_sensor_z": None,       # m, z-location w.r.t. front of fuselage
+
+    # Gimbal Connection
+    "gymbal_connection_x": 0.08458,  # m, x-location w.r.t. front of fuselage
+    "gymbal_connection_y": None,  # m, y-location w.r.t. front of fuselage
+    "gymbal_connection_z": None,  # m, z-location w.r.t. front of fuselage
+
+    # Flight Controller
+    "flight_controller_x": 0.95,  # m, x-location w.r.t. front of fuselage
+    "flight_controller_y": None,  # m, y-location w.r.t. front of fuselage
+    "flight_controller_z": None,  # m, z-location w.r.t. front of fuselage
+
+    # OBC (On-Board Computer)
+    "OBC_x": 0.2185,               # m, x-location w.r.t. front of fuselage
+    "OBC_y": None,               # m, y-location w.r.t. front of fuselage
+    "OBC_z": None,               # m, z-location w.r.t. front of fuselage
+
+    # GPS
+    "GPS_x": 0.3463,               # m, x-location w.r.t. front of fuselage
+    "GPS_y": None,               # m, y-location w.r.t. front of fuselage
+    "GPS_z": None,               # m, z-location w.r.t. front of fuselage
+
+    # Mesh Network Module
+    "Mesh_network_module_x": 0.4313,  # m, x-location w.r.t. front of fuselage
+    "Mesh_network_module_y": None,  # m, y-location w.r.t. front of fuselage
+    "Mesh_network_module_z": None,  # m, z-location w.r.t. front of fuselage
+
+    # SATCOM Module
+    "SATCOM_module_x": 0.4313,        # m, x-location w.r.t. front of fuselage
+    "SATCOM_module_y": None,        # m, y-location w.r.t. front of fuselage
+    "SATCOM_module_z": None,        # m, z-location w.r.t. front of fuselage
+
+    # Winch Motor
+    "Winch_motor_x": 0.95,          # m, x-location w.r.t. front of fuselage
+    "Winch_motor_y": None,          # m, y-location w.r.t. front of fuselage
+    "Winch_motor_z": None,          # m, z-location w.r.t. front of fuselage
+
+    # Power Distribution Board (PDB)
+    "PDB_x": 0.06,                  # m, x-location w.r.t. front of fuselage
+    "PDB_y": None,                  # m, y-location w.r.t. front of fuselage
+    "PDB_z": None,                  # m, z-location w.r.t. front of fuselage
+
+    # Motors
+    "motor_cruise_x": 1.8,         # m, x-location w.r.t. front of the fuselage
+    "motor_cruise_y": None,         # m, y-location w.r.t. vertical centerline of the fuselage
+    "motor_cruise_z": None,         # m, z-location w.r.t. horizontal centerline of the fuselage
+    "motor_front_VTOL_x": -0.101,     # m, x-location w.r.t. leading edge of the wing
+    "motor_rear_VTOL_x": 0.559,      # m, x-location w.r.t. leading edge of the wing
+    "motor_left_VTOL_y": None,      # m, y-location w.r.t. root of the wing
+    "motor_right_VTOL_y": None,     # m, y-location w.r.t. root of the wing
+    "motor_VTOL_z": None,           # m, z-location
+    
+
+    # Battery
+    "battery_x": 0.056,              # m, x-location w.r.t. leading edge of the wing
+    "battery_y": None,              # m, y-location w.r.t. leading edge of the wing
+    "battery_z": None,              # m, z-location w.r.t. leading edge of the wing
+
+    # Buoy
+    "buoy_x": 0.5,                 # m, x-location w.r.t. front of fuselage
+    "buoy_y": None,                 # m, y-location w.r.t. front of fuselage
+    "buoy_z": None,                 # m, z-location w.r.t. front of fuselage
+
+    # Payload
+    "payload_x": 0.95,              # m, x-location w.r.t. front of fuselage
+    "payload_y": None,              # m, y-location w.r.t. front of fuselage    
+    "payload_z": None,              # m, z-location w.r.t. front of fuselage
+}
+inputs.update(component_locations)
+
+stab_n_con_inputs = {
+    "ca_c": 0.4,  # Aileron chord to wing chord ratio
+    "cl_alpha": 5.0 * 180 / np.pi,  # Wing airfoil (E1210) lift curve slope [1/rad]
+    "cd_0": 0.02,  # Wing airfoil (E1210)Zero-lift drag coefficient
+    "wing_area": 1.0,  # m^2, guesstimate
+    "wing_span": 3.0,  # m, guesstimate
+    "wing_chord": 0.333,  # m, guesstimate
+    "bi": 0.1,  # m, location to the innermost point of the aileron
+    "bo": 0.9,  # m, location to the outermost point of the aileron
+    "delta_a_max": np.deg2rad(25),  # rad, maximum aileron deflection angle
+    "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
+    "roll_rate_req": 0.5,  # rad/s, guesstimate
+    "v_ref": 20.0,  # m/s, reference velocity for roll rate requirement
+    "x_cg_no_wing": 1,  # m, x-coordinate of the center of gravity without the wing
+    "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
+    "wing_mass": 3,  # kg, guesstimate for the mass of the wing
+    "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
+    "l_fus": 1.5,  # m, length of the fuselage
+    "lh": 0.5,  # m, horizontal distance from the wing ac to the horizontal tail ac
+    "mac": 0.333,  # m, mean aerodynamic chord of the wing
+    "x_ac_bar": 0.25,  # m, x-coordinate of the aerodynamic center relative to the leading edge of the wing
+    "CL_alpha_Ah": 5.0 * 180 / np.pi,  # Finite wing lift curve slope [1/rad]
+    "CL_alpha_h": -0.8,  # Horizontal tail lift curve slope [-]
+    "d_epsilon_d_alpha": 0.1,  # Downwash gradient [rad/(rad*m)]
+    "Vh_V": 0.5,  # Horizontal tail velocity to wing velocity ratio [-]
+    "Cm_ac": 0.3,  # Moment coefficient at the aerodynamic center of the wing [-]
+    "wind_speed": 30 / 3.6,  # m/s, wind speed from requirement
+    "rpm_max": 4200,  # rpm
+    "T_max": 17.6 * 9.81,  # N, maximum thrust per motor.
+}
+inputs.update(stab_n_con_inputs)
 
 
 # ===========================================

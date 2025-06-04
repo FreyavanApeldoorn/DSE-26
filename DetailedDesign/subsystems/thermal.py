@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from funny_inputs import funny_inputs
 
 
 class Thermal:
@@ -45,11 +46,13 @@ class Thermal:
         self.c_p_int = inputs["c_p_int"]  # Specific heat capacity (J/(kg·K))
 
         # Exposure time in deploy region (s)
-        self.t_exposure = inputs["t_exposure"]
+        self.t_exposure = inputs["time_deploy"] + inputs["time_ascent"] + inputs["time_descent"]  # assuming exposure includes ascent and descent phases
         # Cruise leg duration (s) for both outbound and return
-        self.t_cruise = inputs.get("t_cruise", 12*60)  
+        self.t_cruise = inputs["time_uav"] - self.t_exposure  
+        self.t_cruise_min = inputs["time_uav_min"] - self.t_exposure
         # Maximum thermal power available (positive = heating, negative = cooling) (W)
-        self.Q_therm = inputs.get("Q_therm", 0.0)       # Maximum heating/cooling capacity (W)
+        self.Q_therm = - inputs["power_thermal_required"]     # Maximum heating/cooling capacity (W)
+
 
     # ~~~ Intermediate Functions ~~~
 
@@ -163,11 +166,11 @@ class Thermal:
         def mission_end_temp(Q_trial: float) -> float:
             # 1) Outbound cruise: hold initial temp at cruise using just enough power
             Q_cruise_hold = self.get_cruise_thermal_power()
-            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, self.t_cruise)
+            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, self.t_cruise_min)
             # 2) deploy zone: run at Q_trial
             T_mid = self.simulate_deploy_phase(Q_trial)
             # 3) Return cruise: run at Q_trial
-            T_end = self.simulate_cruise_phase(T_mid, Q_trial, self.t_cruise)
+            T_end = self.simulate_cruise_phase(T_mid, Q_trial, self.t_cruise_min)
             return T_end
 
         # We search Q_trial between Q_low=0 (no active heating/cooling) and Q_high negative (strong cooling)
@@ -203,31 +206,21 @@ class Thermal:
         self.outputs["T_exit_deploy"] = self.get_deploy_region_exit_temperature()
         self.outputs["Time_to_cruise_set"] = self.get_time_to_cruise_set()
         self.outputs["Required_thermal_zero_gain"] = self.get_required_thermal_for_zero_gain()
+        
+        # self.outputs["thickness_insulation"] = None
+
+
+
+        self.outputs["power_thermal_required"] = - self.get_required_thermal_for_zero_gain()  # Maximum thermal power rating (W)
+        self.outputs["max_required_energy_thermal"] = None  # max required energy for thermal at max range (Wh)
+
         return self.outputs
 
 
-if __name__ == '__main__':  # pragma: no cover
+if __name__ == '__main__':
     # Sanity check with example inputs:
-    example_inputs = {
-        "T_amb_deploy": 140.0,
-        "T_amb_cruise": 45.0,
-        "T_int_init": 30.0,
-        "T_int_cruise_set": 30.0,
-        "A_heat_shell": 0.5,
-        "t_shell": 0.002,
-        "k_Ti": 6.7,
-        "include_insulation": True,
-        "t_insulation": 0.01,
-        "k_insulation": 0.017,
-        "heat_coeff_ext": 45.0,
-        "heat_int": 200.0,
-        "m_int": 5.0,
-        "c_p_int": 500.0,
-        "t_exposure": 600.0,
-        "t_cruise": 12*60,
-        "Q_therm": -300.0   # Negative = 300 W of cooling capacity
-    } 
-    thermal = Thermal(example_inputs)
+
+    thermal = Thermal(funny_inputs)
     outputs = thermal.get_all()
     # Print each output on its own line
     for key, value in outputs.items():
@@ -236,12 +229,12 @@ if __name__ == '__main__':  # pragma: no cover
     # --- Simulation and plotting ---
     dt = 1.0  # s interval
     phases = [
-        ("cruise", example_inputs["t_cruise"]),
-        ("deploy", example_inputs["t_exposure"]),
-        ("cruise", example_inputs["t_cruise"])
+        ("cruise", funny_inputs["t_cruise"]),
+        ("deploy", funny_inputs["t_exposure"]),
+        ("cruise", funny_inputs["t_cruise"])
     ]
     times, temps, power_req = [], [], []
-    T = example_inputs["T_int_init"]
+    T = funny_inputs["T_int_init"]
     R_tot = thermal._compute_resistances()
     Q_cruise_hold = outputs["Thermal_power_cruise"]
 
@@ -250,17 +243,17 @@ if __name__ == '__main__':  # pragma: no cover
             for _ in range(int(duration / dt)):
                 current_time = len(times) * dt
                 times.append(current_time)
-                if current_time < example_inputs["t_cruise"]:
-                    T_amb = example_inputs["T_amb_cruise"]
+                if current_time < funny_inputs["t_cruise"]:
+                    T_amb = funny_inputs["T_amb_cruise"]
                     Q_command = Q_cruise_hold
                 else:
-                    T_amb = example_inputs["T_amb_cruise"]
-                    if T > example_inputs["T_int_init"]:
-                        Q_command = example_inputs["Q_therm"]
+                    T_amb = funny_inputs["T_amb_cruise"]
+                    if T > funny_inputs["T_int_init"]:
+                        Q_command = funny_inputs["Q_therm"]
                     else:
                         Q_command = Q_cruise_hold
-                dTdt = (example_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
-                    example_inputs["m_int"] * example_inputs["c_p_int"]
+                dTdt = (funny_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
+                    funny_inputs["m_int"] * funny_inputs["c_p_int"]
                 )
                 T += dTdt * dt
                 temps.append(T)
@@ -270,16 +263,16 @@ if __name__ == '__main__':  # pragma: no cover
             for _ in range(int(duration / dt)):
                 current_time = len(times) * dt
                 times.append(current_time)
-                T_amb = example_inputs["T_amb_deploy"]
-                Q_hold = - (example_inputs["heat_int"] + (T_amb - T) / R_tot)
-                if example_inputs["Q_therm"] <= Q_hold:
+                T_amb = funny_inputs["T_amb_deploy"]
+                Q_hold = - (funny_inputs["heat_int"] + (T_amb - T) / R_tot)
+                if funny_inputs["Q_therm"] <= Q_hold:
                     Q_command = Q_hold
                     temps.append(T)
                     power_req.append(Q_command)
                     continue
-                Q_command = example_inputs["Q_therm"]
-                dTdt = (example_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
-                    example_inputs["m_int"] * example_inputs["c_p_int"]
+                Q_command = funny_inputs["Q_therm"]
+                dTdt = (funny_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
+                    funny_inputs["m_int"] * funny_inputs["c_p_int"]
                 )
                 T += dTdt * dt
                 temps.append(T)

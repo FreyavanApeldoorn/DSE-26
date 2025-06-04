@@ -22,7 +22,32 @@ funny_inputs.update(constants_funny_inputs)
 
 # ~~~ Aerodynamics ~~~
 
-aerodynamics_funny_inputs = {}
+aerodynamics_funny_inputs = {
+    "AR": 7,  # Aspect ratio of the wing
+    "wing_area": 1.27,  # [m^2], Wing area
+    "taper_ratio": 0.85,  # Taper ratio of the wing
+    "sweep_angle": 0.0,  # Sweep angle of the wing in degrees
+    "thickness_to_chord_ratio": 0.12,  # Thickness to chord ratio for the wing max
+    "span_position": 0.3,  # Span position of interest main wing
+    "tail_length": 1.06,  # Length betweem ac tail horizontal and wing ac in m
+    "horizontal_tail_coefficient": 0.7,  # Coefficient for horizontal tail area calculation
+    "taper_ratio_horizontal_tail": 0,  # Taper ratio for horizontal tail
+    "sweep_angle_horizontal_tail": 0.0,  # Sweep angle of the horizontal tail in degrees
+    "relative_horizontal_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the horizontal tail to the wing
+    "vertical_tail_length": 1.06,  # Length betweem ac tail vertical and wing ac in m
+    "vertical_tail_coefficient": 0.032,  # Coefficient for vertical tail area calculation
+    "taper_ratio_vertical_tail": 0.58,  # Taper ratio for vertical tail
+    "sweep_angle_vertical_tail": 0.0,  # Sweep angle of the vertical tail in degrees
+    "relative_vertical_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the vertical tail to the wing
+    "max_load_factor": 3.5,  # Maximum load factor for maneuvering
+    "min_load_factor": -1.0,  # Minimum load factor for maneuvering
+    "density_sea": 1.225,  # Air density in kg/m^3
+    "density_3000": 0.9093,  # Air density at 3000m in kg/m^3
+    "CL_max": 1.34,  # Maximum lift coefficient
+    "wing_loading": 217,  # Wing loading in N/m^2
+    "cruise_velocity": 100 / 3.6,  # Cruise speed in m/s
+    "MTOW": 30 * 9.81,  # Maximum takeoff weight in N
+}
 
 funny_inputs.update(aerodynamics_funny_inputs)
 
@@ -159,14 +184,41 @@ structures_funny_inputs = {
     "battery_length": 0.182,  # m
     "mass_wing": 3,  # kg
     "taper_ratio": 0.83,  # -
+    "propeller_diameter_VTOL": 0.66,  # m
+    "mass_propulsion": 5,  # kg
+    "propeller_mass_VTOL": 0.073,  # kg
+    "y_prop": 0.66
+    / 2,  # m, how far out from the root chord the propeller beam is placed.
+    "VTOL_boom_thickness": 0.05,  # m
+    "VTOL_boom_length": 0.66 * 2,  # m, based on 1 propeller diameter between propellers
+    "titanium_density": 4.43 * 1000,  # kg/m3
+    "titanium_E": 110 * 10**9,  # kg/m3
+    "max_deflection_VTOL_boom": 0.05,  # m, guesstimate
 }
 
 funny_inputs.update(structures_funny_inputs)
 
 # ~~~ Thermal control ~~~
 
-thermal_funny_inputs = {}
+thermal_funny_inputs = {
+    "T_amb_deploy": 140.0,
+    "T_amb_cruise": 45.0,
+    "T_int_init": 30.0,
+    "T_int_cruise_set": 30.0,
+    "A_heat_shell": 0.5,
+    "t_shell": 0.002,
+    "k_Ti": 6.7,
+    "include_insulation": True,
+    "t_insulation": 0.01,
+    "k_insulation": 0.017,
+    "heat_coeff_ext": 45.0,
+    "heat_int": 200.0,
+    "m_int": 10.0,
+    "c_p_int": 500.0,
+    "power_thermal_required": -300.0,  # Negative = cooling ; Positive = heating
+}
 
+funny_inputs.update(thermal_funny_inputs)
 
 final_outputs = {
     "g": 9.81,
@@ -268,8 +320,9 @@ final_outputs = {
     "trips_for_mission": np.float64(358.0),
     "time_uav": np.float64(1930.0),
     "time_cruise": np.float64(1440.0),
-    "time_ascent": np.float64(40.0),
-    "time_descent": np.float64(80.0),
+    "time_cruise_min": np.float64(996.0),
+    "time_ascent": np.float64(20.0),
+    "time_descent": np.float64(40.0),
     "time_turnaround": 60.0,
     "time_preparation": 1345.2631578947369,
     "time_operation": np.float64(34740.0),
@@ -297,7 +350,127 @@ final_outputs = {
     "volume_fueltank": 1.8296442000000004,
     "refills_for_mission": 0,
 }
-funny_inputs.update(final_outputs)
+# funny_inputs.update(final_outputs)
 
 
 funny_inputs.update()
+
+# ~~~ Hardware ~~~
+
+hardware_funny_inputs = {
+    # Wildfire Sensor
+    "wildfire_sensor_mass": 0.92,  # kg, mass of the wildfire sensor
+    "wildfire_sensor_length": 0.169,  # m, length of the wildfire sensor
+    "wildfire_sensor_width": 0.152,  # m, width of the wildfire sensor
+    "wildfire_sensor_height": 0.110,  # m, height of the wildfire sensor
+    # Oil Sensor
+    "oil_sensor_mass": 0.905,  # kg, mass of the oil sensor
+    "oil_sensor_length": 0.155,  # m, length of the oil sensor
+    "oil_sensor_width": 0.128,  # m, width of the oil sensor
+    "oil_sensor_height": 0.176,  # m, height of the oil sensor
+    # Gimbal Connection
+    "gymbal_connection_mass": 0.07,  # kg, mass of the gimbal connection
+    "gymbal_connection_diameter": 0.05,  # m, diameter of the gimbal connection
+    "gymbal_connection_height": 0.044,  # m, height of the gimbal connection
+    # Flight Controller
+    "flight_controller_mass": 0.100,  # kg, mass of the flight controller
+    "flight_controller_length": 0.0923,  # m, length of the flight controller
+    "flight_controller_width": 0.0402,  # m, width of the flight controller
+    "flight_controller_height": 0.02343,  # m, height of the flight controller
+    # OBC (On-Board Computer)
+    "OBC_mass": 0.2270,  # kg, mass of the OBC
+    "OBC_length": 0.1651,  # m, length of the OBC
+    "OBC_width": 0.13716,  # m, width of the OBC
+    "OBC_height": 0.06985,  # m, height of the OBC
+    # GPS
+    "GPS_mass": 0.117,  # kg, mass of the GPS
+    "GPS_diameter": 0.078,  # m, diameter of the GPS
+    "GPS_height": 0.022,  # m, height of the GPS
+    # Mesh Network Module
+    "Mesh_network_module_mass": 0.060,  # kg, mass of the mesh network module
+    "Mesh_network_module_length": 0.123,  # m, length of the mesh network module
+    "Mesh_network_module_width": 0.077,  # m, width of the mesh network module
+    "Mesh_network_module_height": 0.03,  # m, height of the mesh network module
+    # SATCOM Module
+    "SATCOM_module_mass": 0.036,  # kg, mass of the SATCOM module
+    "SATCOM_module_length": 0.045,  # m, length of the SATCOM module
+    "SATCOM_module_width": 0.045,  # m, width of the SATCOM module
+    "SATCOM_module_height": 0.017,  # m, height of the SATCOM module
+    "Winch_motor_mass": 1.117,
+    "Winch_motor_length": 0.17,
+    "Winch_motor_width": 0.142,
+    "Winch_motor_height": 0.11,
+    "PDB_mass": 0.015,
+    "PDB_length": 0.116,
+    "PDB_width": 0.11,
+    "PDB_height": 0.025,
+    # battery
+    "battery_mass": 0.5,  # kg, mass of the battery
+    "battery_length": 0.2,  # m, length of the battery
+    "battery_width": 0.1,  # m, width of the battery
+    "battery_height": 0.05,  # m, height of the battery
+    # buoy
+    "buoy_mass": None,  # kg, mass of the buoy
+}
+funny_inputs.update(hardware_funny_inputs)
+
+component_locations_funny = {
+    # Wildfire Sensor
+    "wildfire_sensor_x": 0.08458,  # m, x-location w.r.t. front of fuselage
+    "wildfire_sensor_y": None,  # m, y-location w.r.t. front of fuselage
+    "wildfire_sensor_z": None,  # m, z-location w.r.t. front of fuselage
+    # Oil Sensor
+    "oil_sensor_x": 0.08458,  # m, x-location w.r.t. front of fuselage
+    "oil_sensor_y": None,  # m, y-location w.r.t. front of fuselage
+    "oil_sensor_z": None,  # m, z-location w.r.t. front of fuselage
+    # Gimbal Connection
+    "gymbal_connection_x": 0.08458,  # m, x-location w.r.t. front of fuselage
+    "gymbal_connection_y": None,  # m, y-location w.r.t. front of fuselage
+    "gymbal_connection_z": None,  # m, z-location w.r.t. front of fuselage
+    # Flight Controller
+    "flight_controller_x": 0.95,  # m, x-location w.r.t. front of fuselage
+    "flight_controller_y": None,  # m, y-location w.r.t. front of fuselage
+    "flight_controller_z": None,  # m, z-location w.r.t. front of fuselage
+    # OBC (On-Board Computer)
+    "OBC_x": 0.2185,  # m, x-location w.r.t. front of fuselage
+    "OBC_y": None,  # m, y-location w.r.t. front of fuselage
+    "OBC_z": None,  # m, z-location w.r.t. front of fuselage
+    # GPS
+    "GPS_x": 0.3463,  # m, x-location w.r.t. front of fuselage
+    "GPS_y": None,  # m, y-location w.r.t. front of fuselage
+    "GPS_z": None,  # m, z-location w.r.t. front of fuselage
+    # Mesh Network Module
+    "Mesh_network_module_x": 431.3,  # m, x-location w.r.t. front of fuselage
+    "Mesh_network_module_y": None,  # m, y-location w.r.t. front of fuselage
+    "Mesh_network_module_z": None,  # m, z-location w.r.t. front of fuselage
+    # SATCOM Module
+    "SATCOM_module_x": 431.3,  # m, x-location w.r.t. front of fuselage
+    "SATCOM_module_y": None,  # m, y-location w.r.t. front of fuselage
+    "SATCOM_module_z": None,  # m, z-location w.r.t. front of fuselage
+    # Winch Motor
+    "Winch_motor_x": 0.95,  # m, x-location w.r.t. front of fuselage
+    "Winch_motor_y": None,  # m, y-location w.r.t. front of fuselage
+    "Winch_motor_z": None,  # m, z-location w.r.t. front of fuselage
+    # Power Distribution Board (PDB)
+    "PDB_x": 0.06,  # m, x-location w.r.t. front of fuselage
+    "PDB_y": None,  # m, y-location w.r.t. front of fuselage
+    "PDB_z": None,  # m, z-location w.r.t. front of fuselage
+    # Motors
+    "motor_cruise_x": 1.8,  # m, x-location w.r.t. front of the fuselage
+    "motor_cruise_y": None,  # m, y-location w.r.t. vertical centerline of the fuselage
+    "motor_cruise_z": None,  # m, z-location w.r.t. horizontal centerline of the fuselage
+    "motor_front_VTOL_x": -0.101,  # m, x-location w.r.t. leading edge of the wing
+    "motor_rear_VTOL_x": 0.559,  # m, x-location w.r.t. leading edge of the wing
+    "motor_left_VTOL_y": None,  # m, y-location w.r.t. root of the wing
+    "motor_right_VTOL_y": None,  # m, y-location w.r.t. root of the wing
+    "motor_VTOL_z": None,  # m, z-location
+    # Battery
+    "battery_x": 0.056,  # m, x-location w.r.t. leading edge of the wing
+    "battery_y": None,  # m, y-location w.r.t. leading edge of the wing
+    "battery_z": None,  # m, z-location w.r.t. leading edge of the wing
+    # Buoy
+    "buoy_x": 0.95,  # m, x-location w.r.t. front of fuselage
+    "buoy_y": None,  # m, y-location w.r.t. front of fuselage
+    "buoy_z": None,  # m, z-location w.r.t. front of fuselage
+}
+funny_inputs.update(component_locations_funny)
