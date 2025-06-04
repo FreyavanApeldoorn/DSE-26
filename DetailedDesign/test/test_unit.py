@@ -10,13 +10,16 @@ import math
 from DetailedDesign.deployment import Deployment
 from DetailedDesign.subsystems.propulsion import Propulsion
 from DetailedDesign.subsystems.constraints import Constraints
+from DetailedDesign.subsystems.structures import Structures
 
 
 from test_inputs import test_inputs, deployment_test_inputs
 
+# Turn on visual inspection if you want to show the plots, off otherwise
+visual_inspection = True
 
 def test_Deployment_perimeter_creation():
-    dep = Deployment(deployment_test_inputs)
+    dep = Deployment(deployment_test_inputs, 'nr_aerogels', 5)
     
     dep.payload_mass = (dep.firebreak_width*dep.aerogel_width*dep.aerogel_thickness) * dep.aerogel_density + dep.n_ferro_magnets * dep.ferro_magnet_mass + dep.deployment_added_mass
 
@@ -72,3 +75,11 @@ def test_power_required_hover():
 def test_get_all_prop():
     res = Propulsion(test_inputs).get_all()
     assert isinstance(res, dict)
+
+def test_NVM_diagrams():
+    s = Structures(test_inputs)
+
+    if visual_inspection:
+        s.NVM_VTOL()
+        s.NVM_cruise()
+        s.NVM_propeller_boom()
