@@ -47,8 +47,8 @@ class UAV:
 
             #stab_n_con = StabnCon()
             
-            #aerodynamics = Aerodynamics(outputs)
-            #outputs = aerodynamics.get_all()
+            aerodynamics = Aerodynamics(outputs)
+            outputs = aerodynamics.get_all()
 
             structures = Structures(outputs)
             outputs = structures.get_all()
