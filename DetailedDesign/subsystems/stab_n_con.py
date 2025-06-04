@@ -266,46 +266,7 @@ class StabCon:
 
             self.bo = new_bo
 
-    # ~~~ Vertical tailplane sizing ~~~
-
-    def size_vertical_tailplane(self) -> float:
-        """
-        Calculate the vertical tailplane area, span, MAC, root chord, and tip chord.
-
-        Returns:
-
-            vertical_tailplane_area (float): Area of the vertical tailplane in square meters.
-            vertical_tailplane_span (float): Span of the vertical tailplane in meters.
-            vertical_tailplane_mac (float): Mean Aerodynamic Chord (MAC) of the vertical tailplane in meters.
-            vertical_tailplane_root_chord (float): Root chord of the vertical tailplane in meters.
-            vertical_tailplane_tip_chord (float): Tip chord of the vertical tailplane in meters.
-        """
-
-        vertical_tailplane_area = self.Vv * self.wing_span * self.wing_area / self.lvt
-        vertical_tailplane_span = np.sqrt(vertical_tailplane_area * self.ARvt)
-        vertical_tailplane_mac = vertical_tailplane_area / vertical_tailplane_span
-        vertical_tailplane_root_chord = (
-            (3 / 2)
-            * vertical_tailplane_mac
-            * (
-                (1 + self.taper_ratio_vt)
-                / (1 + self.taper_ratio_vt + self.taper_ratio_vt**2)
-            )
-        )
-        vertical_tailplane_tip_chord = (
-            vertical_tailplane_root_chord * self.taper_ratio_vt
-        )
-
-        return (
-            vertical_tailplane_area,
-            vertical_tailplane_span,
-            vertical_tailplane_mac,
-            vertical_tailplane_root_chord,
-            vertical_tailplane_tip_chord,
-        )
-
-    def size_rudder(self):
-        return None
+    # ~~~ Rudder sizing ~~~
 
     # ~~~ VTOL sizing ~~~
 
