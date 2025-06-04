@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from funny_inputs import funny_inputs
 
 
 class Thermal:
@@ -218,30 +219,8 @@ class Thermal:
 
 if __name__ == '__main__':
     # Sanity check with example inputs:
-    example_inputs = {
-        "T_amb_deploy": 140.0,
-        "T_amb_cruise": 45.0,
-        "T_int_init": 30.0,
-        "T_int_cruise_set": 30.0,
-        "A_heat_shell": 0.5,
-        "t_shell": 0.002,
-        "k_Ti": 6.7,
-        "include_insulation": True,
-        "t_insulation": 0.01,
-        "k_insulation": 0.017,
-        "heat_coeff_ext": 45.0,
-        "heat_int": 200.0,
-        "m_int": 10.0,
-        "c_p_int": 500.0,
-        "time_deploy": 250.0,
-        "time_ascent": 20.0,
-        "time_descent": 40.0,
-        "time_uav": 12*60,
-        "time_uav_min": 996.0,
-        
-        "power_thermal_required": -300.0   # Negative = cooling ; Positive = heating
-    } 
-    thermal = Thermal(example_inputs)
+
+    thermal = Thermal(funny_inputs)
     outputs = thermal.get_all()
     # Print each output on its own line
     for key, value in outputs.items():
@@ -250,12 +229,12 @@ if __name__ == '__main__':
     # --- Simulation and plotting ---
     dt = 1.0  # s interval
     phases = [
-        ("cruise", example_inputs["t_cruise"]),
-        ("deploy", example_inputs["t_exposure"]),
-        ("cruise", example_inputs["t_cruise"])
+        ("cruise", funny_inputs["t_cruise"]),
+        ("deploy", funny_inputs["t_exposure"]),
+        ("cruise", funny_inputs["t_cruise"])
     ]
     times, temps, power_req = [], [], []
-    T = example_inputs["T_int_init"]
+    T = funny_inputs["T_int_init"]
     R_tot = thermal._compute_resistances()
     Q_cruise_hold = outputs["Thermal_power_cruise"]
 
@@ -264,17 +243,17 @@ if __name__ == '__main__':
             for _ in range(int(duration / dt)):
                 current_time = len(times) * dt
                 times.append(current_time)
-                if current_time < example_inputs["t_cruise"]:
-                    T_amb = example_inputs["T_amb_cruise"]
+                if current_time < funny_inputs["t_cruise"]:
+                    T_amb = funny_inputs["T_amb_cruise"]
                     Q_command = Q_cruise_hold
                 else:
-                    T_amb = example_inputs["T_amb_cruise"]
-                    if T > example_inputs["T_int_init"]:
-                        Q_command = example_inputs["Q_therm"]
+                    T_amb = funny_inputs["T_amb_cruise"]
+                    if T > funny_inputs["T_int_init"]:
+                        Q_command = funny_inputs["Q_therm"]
                     else:
                         Q_command = Q_cruise_hold
-                dTdt = (example_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
-                    example_inputs["m_int"] * example_inputs["c_p_int"]
+                dTdt = (funny_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
+                    funny_inputs["m_int"] * funny_inputs["c_p_int"]
                 )
                 T += dTdt * dt
                 temps.append(T)
@@ -284,16 +263,16 @@ if __name__ == '__main__':
             for _ in range(int(duration / dt)):
                 current_time = len(times) * dt
                 times.append(current_time)
-                T_amb = example_inputs["T_amb_deploy"]
-                Q_hold = - (example_inputs["heat_int"] + (T_amb - T) / R_tot)
-                if example_inputs["Q_therm"] <= Q_hold:
+                T_amb = funny_inputs["T_amb_deploy"]
+                Q_hold = - (funny_inputs["heat_int"] + (T_amb - T) / R_tot)
+                if funny_inputs["Q_therm"] <= Q_hold:
                     Q_command = Q_hold
                     temps.append(T)
                     power_req.append(Q_command)
                     continue
-                Q_command = example_inputs["Q_therm"]
-                dTdt = (example_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
-                    example_inputs["m_int"] * example_inputs["c_p_int"]
+                Q_command = funny_inputs["Q_therm"]
+                dTdt = (funny_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
+                    funny_inputs["m_int"] * funny_inputs["c_p_int"]
                 )
                 T += dTdt * dt
                 temps.append(T)
