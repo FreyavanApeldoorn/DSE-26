@@ -239,7 +239,7 @@ class StabCon:
         wing_x_cg = numerator_x_wing/wing_mass
 
 
-        return fuselage_mass, wing_mass, fuselage_x_cg, fuselage_y_cg, fuselage_z_cg, wing_x_cg
+        return fuselage_mass, wing_mass, fuselage_x_cg, wing_x_cg
 
     # ~~~ Scissor plot ~~~
 

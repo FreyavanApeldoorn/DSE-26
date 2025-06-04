@@ -255,72 +255,72 @@ inputs.update(hardware_inputs)
 
 component_locations = {
     # Wildfire Sensor
-    "wildfire_sensor_x": None,  # m, x-location w.r.t. front of fuselage
+    "wildfire_sensor_x": 0.08458,  # m, x-location w.r.t. front of fuselage
     "wildfire_sensor_y": None,  # m, y-location w.r.t. front of fuselage
     "wildfire_sensor_z": None,  # m, z-location w.r.t. front of fuselage
 
     # Oil Sensor
-    "oil_sensor_x": None,       # m, x-location w.r.t. front of fuselage
+    "oil_sensor_x": 0.08458,       # m, x-location w.r.t. front of fuselage
     "oil_sensor_y": None,       # m, y-location w.r.t. front of fuselage
     "oil_sensor_z": None,       # m, z-location w.r.t. front of fuselage
 
     # Gimbal Connection
-    "gymbal_connection_x": None,  # m, x-location w.r.t. front of fuselage
+    "gymbal_connection_x": 0.08458,  # m, x-location w.r.t. front of fuselage
     "gymbal_connection_y": None,  # m, y-location w.r.t. front of fuselage
     "gymbal_connection_z": None,  # m, z-location w.r.t. front of fuselage
 
     # Flight Controller
-    "flight_controller_x": None,  # m, x-location w.r.t. front of fuselage
+    "flight_controller_x": 0.95,  # m, x-location w.r.t. front of fuselage
     "flight_controller_y": None,  # m, y-location w.r.t. front of fuselage
     "flight_controller_z": None,  # m, z-location w.r.t. front of fuselage
 
     # OBC (On-Board Computer)
-    "OBC_x": None,               # m, x-location w.r.t. front of fuselage
+    "OBC_x": 0.2185,               # m, x-location w.r.t. front of fuselage
     "OBC_y": None,               # m, y-location w.r.t. front of fuselage
     "OBC_z": None,               # m, z-location w.r.t. front of fuselage
 
     # GPS
-    "GPS_x": None,               # m, x-location w.r.t. front of fuselage
+    "GPS_x": 0.3463,               # m, x-location w.r.t. front of fuselage
     "GPS_y": None,               # m, y-location w.r.t. front of fuselage
     "GPS_z": None,               # m, z-location w.r.t. front of fuselage
 
     # Mesh Network Module
-    "Mesh_network_module_x": None,  # m, x-location w.r.t. front of fuselage
+    "Mesh_network_module_x": 431.3,  # m, x-location w.r.t. front of fuselage
     "Mesh_network_module_y": None,  # m, y-location w.r.t. front of fuselage
     "Mesh_network_module_z": None,  # m, z-location w.r.t. front of fuselage
 
     # SATCOM Module
-    "SATCOM_module_x": None,        # m, x-location w.r.t. front of fuselage
+    "SATCOM_module_x": 431.3,        # m, x-location w.r.t. front of fuselage
     "SATCOM_module_y": None,        # m, y-location w.r.t. front of fuselage
     "SATCOM_module_z": None,        # m, z-location w.r.t. front of fuselage
 
     # Winch Motor
-    "Winch_motor_x": None,          # m, x-location w.r.t. front of fuselage
+    "Winch_motor_x": 0.95,          # m, x-location w.r.t. front of fuselage
     "Winch_motor_y": None,          # m, y-location w.r.t. front of fuselage
     "Winch_motor_z": None,          # m, z-location w.r.t. front of fuselage
 
     # Power Distribution Board (PDB)
-    "PDB_x": None,                  # m, x-location w.r.t. front of fuselage
+    "PDB_x": 0.06,                  # m, x-location w.r.t. front of fuselage
     "PDB_y": None,                  # m, y-location w.r.t. front of fuselage
     "PDB_z": None,                  # m, z-location w.r.t. front of fuselage
 
     # Motors
-    "motor_cruise_x": None,         # m, x-location w.r.t. front of the fuselage
+    "motor_cruise_x": 1.8,         # m, x-location w.r.t. front of the fuselage
     "motor_cruise_y": None,         # m, y-location w.r.t. vertical centerline of the fuselage
     "motor_cruise_z": None,         # m, z-location w.r.t. horizontal centerline of the fuselage
-    "motor_front_VTOL_x": None,     # m, x-location w.r.t. leading edge of the wing
-    "motor_rear_VTOL_x": None,      # m, x-location w.r.t. leading edge of the wing
+    "motor_front_VTOL_x": -0.101,     # m, x-location w.r.t. leading edge of the wing
+    "motor_rear_VTOL_x": 0.559,      # m, x-location w.r.t. leading edge of the wing
     "motor_left_VTOL_y": None,      # m, y-location w.r.t. root of the wing
     "motor_right_VTOL_y": None,     # m, y-location w.r.t. root of the wing
     "motor_VTOL_z": None,           # m, z-location
 
     # Battery
-    "battery_x": None,              # m, x-location w.r.t. leading edge of the wing
+    "battery_x": 0.056,              # m, x-location w.r.t. leading edge of the wing
     "battery_y": None,              # m, y-location w.r.t. leading edge of the wing
     "battery_z": None,              # m, z-location w.r.t. leading edge of the wing
 
     # Buoy
-    "buoy_x": None,                 # m, x-location w.r.t. front of fuselage
+    "buoy_x": 0.95,                 # m, x-location w.r.t. front of fuselage
     "buoy_y": None,                 # m, y-location w.r.t. front of fuselage
     "buoy_z": None,                 # m, z-location w.r.t. front of fuselage
 }
