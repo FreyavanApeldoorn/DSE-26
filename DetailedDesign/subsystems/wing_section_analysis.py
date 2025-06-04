@@ -188,15 +188,16 @@ def polygon_area(x, y):
 enclosed_area = polygon_area(combined_df["x"].values, combined_df["y"].values)
 
 # Torsional moment (Nm)
+
 T = 100  # Torsional moment [Nm]
 
-# Shear flow in the skin (Bredt-Batho theory)
-if enclosed_area > 0:
-    shear_flow = T / (2 * enclosed_area)
-    max_shear_stress = shear_flow / skin_thickness
-    print(f"Torsional moment (T): {T:.2f} Nm")
-    print(f"Enclosed area (A_m): {enclosed_area:.6f} m^2")
-    print(f"Shear flow (q): {shear_flow:.2f} N/m")
-    print(f"Maximum shear stress in skin: {max_shear_stress:.2f} Pa")
-else:
-    print("Enclosed area is zero, cannot compute torsional response.")
+# # Shear flow in the skin (Bredt-Batho theory)
+# if enclosed_area > 0:
+#     shear_flow = T / (2 * enclosed_area)
+#     max_shear_stress = shear_flow / skin_thickness
+#     print(f"Torsional moment (T): {T:.2f} Nm")
+#     print(f"Enclosed area (A_m): {enclosed_area:.6f} m^2")
+#     print(f"Shear flow (q): {shear_flow:.2f} N/m")
+#     print(f"Maximum shear stress in skin: {max_shear_stress:.2f} Pa")
+# else:
+#     print("Enclosed area is zero, cannot compute torsional response.")
