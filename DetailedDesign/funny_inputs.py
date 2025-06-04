@@ -168,11 +168,6 @@ thermal_funny_inputs = {
     "heat_int": 200.0,
     "m_int": 10.0,
     "c_p_int": 500.0,
-    #"time_deploy": 250.0, > get from deployment
-    #"time_ascent": 20.0,
-    #"time_descent": 40.0,
-    #"time_uav": 12*60,
-    "time_uav_min": 996.0,
     "power_thermal_required": -300.0   # Negative = cooling ; Positive = heating
 }
 
@@ -278,8 +273,9 @@ final_outputs = {
     'trips_for_mission': np.float64(358.0),
     'time_uav': np.float64(1930.0),
     'time_cruise': np.float64(1440.0),
-    'time_ascent': np.float64(40.0),
-    'time_descent': np.float64(80.0),
+    'time_cruise_min': np.float64(996.0),
+    'time_ascent': np.float64(20.0),
+    'time_descent': np.float64(40.0),
     'time_turnaround': 60.0,
     'time_preparation': 1345.2631578947369,
     'time_operation': np.float64(34740.0),
