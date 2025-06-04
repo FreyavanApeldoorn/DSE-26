@@ -48,7 +48,7 @@ class Thermal:
         # Exposure time in deploy region (s)
         self.t_exposure = inputs["time_deploy"] + inputs["time_ascent"] + inputs["time_descent"]  # assuming exposure includes ascent and descent phases
         # Cruise leg duration (s) for both outbound and return
-        self.t_cruise = inputs["time_uav"] - self.t_exposure  
+        self.t_cruise_max = inputs["time_uav_max"] - self.t_exposure  
         self.t_cruise_min = inputs["time_uav_min"] - self.t_exposure
         # Maximum thermal power available (positive = heating, negative = cooling) (W)
         self.Q_therm = - inputs["power_thermal_required"]     # Maximum heating/cooling capacity (W)
