@@ -139,14 +139,40 @@ aerodynamics_inputs = {
     "AR": 7,  # Aspect ratio
     "CL_max": 1.34,  # Maximum lift coefficient
     "CD_0": 0.040,  # Zero-lift drag coefficient
-    "eff_prop": 0.83  # Propeller efficiency
+    "eff_prop": 0.83,  # Propeller efficiency
+
+    "wing_area": 1.27, # [m^2], Wing area
+    "taper_ratio": 0.85,  # Taper ratio of the wing
+    "sweep_angle": 0.0,  # Sweep angle of the wing in degrees
+    "thickness_to_chord_ratio": 0.12,  # Thickness to chord ratio for the wing max
+    "span_position": 0.3,  # Span position of interest main wing
+    "tail_length": 1.06,  # Length betweem ac tail horizontal and wing ac in m
+    "horizontal_tail_coefficient": 0.7,  # Coefficient for horizontal tail area calculation
+    "taper_ratio_horizontal_tail": 0,  # Taper ratio for horizontal tail
+    "sweep_angle_horizontal_tail": 0.0,  # Sweep angle of the horizontal tail in degrees
+    "relative_horizontal_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the horizontal tail to the wing
+    "vertical_tail_length": 1.06,  # Length betweem ac tail vertical and wing ac in m
+    "vertical_tail_coefficient": 0.032,  # Coefficient for vertical tail area calculation
+    "taper_ratio_vertical_tail": 0.58,  # Taper ratio for vertical tail
+    "sweep_angle_vertical_tail": 0.0,  # Sweep angle of the vertical tail in degrees
+    "relative_vertical_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the vertical tail to the wing
+    "max_load_factor": 3.5,  # Maximum load factor for maneuvering
+    "min_load_factor": -1.0,  # Minimum load factor for maneuvering
+    
+    "CL_max": 1.34,  # Maximum lift coefficient
+    "wing_loading": 217  # Wing loading in N/m^2
 }
 inputs.update(aerodynamics_inputs)
 
 # ~~~ Structures ~~~ initial inputs for structures sizing
 
 structures_inputs = {
-
+    "y_prop": 0.66 / 2,
+    "VTOL_boom_thickness": 0.05, #m
+    "VTOL_boom_length": 0.66 * 2, #m, based on 1 propeller diameter between propellers
+    "titanium_density": 4.43 * 1000, #kg/m3
+    "titanium_E": 110 * 10**9, #kg/m3
+    "max_deflection_VTOL_boom": 0.05, #m, guesstimate
 }
 inputs.update(structures_inputs)
 
@@ -364,10 +390,19 @@ stab_n_con_inputs = {
     "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
     "roll_rate_req": 0.5,  # rad/s, guesstimate
     "v_ref": 20.0,  # m/s, reference velocity for roll rate requirement
-    "x_cg_no_wing": 1,  # m, x-coordinate of the center of gravity without the wing
-    "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
-    "wing_mass": 3,  # kg, guesstimate for the mass of the wing
-    "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
+    
+    "wildfire_fuselage_x_cg": 0,  #m, initially set to 0 and updated later 
+    "oil_spill_fuselage_x_cg": 0, #m, initially set to 0 and updated later
+    "wildfire_wing_x_cg":0, #m, initially set to 0 and updated later
+    "oil_spill_wing_x_cg": 0, #m, initially set to 0 and updated later 
+    "wildfire_fuselage_mass": 0, #kg, initially set to 0 and updated later
+    "oil_spill_fuselage_mass": 0, #kg, initially set to 0 and updated later
+    "wildfire_wing_mass": 0, #kg, initially set to 0 and updated later
+    "oil_spill_wing_mass": 0, #kg, initially set to 0 and updated later
+
+    # "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
+    # "wing_mass": 3,  # kg, guesstimate for the mass of the wing
+    # "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
     "l_fus": 1.5,  # m, length of the fuselage
     "lh": 0.5,  # m, horizontal distance from the wing ac to the horizontal tail ac
     "mac": 0.333,  # m, mean aerodynamic chord of the wing

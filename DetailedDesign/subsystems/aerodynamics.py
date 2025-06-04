@@ -74,7 +74,7 @@ class Aerodynamics:
     
     def calculate_vertical_tail_parameters(self) -> dict[str, float]:
         self.vertical_tail_area = (self.vertical_tail_coefficient * self.wing_area * self.wing_span)/self.vertical_tail_length
-        self.vertical_tail_aspect_ratio = self.aspect_ratio * self.vertical_tail_aspect_ratio # Assuming hald the aspect ratio for vertical tail
+        self.vertical_tail_aspect_ratio = self.aspect_ratio * self.relative_vertical_tail_aspect_ratio # Assuming hald the aspect ratio for vertical tail
         self.vertical_tail_span = (self.vertical_tail_area * self.vertical_tail_aspect_ratio) ** 0.5
         self.vertical_tail_chord = self.vertical_tail_area / self.vertical_tail_span  # Vertical tail chord in m
         self.vertical_tail_root_chord = (2 * self.vertical_tail_chord) / (1 + self.taper_ratio_vertical_tail)  # Root chord length for vertical tail m
