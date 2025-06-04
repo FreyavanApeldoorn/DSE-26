@@ -361,14 +361,14 @@ stab_n_con_inputs = {
     # "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
     # "wing_mass": 3,  # kg, guesstimate for the mass of the wing
     # "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
-    "l_fus": 1.5,  # m, length of the fuselage
-    "lh": 0.5,  # m, horizontal distance from the wing ac to the horizontal tail ac
+    "l_fus": 2,  # m, length of the fuselage
+    "lh": 1,  # m, horizontal distance from the wing ac to the horizontal tail ac
     "mac": 0.333,  # m, mean aerodynamic chord of the wing
     "x_ac_bar": 0.25,  # m, x-coordinate of the aerodynamic center relative to the leading edge of the wing
-    "CL_alpha_Ah": 5.0 * 180 / np.pi,  # Finite wing lift curve slope [1/rad]
-    "CL_alpha_h": -0.8,  # Horizontal tail lift curve slope [-]
-    "d_epsilon_d_alpha": 0.1,  # Downwash gradient [rad/(rad*m)]
-    "Vh_V": 0.5,  # Horizontal tail velocity to wing velocity ratio [-]
+    "CL_alpha_Ah": 0.08,  # Finite wing lift curve slope [1/rad]
+    "CL_alpha_h": 0.06,  # Horizontal tail lift curve slope [-]
+    "d_epsilon_d_alpha": 0.3,  # Downwash gradient [rad/(rad*m)]
+    "Vh_V": 0.85,  # Horizontal tail velocity to wing velocity ratio [-]
     "Cm_ac": 0.3,  # Moment coefficient at the aerodynamic center of the wing [-]
     "wind_speed": 30 / 3.6,  # m/s, wind speed from requirement
     "rpm_max": 4200,  # rpm

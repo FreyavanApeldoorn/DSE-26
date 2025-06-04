@@ -546,6 +546,8 @@ if __name__ == "__main__":  # pragma: no cover
     plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
     plt.legend()
     plt.grid()
+    plt.xlim(0, 1)
+    plt.ylim(0,1)
     plt.show()
     print("Scissor plot generated successfully.")
 
