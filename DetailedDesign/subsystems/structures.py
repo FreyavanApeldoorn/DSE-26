@@ -37,7 +37,7 @@ class Structures:
 
         self.M_to = inputs["M_to"]
 
-        self.mass_margin = inputs["mass_margin"]
+        # self.mass_margin = inputs["mass_margin"]
 
         self.mass_payload = inputs["payload_mass"]
         self.mass_hardware = inputs["mass_hardware"]
@@ -63,6 +63,9 @@ class Structures:
         self.fuselage_diameter = inputs['fuselage_diameter']
         self.max_shear_titanium = 214*10**6 # inputs['max_shear_titanium']
         self.max_stress_titanium = inputs['max_stress_titanium']
+        self.wind_speed = inputs['wind_speed']
+        self.rho_0 = inputs['rho_0']
+        self.wing_area = inputs['wing_area']
 
 
 
@@ -222,16 +225,21 @@ class Structures:
         # Distributed load from the wing weight
 
         x_0 = self.mass_wing*9.81 / (half_span*(self.taper_ratio + 0.5*(1-self.taper_ratio)))
-        W_wing = [-(((1-self.taper_ratio)*x_0 / half_span)* i - x_0) for i in y]
+        W_wing = np.array([-(((1-self.taper_ratio)*x_0 / half_span)* i - x_0) for i in y])
+
+        F_gust = 0.5*self.rho_0* self.wind_speed**2 * (self.wing_area / 2)
+        W_gust = np.array([F_gust / self.span for _ in y])
+
+        print(W_gust)
 
         # Point load from the propellers
 
-        F_prop = self.load_factor*9.81*2*(self.propeller_mass_VTOL + self.motor_mass_VTOL) - 0.5*self.mtow
+        F_prop = 9.81*2*(self.propeller_mass_VTOL + self.motor_mass_VTOL) - 0.5*self.mtow
 
 
         V_prop = [F_prop if i < self.y_prop else 0 for i in y]
 
-        total_forces = W_wing + W_batt
+        total_forces = W_wing + W_batt + W_gust
         forces_rev = total_forces[::-1]
 
         # V = integrate.cumulative_simpson(total_forces, x=y)
@@ -411,7 +419,7 @@ class Structures:
 if __name__ == "__main__":  # pragma: no cover
     a = Structures(fi)
     # print(a.determine_VTOL_boom_thickness())
-    # a.NVM_VTOL()
-    # a.NVM_cruise()
-    # a.NVM_propeller_boom()
+    a.NVM_VTOL()
+    a.NVM_cruise()
+    a.NVM_propeller_boom()
     print(a.determine_fuselage_thickness())
