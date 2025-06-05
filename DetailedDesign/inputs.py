@@ -263,7 +263,7 @@ hardware_inputs = {
     "PDB_width": 0.11,
     "PDB_height": 0.025,
     # battery
-    "battery_mass": 0.5,  # kg, mass of the battery
+    "battery_mass": 2.8*4,  # kg, mass of the battery
     "battery_length": 0.2,  # m, length of the battery
     "battery_width": 0.1,  # m, width of the battery
     "battery_height": 0.05,  # m, height of the battery
@@ -314,11 +314,11 @@ component_locations = {
     "PDB_y": None,  # m, y-location w.r.t. front of fuselage
     "PDB_z": None,  # m, z-location w.r.t. front of fuselage
     # Motors
-    "motor_cruise_x": 1.8,  # m, x-location w.r.t. front of the fuselage
+    "motor_cruise_x": 2,  # m, x-location w.r.t. front of the fuselage
     "motor_cruise_y": None,  # m, y-location w.r.t. vertical centerline of the fuselage
     "motor_cruise_z": None,  # m, z-location w.r.t. horizontal centerline of the fuselage
-    "motor_front_VTOL_x": -0.101,  # m, x-location w.r.t. leading edge of the wing
-    "motor_rear_VTOL_x": 0.559,  # m, x-location w.r.t. leading edge of the wing
+    "motor_front_VTOL_x": -0.44,  # m, x-location w.r.t. leading edge of the wing
+    "motor_rear_VTOL_x": 0.88,  # m, x-location w.r.t. leading edge of the wing
     "motor_left_VTOL_y": None,  # m, y-location w.r.t. root of the wing
     "motor_right_VTOL_y": None,  # m, y-location w.r.t. root of the wing
     "motor_VTOL_z": None,  # m, z-location
@@ -365,7 +365,7 @@ stab_n_con_inputs = {
     #control and stability curve parameters
     "l_fus": 2,  # m, length of the fuselage
     "fuselage_diameter": 0.4,  # m, diameter of the fuselage
-    "lh": 1,  # m, horizontal distance from the wing ac to the horizontal tail ac
+    "lh": 1.2,  # m, horizontal distance from the wing ac to the horizontal tail ac
     "mac": 0.333,  # m, mean aerodynamic chord of the wing
     "x_ac_bar_wing": 0.24,  # m, x-coordinate of the aerodynamic center relative to the leading edge of the wing, based on ADSEE estimation lecture 8
     "CL_alpha_Ah": 0.08,  # Finite wing lift curve slope [1/rad]
