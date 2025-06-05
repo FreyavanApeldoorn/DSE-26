@@ -9,7 +9,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from funny_inputs import funny_inputs
+from DetailedDesign.funny_inputs import funny_inputs
+from power import Power
+from propulsion import Propulsion
 
 
 class Thermal:
@@ -52,6 +54,8 @@ class Thermal:
         self.t_cruise_min = inputs["time_uav_min"] - self.t_exposure
         # Maximum thermal power available (positive = heating, negative = cooling) (W)
         self.Q_therm = - inputs["power_thermal_required"]     # Maximum heating/cooling capacity (W)
+
+
 
 
     # ~~~ Intermediate Functions ~~~
@@ -219,6 +223,11 @@ class Thermal:
 
 if __name__ == '__main__':
     # Sanity check with example inputs:
+    prop = Propulsion(funny_inputs)
+    funny_inputs = prop.get_all()
+
+    power = Power(funny_inputs)
+    funny_inputs = power.get_all()
 
     thermal = Thermal(funny_inputs)
     outputs = thermal.get_all()
