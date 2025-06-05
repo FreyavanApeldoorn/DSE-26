@@ -41,14 +41,11 @@ aerodynamics_funny_inputs = {
     "relative_vertical_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the vertical tail to the wing
     "max_load_factor": 3.5,  # Maximum load factor for maneuvering
     "min_load_factor": -1.0,  # Minimum load factor for maneuvering
-    "rho_0": 1.225,  # Air density in kg/m^3
-    "rho_service": 0.9093,  # Air density at 3000m in kg/m^3
+    "density_sea": 1.225,  # Air density in kg/m^3
+    "density_3000": 0.9093,  # Air density at 3000m in kg/m^3
     "CL_max": 1.34,  # Maximum lift coefficient
     "wing_loading": 217,  # Wing loading in N/m^2
-    "V_cruise": 100/3.6,  # Cruise speed in m/s
-    "MTOW": 30 * 9.81,  # Maximum takeoff weight in N  
-    "V_stall": 19,  # Stall speed in m/s
-    "CL_alpha": 0.09 * 180/np.pi * 0.85,  # Lift curve slope in 1/deg
+    "cruise_velocity": 100 / 3.6,  # Cruise speed in m/s
 }
 
 funny_inputs.update(aerodynamics_funny_inputs)
@@ -78,7 +75,7 @@ deployment_funny_inputs = {
     "deployment_time_margin": 30.0,  # s, guesstimate for aerogel unrolling, final positioning, and dropping
     "power_required_epm": 20.0,  # W
     "epm_duration": 8.0,  # s, maximum OFF-mode duration
-    "power_required_winch": 96.0,  # W
+    "power_required_winch": 96.0,  # W, follows from PSDK protocol of DJI (24V/4A)
     "deployment_accuracy": 0.5,  # m, guesstimate
     "firebreak_width": 3,  # m
     "fuselage_size": 1.5,  # m, guesstimate
@@ -136,28 +133,29 @@ funny_inputs.update(prop_n_pow_funny_inputs)
 stab_n_con_funny_inputs = {
     "ca_c": 0.4,  # Aileron chord to wing chord ratio
     "cl_alpha": 5.0 * 180 / np.pi,  # Wing airfoil (E1210) lift curve slope [1/rad]
-    "cd_0": 0.02,  # Wing airfoil (E1210) zero-lift drag coefficient
-    "wing_area": 1.0,  # m^2, guesstimate
+    "cd_0": 0.02,  # Wing airfoil (E1210)Zero-lift drag coefficient
+    "wing_area": 1.27,  # m^2, guesstimate
     "wing_span": 3.0,  # m, guesstimate
-    "wing_chord": 0.333,  # m, guesstimate
-    "bi": 0.8,  # m, location of the inboard hinge of the aileron
-    "bo": 0.85,  # m, location of the outboard hinge of the aileron
+    "wing_root_chord": 0.458,  # m, guesstimate
+    "wing_tip_chord": 0.39,  # m, guesstimate
+    "bi": 0.5,  # m, location to the innermost point of the aileron
+    "bo": 0.76,  # m, location to the outermost point of the aileron
     "delta_a_max": np.deg2rad(25),  # rad, maximum aileron deflection angle
-    "aileron_differential": 0.75,  # ratio of down-going to up-going aileron deflection
-    "roll_rate_req": np.deg2rad(10),  # rad/s, guesstimate for required roll rate
-    "v_ref": 20.0,  # m/s, reference velocity for roll-rate sizing
-    "x_cg_no_wing": 1.0,  # m, CG position (from LEMAC) without the wing installed
-    "mass_no_wing": 22.0,  # kg, mass of the fuselage+components without the wing
-    "wing_mass": 3.0,  # kg, mass of the wing
-    "wing_cg": 0.3,  # m, wing CG position (from LEMAC)
-    "l_fus": 3,  # m, length of the fuselage from nose to tail
-    "lh": 0.5,  # m, horizontal distance from wing AC to tailplane AC
+    "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
+    "roll_rate_req": np.deg2rad(1),  # rad/s, guesstimate
+    "v_ref": 20.0,  # m/s, reference velocity for roll rate requirement
+    "x_cg_no_wing": 1,  # m, x-coordinate of the center of gravity without the wing
+    "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
+    "wing_mass": 3,  # kg, guesstimate for the mass of the wing
+    "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
+    "l_fus": 1.5,  # m, length of the fuselage
+    "lh": 0.5,  # m, horizontal distance from the wing ac to the horizontal tail ac
     "mac": 0.333,  # m, mean aerodynamic chord of the wing
     "x_ac_bar": 0.25,  # nondimensional (×MAC) aerodynamic centre position of the wing
-    "CL_alpha_Ah": 5.0 * 180 / np.pi,  # finite-wing lift-curve slope [1/rad]
-    "CL_alpha_h": -0.8,  # tailplane lift-curve slope [1/rad]
+    "CL_alpha_Ah": 0.08,  # finite-wing lift-curve slope [1/rad] based on XFLR5 values
+    "CL_alpha_h": 0.065,  # tailplane lift-curve slope [1/rad] based on XFLR5 values
     "d_epsilon_d_alpha": 0.1,  # downwash gradient [–]
-    "Vh_V": 0.5,  # ratio of tailplane to wing freestream velocity [–]
+    "Vh_V": 0.85,  # ratio of tailplane to wing freestream velocity [–] based on ADSEE slides
     "Cm_ac": 0.3,  # wing moment coefficient about the aerodynamic centre [–]
     "wind_speed": 30.0 / 3.6,  # m/s, design gust/wind speed requirement
     "rpm_max": 4200,  # rpm, maximum motor speed (not directly used here)
@@ -185,16 +183,6 @@ structures_funny_inputs = {
     "battery_length": 0.182,  # m
     "mass_wing": 3,  # kg
     "taper_ratio": 0.83,  # -
-    "propeller_diameter_VTOL": 0.66,  # m
-    "mass_propulsion": 5,  # kg
-    "propeller_mass_VTOL": 0.073,  # kg
-    "y_prop": 0.66
-    / 2,  # m, how far out from the root chord the propeller beam is placed.
-    "VTOL_boom_thickness": 0.05,  # m
-    "VTOL_boom_length": 0.66 * 2,  # m, based on 1 propeller diameter between propellers
-    "titanium_density": 4.43 * 1000,  # kg/m3
-    "titanium_E": 110 * 10**9,  # kg/m3
-    "max_deflection_VTOL_boom": 0.05,  # m, guesstimate
 }
 
 funny_inputs.update(structures_funny_inputs)
@@ -351,7 +339,7 @@ final_outputs = {
     "volume_fueltank": 1.8296442000000004,
     "refills_for_mission": 0,
 }
-# funny_inputs.update(final_outputs)
+funny_inputs.update(final_outputs)
 
 
 funny_inputs.update()
@@ -364,114 +352,59 @@ hardware_funny_inputs = {
     "wildfire_sensor_length": 0.169,  # m, length of the wildfire sensor
     "wildfire_sensor_width": 0.152,  # m, width of the wildfire sensor
     "wildfire_sensor_height": 0.110,  # m, height of the wildfire sensor
+    "wildfire_sensor_x": None,  # m, x-location w.r.t. front of fuselage
+    "wildfire_sensor_y": None,  # m, y-location w.r.t. front of fuselage
+    "wildfire_sensor_z": None,  # m, z-location w.r.t. front of fuselage
     # Oil Sensor
     "oil_sensor_mass": 0.905,  # kg, mass of the oil sensor
     "oil_sensor_length": 0.155,  # m, length of the oil sensor
     "oil_sensor_width": 0.128,  # m, width of the oil sensor
     "oil_sensor_height": 0.176,  # m, height of the oil sensor
+    "oil_sensor_x": None,  # m, x-location w.r.t. front of fuselage
+    "oil_sensor_y": None,  # m, y-location w.r.t. front of fuselage
+    "oil_sensor_z": None,  # m, z-location w.r.t. front of fuselage
     # Gimbal Connection
     "gymbal_connection_mass": 0.07,  # kg, mass of the gimbal connection
     "gymbal_connection_diameter": 0.05,  # m, diameter of the gimbal connection
     "gymbal_connection_height": 0.044,  # m, height of the gimbal connection
+    "gymbal_connection_x": None,  # m, x-location w.r.t. front of fuselage
+    "gymbal_connection_y": None,  # m, y-location w.r.t. front of fuselage
+    "gymbal_connection_z": None,  # m, z-location w.r.t. front of fuselage
     # Flight Controller
     "flight_controller_mass": 0.100,  # kg, mass of the flight controller
     "flight_controller_length": 0.0923,  # m, length of the flight controller
     "flight_controller_width": 0.0402,  # m, width of the flight controller
     "flight_controller_height": 0.02343,  # m, height of the flight controller
+    "flight_controller_x": None,  # m, x-location w.r.t. front of fuselage
+    "flight_controller_y": None,  # m, y-location w.r.t. front of fuselage
+    "flight_controller_z": None,  # m, z-location w.r.t. front of fuselage
     # OBC (On-Board Computer)
     "OBC_mass": 0.2270,  # kg, mass of the OBC
     "OBC_length": 0.1651,  # m, length of the OBC
     "OBC_width": 0.13716,  # m, width of the OBC
     "OBC_height": 0.06985,  # m, height of the OBC
+    "OBC_x": None,  # m, x-location w.r.t. front of fuselage
+    "OBC_y": None,  # m, y-location w.r.t. front of fuselage
+    "OBC_z": None,  # m, z-location w.r.t. front of fuselage
     # GPS
     "GPS_mass": 0.117,  # kg, mass of the GPS
     "GPS_diameter": 0.078,  # m, diameter of the GPS
     "GPS_height": 0.022,  # m, height of the GPS
+    "GPS_x": None,  # m, x-location w.r.t. front of fuselage
+    "GPS_y": None,  # m, y-location w.r.t. front of fuselage
+    "GPS_z": None,  # m, z-location w.r.t. front of fuselage
     # Mesh Network Module
     "Mesh_network_module_mass": 0.060,  # kg, mass of the mesh network module
     "Mesh_network_module_length": 0.123,  # m, length of the mesh network module
     "Mesh_network_module_width": 0.077,  # m, width of the mesh network module
     "Mesh_network_module_height": 0.03,  # m, height of the mesh network module
+    "Mesh_network_module_x": None,  # m, x-location w.r.t. front of fuselage
+    "Mesh_network_module_y": None,  # m, y-location w.r.t. front of fuselage
+    "Mesh_network_module_z": None,  # m, z-location w.r.t. front of fuselage
     # SATCOM Module
     "SATCOM_module_mass": 0.036,  # kg, mass of the SATCOM module
     "SATCOM_module_length": 0.045,  # m, length of the SATCOM module
     "SATCOM_module_width": 0.045,  # m, width of the SATCOM module
     "SATCOM_module_height": 0.017,  # m, height of the SATCOM module
-    "Winch_motor_mass": 1.117,
-    "Winch_motor_length": 0.17,
-    "Winch_motor_width": 0.142,
-    "Winch_motor_height": 0.11,
-    "PDB_mass": 0.015,
-    "PDB_length": 0.116,
-    "PDB_width": 0.11,
-    "PDB_height": 0.025,
-    # battery
-    "battery_mass": 0.5,  # kg, mass of the battery
-    "battery_length": 0.2,  # m, length of the battery
-    "battery_width": 0.1,  # m, width of the battery
-    "battery_height": 0.05,  # m, height of the battery
-    # buoy
-    "buoy_mass": None,  # kg, mass of the buoy
+    "SATCOM_module_x": None,  # m, x-location
 }
-funny_inputs.update(hardware_funny_inputs)
-
-component_locations_funny = {
-    # Wildfire Sensor
-    "wildfire_sensor_x": 0.08458,  # m, x-location w.r.t. front of fuselage
-    "wildfire_sensor_y": None,  # m, y-location w.r.t. front of fuselage
-    "wildfire_sensor_z": None,  # m, z-location w.r.t. front of fuselage
-    # Oil Sensor
-    "oil_sensor_x": 0.08458,  # m, x-location w.r.t. front of fuselage
-    "oil_sensor_y": None,  # m, y-location w.r.t. front of fuselage
-    "oil_sensor_z": None,  # m, z-location w.r.t. front of fuselage
-    # Gimbal Connection
-    "gymbal_connection_x": 0.08458,  # m, x-location w.r.t. front of fuselage
-    "gymbal_connection_y": None,  # m, y-location w.r.t. front of fuselage
-    "gymbal_connection_z": None,  # m, z-location w.r.t. front of fuselage
-    # Flight Controller
-    "flight_controller_x": 0.95,  # m, x-location w.r.t. front of fuselage
-    "flight_controller_y": None,  # m, y-location w.r.t. front of fuselage
-    "flight_controller_z": None,  # m, z-location w.r.t. front of fuselage
-    # OBC (On-Board Computer)
-    "OBC_x": 0.2185,  # m, x-location w.r.t. front of fuselage
-    "OBC_y": None,  # m, y-location w.r.t. front of fuselage
-    "OBC_z": None,  # m, z-location w.r.t. front of fuselage
-    # GPS
-    "GPS_x": 0.3463,  # m, x-location w.r.t. front of fuselage
-    "GPS_y": None,  # m, y-location w.r.t. front of fuselage
-    "GPS_z": None,  # m, z-location w.r.t. front of fuselage
-    # Mesh Network Module
-    "Mesh_network_module_x": 431.3,  # m, x-location w.r.t. front of fuselage
-    "Mesh_network_module_y": None,  # m, y-location w.r.t. front of fuselage
-    "Mesh_network_module_z": None,  # m, z-location w.r.t. front of fuselage
-    # SATCOM Module
-    "SATCOM_module_x": 431.3,  # m, x-location w.r.t. front of fuselage
-    "SATCOM_module_y": None,  # m, y-location w.r.t. front of fuselage
-    "SATCOM_module_z": None,  # m, z-location w.r.t. front of fuselage
-    # Winch Motor
-    "Winch_motor_x": 0.95,  # m, x-location w.r.t. front of fuselage
-    "Winch_motor_y": None,  # m, y-location w.r.t. front of fuselage
-    "Winch_motor_z": None,  # m, z-location w.r.t. front of fuselage
-    # Power Distribution Board (PDB)
-    "PDB_x": 0.06,  # m, x-location w.r.t. front of fuselage
-    "PDB_y": None,  # m, y-location w.r.t. front of fuselage
-    "PDB_z": None,  # m, z-location w.r.t. front of fuselage
-    # Motors
-    "motor_cruise_x": 1.8,  # m, x-location w.r.t. front of the fuselage
-    "motor_cruise_y": None,  # m, y-location w.r.t. vertical centerline of the fuselage
-    "motor_cruise_z": None,  # m, z-location w.r.t. horizontal centerline of the fuselage
-    "motor_front_VTOL_x": -0.101,  # m, x-location w.r.t. leading edge of the wing
-    "motor_rear_VTOL_x": 0.559,  # m, x-location w.r.t. leading edge of the wing
-    "motor_left_VTOL_y": None,  # m, y-location w.r.t. root of the wing
-    "motor_right_VTOL_y": None,  # m, y-location w.r.t. root of the wing
-    "motor_VTOL_z": None,  # m, z-location
-    # Battery
-    "battery_x": 0.056,  # m, x-location w.r.t. leading edge of the wing
-    "battery_y": None,  # m, y-location w.r.t. leading edge of the wing
-    "battery_z": None,  # m, z-location w.r.t. leading edge of the wing
-    # Buoy
-    "buoy_x": 0.95,  # m, x-location w.r.t. front of fuselage
-    "buoy_y": None,  # m, y-location w.r.t. front of fuselage
-    "buoy_z": None,  # m, z-location w.r.t. front of fuselage
-}
-funny_inputs.update(component_locations_funny)

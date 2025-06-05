@@ -19,9 +19,10 @@ import matplotlib.pyplot as plt
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT))
 
-from DetailedDesign.funny_inputs import constants_funny_inputs as constantsi
-from DetailedDesign.funny_inputs import stab_n_con_funny_inputs as fi
-#from DetailedDesign.funny_inputs import structures_funny_inputs as fi
+
+# from DetailedDesign.funny_inputs import structures_funny_inputs as fi
+from DetailedDesign.inputs import constants_inputs as constantsi
+from DetailedDesign.inputs import requirements_inputs as requirementsi
 from DetailedDesign.inputs import hardware_inputs as hi
 from DetailedDesign.inputs import component_locations as pi
 from DetailedDesign.inputs import deployment_inputs as di
@@ -50,7 +51,8 @@ class StabCon:
         self.inputs = inputs.copy()  # Copy to avoid mutating caller's data
 
         self.wing_span = inputs["wing_span"]
-        self.wing_chord = inputs["wing_chord"]
+        self.wing_root_chord = inputs["wing_root_chord"]
+        self.wing_tip_chord = inputs["wing_tip_chord"]
         self.wing_area = inputs["wing_area"]
         self.cl_alpha = inputs["cl_alpha"]
         self.cd_0 = inputs["cd_0"]
@@ -65,19 +67,16 @@ class StabCon:
 
         self.roll_rate_req = inputs["roll_rate_req"]
 
-        self.rho_sea = inputs["rho_sea"]
+        self.rho_sea = inputs["rho_0"]
         self.wind_speed = inputs["wind_speed"]
-        self.Propeller_diameter_VTOL = inputs["Propeller_diameter_VTOL"]
+        # self.Propeller_diameter_VTOL = inputs["Propeller_diameter_VTOL"]
         self.T_max = inputs["T_max"]
-        self.mtow = inputs["mtow"]
+        self.mtow = inputs["MTOW"]
         self.n_prop_vtol = inputs["n_prop_vtol"]
 
         self.l_fus = inputs["l_fus"]
         self.mac = inputs["mac"]
-        self.x_cg_no_wing = inputs["x_cg_no_wing"]
-        self.mass_no_wing = inputs["mass_no_wing"]
-        self.wing_cg = inputs["wing_cg"]
-        self.wing_mass = inputs["wing_mass"]
+        
         self.x_ac_bar = inputs["x_ac_bar"]
 
         self.CL_alpha_h = inputs["CL_alpha_h"]
@@ -88,94 +87,80 @@ class StabCon:
         self.Cm_ac = inputs["Cm_ac"]
 
         self.ca_c = inputs["ca_c"]
-
-        self.lvt = inputs["lvt"]
-        self.Vv = inputs["Vv"]
-        self.ARvt = inputs["ARvt"]
-        self.taper_ratio_vt = inputs["taper_ratio_vt"]
-
-        # Prepare an outputs dictionary for later use
-        self._outputs: dict[str, Any] = self.inputs.copy()
-        self.inputs = inputs
-        # A simple `.get` keeps the attribute block short while still failing
-        # loudly if the key is missing.
-        for key, value in inputs.items():
-            setattr(self, key, value)
-
         # Make a *copy* of the inputs dict so we do not mutate the caller’s data.
         self._outputs: dict[str, Any] = inputs.copy()
 
-        self.oil_sensor_mass = inputs['oil_sensor_mass']
-        self.oil_sensor_x = inputs['oil_sensor_x']
-        self.oil_sensor_y = inputs['oil_sensor_y']
-        self.oil_sensor_z = inputs['oil_sensor_z']
-        self.wildfire_sensor_mass = inputs['wildfire_sensor_mass']
-        self.wildfire_sensor_x = inputs['wildfire_sensor_x']
-        self.wildfire_sensor_y = inputs['wildfire_sensor_y']
-        self.wildfire_sensor_z = inputs['wildfire_sensor_z']
-        self.gymbal_connection_mass = inputs['gymbal_connection_mass']
-        self.gymbal_connection_x = inputs['gymbal_connection_x']
-        self.gymbal_connection_y = inputs['gymbal_connection_y']
-        self.gymbal_connection_z = inputs['gymbal_connection_z']    
-        self.flight_controller_mass = inputs['flight_controller_mass']
-        self.flight_controller_x = inputs['flight_controller_x']
-        self.flight_controller_y = inputs['flight_controller_y']
-        self.flight_controller_z = inputs['flight_controller_z']
-        self.OBC_mass = inputs['OBC_mass']
-        self.OBC_x = inputs['OBC_x']
-        self.OBC_y = inputs['OBC_y']
-        self.OBC_z = inputs['OBC_z']
-        self.GPS_mass = inputs['GPS_mass']
-        self.GPS_x = inputs['GPS_x']
-        self.GPS_y = inputs['GPS_y']
-        self.GPS_z = inputs['GPS_z']
-        self.Mesh_network_module_mass = inputs['Mesh_network_module_mass']
-        self.Mesh_network_module_x = inputs['Mesh_network_module_x'] 
-        self.Mesh_network_module_y = inputs['Mesh_network_module_y']
-        self.Mesh_network_module_z = inputs['Mesh_network_module_z']
-        self.SATCOM_module_mass = inputs['SATCOM_module_mass']
-        self.SATCOM_module_x = inputs['SATCOM_module_x']
-        self.SATCOM_module_y = inputs['SATCOM_module_y']
-        self.SATCOM_module_z = inputs['SATCOM_module_z']
-        self.Winch_motor_mass = inputs['Winch_motor_mass']
-        self.Winch_motor_x = inputs['Winch_motor_x']  
-        self.Winch_motor_y = inputs['Winch_motor_y']
-        self.Winch_motor_z = inputs['Winch_motor_z']
-        self.payload_mass = inputs['payload_mass']
-        self.payload_x = inputs['payload_x']
-        self.payload_y = inputs['payload_y']
-        self.payload_z = inputs['payload_z']
-        self.motor_mass_cruise = inputs['motor_mass_cruise']
-        self.motor_cruise_x = inputs['motor_cruise_x']
-        self.motor_cruise_y = inputs['motor_cruise_y']  
-        self.motor_cruise_z = inputs['motor_cruise_z']
-        self.propeller_mass_cruise = inputs['propeller_mass_cruise']
-        #self.propeller_cruise_x = inputs['propeller_cruise_x']
-        #self.propeller_cruise_y = inputs['propeller_cruise_y']
-        #self.propeller_cruise_z = inputs['propeller_cruise_z']
-        self.motor_mass_VTOL = inputs['motor_mass_VTOL']
-        self.motor_front_VTOL_x = inputs['motor_front_VTOL_x']  
-        #self.motor_front_VTOL_y = inputs['motor_front_VTOL_y']
-        #self.motor_front_VTOL_z = inputs['motor_front_VTOL_z']
-        self.motor_rear_VTOL_x = inputs['motor_rear_VTOL_x']
-        #self.motor_rear_VTOL_y = inputs['motor_rear_VTOL_y']
-        #self.motor_rear_VTOL_z = inputs['motor_rear_VTOL_z']
-        self.propeller_mass_VTOL = inputs['propeller_mass_VTOL']
-        #self.propeller_VTOL_x = inputs['propeller_VTOL_x']
-        #self.propeller_VTOL_y = inputs['propeller_VTOL_y']
-        #self.propeller_VTOL_z = inputs['propeller_VTOL_z']
-        self.battery_mass = inputs['battery_mass']
-        self.battery_x = inputs['battery_x']
-        self.battery_y = inputs['battery_y']
-        self.battery_z = inputs['battery_z']
-        self.PDB_mass = inputs['PDB_mass']
-        self.PDB_x = inputs['PDB_x']
-        self.PDB_y = inputs['PDB_y']
-        self.PDB_z = inputs['PDB_z']
-        self.buoy_mass = inputs['buoy_mass']
-        self.buoy_x = inputs['buoy_x']
-        self.buoy_y = inputs['buoy_y']
-        self.buoy_z = inputs['buoy_z'] 
+        self.oil_sensor_mass = inputs["oil_sensor_mass"]
+        self.oil_sensor_x = inputs["oil_sensor_x"]
+        self.oil_sensor_y = inputs["oil_sensor_y"]
+        self.oil_sensor_z = inputs["oil_sensor_z"]
+        self.wildfire_sensor_mass = inputs["wildfire_sensor_mass"]
+        self.wildfire_sensor_x = inputs["wildfire_sensor_x"]
+        self.wildfire_sensor_y = inputs["wildfire_sensor_y"]
+        self.wildfire_sensor_z = inputs["wildfire_sensor_z"]
+        self.gymbal_connection_mass = inputs["gymbal_connection_mass"]
+        self.gymbal_connection_x = inputs["gymbal_connection_x"]
+        self.gymbal_connection_y = inputs["gymbal_connection_y"]
+        self.gymbal_connection_z = inputs["gymbal_connection_z"]
+        self.flight_controller_mass = inputs["flight_controller_mass"]
+        self.flight_controller_x = inputs["flight_controller_x"]
+        self.flight_controller_y = inputs["flight_controller_y"]
+        self.flight_controller_z = inputs["flight_controller_z"]
+        self.OBC_mass = inputs["OBC_mass"]
+        self.OBC_x = inputs["OBC_x"]
+        self.OBC_y = inputs["OBC_y"]
+        self.OBC_z = inputs["OBC_z"]
+        self.GPS_mass = inputs["GPS_mass"]
+        self.GPS_x = inputs["GPS_x"]
+        self.GPS_y = inputs["GPS_y"]
+        self.GPS_z = inputs["GPS_z"]
+        self.Mesh_network_module_mass = inputs["Mesh_network_module_mass"]
+        self.Mesh_network_module_x = inputs["Mesh_network_module_x"]
+        self.Mesh_network_module_y = inputs["Mesh_network_module_y"]
+        self.Mesh_network_module_z = inputs["Mesh_network_module_z"]
+        self.SATCOM_module_mass = inputs["SATCOM_module_mass"]
+        self.SATCOM_module_x = inputs["SATCOM_module_x"]
+        self.SATCOM_module_y = inputs["SATCOM_module_y"]
+        self.SATCOM_module_z = inputs["SATCOM_module_z"]
+        self.Winch_motor_mass = inputs["Winch_motor_mass"]
+        self.Winch_motor_x = inputs["Winch_motor_x"]
+        self.Winch_motor_y = inputs["Winch_motor_y"]
+        self.Winch_motor_z = inputs["Winch_motor_z"]
+        self.payload_mass = inputs["payload_mass"]
+        self.payload_x = inputs["payload_x"]
+        self.payload_y = inputs["payload_y"]
+        self.payload_z = inputs["payload_z"]
+        self.motor_mass_cruise = inputs["motor_mass_cruise"]
+        self.motor_cruise_x = inputs["motor_cruise_x"]
+        self.motor_cruise_y = inputs["motor_cruise_y"]
+        self.motor_cruise_z = inputs["motor_cruise_z"]
+        self.propeller_mass_cruise = inputs["propeller_mass_cruise"]
+        # self.propeller_cruise_x = inputs['propeller_cruise_x']
+        # self.propeller_cruise_y = inputs['propeller_cruise_y']
+        # self.propeller_cruise_z = inputs['propeller_cruise_z']
+        self.motor_mass_VTOL = inputs["motor_mass_VTOL"]
+        self.motor_front_VTOL_x = inputs["motor_front_VTOL_x"]
+        # self.motor_front_VTOL_y = inputs['motor_front_VTOL_y']
+        # self.motor_front_VTOL_z = inputs['motor_front_VTOL_z']
+        self.motor_rear_VTOL_x = inputs["motor_rear_VTOL_x"]
+        # self.motor_rear_VTOL_y = inputs['motor_rear_VTOL_y']
+        # self.motor_rear_VTOL_z = inputs['motor_rear_VTOL_z']
+        self.propeller_mass_VTOL = inputs["propeller_mass_VTOL"]
+        # self.propeller_VTOL_x = inputs['propeller_VTOL_x']
+        # self.propeller_VTOL_y = inputs['propeller_VTOL_y']
+        # self.propeller_VTOL_z = inputs['propeller_VTOL_z']
+        self.battery_mass = inputs["battery_mass"]
+        self.battery_x = inputs["battery_x"]
+        self.battery_y = inputs["battery_y"]
+        self.battery_z = inputs["battery_z"]
+        self.PDB_mass = inputs["PDB_mass"]
+        self.PDB_x = inputs["PDB_x"]
+        self.PDB_y = inputs["PDB_y"]
+        self.PDB_z = inputs["PDB_z"]
+        self.buoy_mass = inputs["buoy_mass"]
+        self.buoy_x = inputs["buoy_x"]
+        self.buoy_y = inputs["buoy_y"]
+        self.buoy_z = inputs["buoy_z"]
         self.wildfire_fuselage_x_cg = inputs["wildfire_fuselage_x_cg"]
         self.oil_spill_fuselage_x_cg = inputs["oil_spill_fuselage_x_cg"]
         self.wildfire_wing_x_cg = inputs["wildfire_wing_x_cg"]
@@ -184,10 +169,8 @@ class StabCon:
         self.oil_spill_fuselage_mass = inputs["oil_spill_fuselage_mass"]
         self.wildfire_wing_mass = inputs["wildfire_wing_mass"]
         self.oil_spill_wing_mass = inputs["oil_spill_wing_mass"]
-        self.mac = inputs['mac'] 
-        self.l_fus = inputs['l_fus']
-        
-
+        self.mac = inputs["mac"]
+        self.l_fus = inputs["l_fus"]
 
     # ---------------------------------------------------------------------#
     # Main Functions                                                       #
@@ -219,8 +202,15 @@ class StabCon:
             raise ValueError(f"Invalid aileron stations: bi={self.bi}, bo={self.bo}")
 
         # Precompute arrays that stay constant
-        spanwise_stations = np.linspace(0.0, half_span, 1000)
-        chord = np.full_like(spanwise_stations, self.wing_chord)
+        spanwise_stations = np.linspace(0.0, half_span, 100)
+        chord = (
+            self.wing_root_chord
+            - ((self.wing_root_chord - self.wing_tip_chord) / half_span)
+            * spanwise_stations
+        )
+        print("spanwise_stations =", spanwise_stations)
+        print("chord =", chord)
+        print("roll_rate_req =", self.roll_rate_req)
 
         # Compute Cl_p once (unchanging with bo)
         Cl_p = -(
@@ -277,46 +267,7 @@ class StabCon:
 
             self.bo = new_bo
 
-    # ~~~ Vertical tailplane sizing ~~~
-
-    def size_vertical_tailplane(self) -> float:
-        """
-        Calculate the vertical tailplane area, span, MAC, root chord, and tip chord.
-
-        Returns:
-
-            vertical_tailplane_area (float): Area of the vertical tailplane in square meters.
-            vertical_tailplane_span (float): Span of the vertical tailplane in meters.
-            vertical_tailplane_mac (float): Mean Aerodynamic Chord (MAC) of the vertical tailplane in meters.
-            vertical_tailplane_root_chord (float): Root chord of the vertical tailplane in meters.
-            vertical_tailplane_tip_chord (float): Tip chord of the vertical tailplane in meters.
-        """
-
-        vertical_tailplane_area = self.Vv * self.wing_span * self.wing_area / self.lvt
-        vertical_tailplane_span = np.sqrt(vertical_tailplane_area * self.ARvt)
-        vertical_tailplane_mac = vertical_tailplane_area / vertical_tailplane_span
-        vertical_tailplane_root_chord = (
-            (3 / 2)
-            * vertical_tailplane_mac
-            * (
-                (1 + self.taper_ratio_vt)
-                / (1 + self.taper_ratio_vt + self.taper_ratio_vt**2)
-            )
-        )
-        vertical_tailplane_tip_chord = (
-            vertical_tailplane_root_chord * self.taper_ratio_vt
-        )
-
-        return (
-            vertical_tailplane_area,
-            vertical_tailplane_span,
-            vertical_tailplane_mac,
-            vertical_tailplane_root_chord,
-            vertical_tailplane_tip_chord,
-        )
-    
-    def size_rudder(self):
-        return None
+    # ~~~ Rudder sizing ~~~
 
     # ~~~ VTOL sizing ~~~
 
@@ -340,9 +291,9 @@ class StabCon:
         )
 
         return minimum_boom_arm
-    
+
     # ~~~ C.G Calculation ~~~
-    
+
     def calculate_UAV_cg(self) -> dict:
         """Calculate the center of gravity (c.g.) of the UAV for different configurations."""
 
@@ -351,7 +302,7 @@ class StabCon:
             if configuration == "wildfire":
                 sensor_mass = self.wildfire_sensor_mass
                 sensor_x = self.wildfire_sensor_x
-                sensor_y = self.wildfire_sensor_y   
+                sensor_y = self.wildfire_sensor_y
                 sensor_z = self.wildfire_sensor_z
                 buoy_mass = 0
                 buoy_x = 0
@@ -360,7 +311,7 @@ class StabCon:
             else:  # oil_spill
                 sensor_mass = self.oil_sensor_mass
                 sensor_x = self.oil_sensor_x
-                sensor_y = self.oil_sensor_y   
+                sensor_y = self.oil_sensor_y
                 sensor_z = self.oil_sensor_z
                 buoy_mass = self.buoy_mass
                 buoy_x = self.buoy_x
@@ -369,18 +320,19 @@ class StabCon:
 
             # Calculate the c.g of the fuselage group
             numerator_x_fuselage = (
-                sensor_mass * sensor_x +
-                self.gymbal_connection_mass * self.gymbal_connection_x +
-                self.flight_controller_mass * self.flight_controller_x +
-                self.OBC_mass * self.OBC_x +
-                self.GPS_mass * self.GPS_x +
-                self.Mesh_network_module_mass * self.Mesh_network_module_x +
-                self.SATCOM_module_mass * self.SATCOM_module_x +
-                self.Winch_motor_mass * self.Winch_motor_x +
-                (self.motor_mass_cruise + self.propeller_mass_cruise) * self.motor_cruise_x +
-                self.payload_mass * self.payload_x +
-                buoy_mass * buoy_x 
-                # add structure, tail, landing gear 
+                sensor_mass * sensor_x
+                + self.gymbal_connection_mass * self.gymbal_connection_x
+                + self.flight_controller_mass * self.flight_controller_x
+                + self.OBC_mass * self.OBC_x
+                + self.GPS_mass * self.GPS_x
+                + self.Mesh_network_module_mass * self.Mesh_network_module_x
+                + self.SATCOM_module_mass * self.SATCOM_module_x
+                + self.Winch_motor_mass * self.Winch_motor_x
+                + (self.motor_mass_cruise + self.propeller_mass_cruise)
+                * self.motor_cruise_x
+                + self.payload_mass * self.payload_x
+                + buoy_mass * buoy_x
+                # add structure, tail, landing gear
             )
 
             # numerator_y_fuselage = (
@@ -394,9 +346,9 @@ class StabCon:
             #     self.SATCOM_module_mass * self.SATCOM_module_y +
             #     self.Winch_motor_mass * self.Winch_motor_y +
             #     (self.motor_mass_cruise + self.propeller_mass_cruise) * self.motor_cruise_y +
-                
+
             #     self.payload_mass * self.payload_y +
-            #     buoy_mass * buoy_y 
+            #     buoy_mass * buoy_y
             #     # add structure, tail, landing gear
             # )
 
@@ -411,30 +363,29 @@ class StabCon:
             #     self.SATCOM_module_mass * self.SATCOM_module_z +
             #     self.Winch_motor_mass * self.Winch_motor_z +
             #     (self.motor_mass_cruise + self.propeller_mass_cruise) * self.motor_cruise_z +
-                
-            #     self.payload_mass * self.payload_z + 
+
+            #     self.payload_mass * self.payload_z +
             #     buoy_mass * buoy_z
-            #     # add structure, tail, landing gear 
+            #     # add structure, tail, landing gear
             # )
 
             fuselage_mass = (
-                sensor_mass +
-                self.gymbal_connection_mass +
-                self.flight_controller_mass +
-                self.OBC_mass +
-                self.GPS_mass +
-                self.Mesh_network_module_mass +
-                self.SATCOM_module_mass +
-                self.Winch_motor_mass +
-                self.payload_mass +
-                buoy_mass + 
-                self.motor_mass_cruise +
-                self.propeller_mass_cruise 
-                # add structure, tail, landing gear 
+                sensor_mass
+                + self.gymbal_connection_mass
+                + self.flight_controller_mass
+                + self.OBC_mass
+                + self.GPS_mass
+                + self.Mesh_network_module_mass
+                + self.SATCOM_module_mass
+                + self.Winch_motor_mass
+                + self.payload_mass
+                + buoy_mass
+                + self.motor_mass_cruise
+                + self.propeller_mass_cruise
+                # add structure, tail, landing gear
             )
             print("numerator_x_fuselage =", numerator_x_fuselage)
             print("fuselage_mass =", fuselage_mass)
-            
 
             fuselage_x_cg = numerator_x_fuselage / fuselage_mass
             print("fuselage_x_cg =", fuselage_x_cg)
@@ -443,17 +394,21 @@ class StabCon:
 
             # Wing group
             numerator_x_wing = (
-                2 * (self.motor_mass_VTOL + self.propeller_mass_VTOL) * self.motor_front_VTOL_x +
-                2 * (self.motor_mass_VTOL + self.propeller_mass_VTOL) * self.motor_rear_VTOL_x +
-                self.battery_mass * self.battery_x +
-                self.PDB_mass * self.PDB_x 
+                2
+                * (self.motor_mass_VTOL + self.propeller_mass_VTOL)
+                * self.motor_front_VTOL_x
+                + 2
+                * (self.motor_mass_VTOL + self.propeller_mass_VTOL)
+                * self.motor_rear_VTOL_x
+                + self.battery_mass * self.battery_x
+                + self.PDB_mass * self.PDB_x
                 # add wing structure here
             )
 
             wing_mass = (
-                4 * self.motor_mass_VTOL +
-                self.battery_mass + 
-                self.PDB_mass
+                4 * self.motor_mass_VTOL
+                + self.battery_mass
+                + self.PDB_mass
                 # add wing structure here
             )
 
@@ -464,8 +419,8 @@ class StabCon:
                 "fuselage_mass": fuselage_mass,
                 "wing_mass": wing_mass,
                 "fuselage_x_cg": fuselage_x_cg,
-                #"fuselage_y_cg": fuselage_y_cg,
-                #"fuselage_z_cg": fuselage_z_cg,
+                # "fuselage_y_cg": fuselage_y_cg,
+                # "fuselage_z_cg": fuselage_z_cg,
                 "wing_x_cg": wing_x_cg,
             }
 
@@ -474,7 +429,7 @@ class StabCon:
     # ~~~ Loading diagram ~~~
     def loading_diagram(self) -> tuple[np.ndarray, np.ndarray]:
         x_lemac = np.linspace(0.0, self.l_fus - self.mac, 10)
-        
+
         results = {}
         for configuration in ["wildfire", "oil_spill"]:
             if configuration == "wildfire":
@@ -487,18 +442,17 @@ class StabCon:
                 wing_x_cg = self.oil_spill_wing_x_cg
                 fuselage_mass = self.oil_spill_fuselage_mass
                 wing_mass = self.oil_spill_wing_mass
-            
+
             x_cg = (
-                fuselage_x_cg * fuselage_mass
-                + (wing_x_cg + x_lemac) * wing_mass
+                fuselage_x_cg * fuselage_mass + (wing_x_cg + x_lemac) * wing_mass
             ) / (fuselage_mass + wing_mass)
 
             x_cg_bar = (x_cg - x_lemac) / self.mac
 
             results[configuration] = {
-            "x_lemac": x_lemac,
-            "x_cg": x_cg,
-            "x_cg_bar": x_cg_bar,
+                "x_lemac": x_lemac,
+                "x_cg": x_cg,
+                "x_cg_bar": x_cg_bar,
             }
         return results
 
@@ -508,15 +462,15 @@ class StabCon:
         """Return the control & stability curves and the non-dimensional CG track."""
         # Create an array with positions for lemac.
         x_lemac = np.linspace(0.0, self.l_fus - self.mac, 5)
-        print(x_lemac)
 
-        x_cg = (
-            self.x_cg_no_wing * self.mass_no_wing
-            + (self.wing_cg + x_lemac) * self.wing_mass
-        ) / (self.mass_no_wing + self.wing_mass)
+        # x_cg = (
+        #     self.x_cg_no_wing * self.mass_no_wing
+        #     + (self.wing_cg + x_lemac) * self.wing_mass
+        # ) / (self.mass_no_wing + self.wing_mass)
 
-        x_cg_bar = (x_cg - x_lemac) / self.mac
-        print(x_cg_bar)
+        # x_cg_bar = (x_cg - x_lemac) / self.mac
+        # print(x_cg_bar)
+        x_cg_bar = np.linspace(0.0,1.0,100)
 
         sh_s_stability = (
             1.0
@@ -564,23 +518,24 @@ class StabCon:
 # Basic sanity check                                                         #
 # ---------------------------------------------------------------------------#
 if __name__ == "__main__":  # pragma: no cover
-    
+
     inputs = {}
     inputs.update(constantsi)
-    inputs.update(fi)
-    inputs.update(hi)          
+    inputs.update(requirementsi)
+    inputs.update(hi)
     inputs.update(pi)
-    inputs.update(di)   
-    inputs.update(propi)  
+    inputs.update(di)
+    inputs.update(propi)
     inputs.update(sci)
     stabcon = StabCon(inputs)
-    
+
     stabcon.size_ailerons()
     print("Ailerons sized successfully.")
     p_achieved, bo = stabcon.size_ailerons()
     print(
         f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
     )
+
 
     plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[0], label="Control")
     plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[1], label="Stability")
@@ -591,6 +546,8 @@ if __name__ == "__main__":  # pragma: no cover
     plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
     plt.legend()
     plt.grid()
+    plt.xlim(0, 1)
+    plt.ylim(0,1)
     plt.show()
     print("Scissor plot generated successfully.")
 
@@ -601,8 +558,6 @@ if __name__ == "__main__":  # pragma: no cover
     print("Vertical tailplane root chord: ", stabcon.size_vertical_tailplane()[3])
     print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
 
-
-    
     # CG calculation
     cg_results = stabcon.calculate_UAV_cg()
     for config, result in cg_results.items():
@@ -610,7 +565,7 @@ if __name__ == "__main__":  # pragma: no cover
         setattr(stabcon, f"{config}_wing_x_cg", result["wing_x_cg"])
         setattr(stabcon, f"{config}_fuselage_mass", result["fuselage_mass"])
         setattr(stabcon, f"{config}_wing_mass", result["wing_mass"])
-    
+
         print(f"\n{config.upper()} configuration:")
         print(f"  Fuselage mass: {result['fuselage_mass']:.3f} kg")
         print(f"  Fuselage CG (x): {result['fuselage_x_cg']:.3f} m")
@@ -632,12 +587,20 @@ if __name__ == "__main__":  # pragma: no cover
             print("oil_spill_wing_mass:", stabcon.oil_spill_wing_mass)
 
     for config in loading_results:
-        print(f"{config} x_cg_bar: min={np.min(loading_results[config]['x_cg_bar'])}, max={np.max(loading_results[config]['x_cg_bar'])}")
-        print(f"{config} x_lemac / l_fus: min={np.min(loading_results[config]['x_lemac'] / stabcon.l_fus)}, max={np.max(loading_results[config]['x_lemac'] / stabcon.l_fus)}")
+        print(
+            f"{config} x_cg_bar: min={np.min(loading_results[config]['x_cg_bar'])}, max={np.max(loading_results[config]['x_cg_bar'])}"
+        )
+        print(
+            f"{config} x_lemac / l_fus: min={np.min(loading_results[config]['x_lemac'] / stabcon.l_fus)}, max={np.max(loading_results[config]['x_lemac'] / stabcon.l_fus)}"
+        )
 
     for config in loading_results:
-        x_vals = loading_results[config]["x_cg_bar"]          # x-axis: non-dimensional CG position
-        y_vals = loading_results[config]["x_lemac"] / stabcon.l_fus  # y-axis: LEMAC / fuselage length
+        x_vals = loading_results[config][
+            "x_cg_bar"
+        ]  # x-axis: non-dimensional CG position
+        y_vals = (
+            loading_results[config]["x_lemac"] / stabcon.l_fus
+        )  # y-axis: LEMAC / fuselage length
         plt.plot(x_vals, y_vals, label=f"{config} config")
 
     plt.ylabel("LEMAC / l_fus")
@@ -645,4 +608,6 @@ if __name__ == "__main__":  # pragma: no cover
     plt.title("Loading Diagram for Both Configurations")
     plt.legend()
     plt.grid(True)
+    plt.xlim(0, 1)
     plt.show()
+    
