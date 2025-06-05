@@ -351,6 +351,8 @@ stab_n_con_inputs = {
     "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
     "roll_rate_req": np.deg2rad(10),  # rad/s, guesstimate
     "v_ref": 20.0,  # m/s, reference velocity for roll rate requirement
+
+    #cg calculations
     "wildfire_fuselage_x_cg": 0,  # m, initially set to 0 and updated later
     "oil_spill_fuselage_x_cg": 0,  # m, initially set to 0 and updated later
     "wildfire_wing_x_cg": 0,  # m, initially set to 0 and updated later
@@ -359,21 +361,26 @@ stab_n_con_inputs = {
     "oil_spill_fuselage_mass": 0,  # kg, initially set to 0 and updated later
     "wildfire_wing_mass": 0,  # kg, initially set to 0 and updated later
     "oil_spill_wing_mass": 0,  # kg, initially set to 0 and updated later
-    # "mass_no_wing": 22.0,  # kg, guesstimate for the mass without the
-    # "wing_mass": 3,  # kg, guesstimate for the mass of the wing
-    # "wing_cg": 0.3,  # m, x-coordinate of the center of gravity of the wing from LEMAC
+    
+    #control and stability curve parameters
     "l_fus": 2,  # m, length of the fuselage
+    "fuselage_diameter": 0.4,  # m, diameter of the fuselage
     "lh": 1,  # m, horizontal distance from the wing ac to the horizontal tail ac
     "mac": 0.333,  # m, mean aerodynamic chord of the wing
-    "x_ac_bar": 0.25,  # m, x-coordinate of the aerodynamic center relative to the leading edge of the wing
+    "x_ac_bar_wing": 0.24,  # m, x-coordinate of the aerodynamic center relative to the leading edge of the wing, based on ADSEE estimation lecture 8
     "CL_alpha_Ah": 0.08,  # Finite wing lift curve slope [1/rad]
     "CL_alpha_h": 0.06,  # Horizontal tail lift curve slope [-]
     "d_epsilon_d_alpha": 0.3,  # Downwash gradient [rad/(rad*m)]
     "Vh_V": 0.85,  # Horizontal tail velocity to wing velocity ratio [-]
-    "Cm_ac": 0.3,  # Moment coefficient at the aerodynamic center of the wing [-]
+    "Cm_ac_wing": -0.11,  # Moment coefficient at the aerodynamic center of the wing at zero lift [-] based on XFLR5
+    "AR_h": 3.5,  # Aspect ratio of the horizontal tail [-]
+    "CL_A-h": 0.62,  # Lift coefficient of the aircraft - tail at cruise conditions [-]
+    
+    #other parameters
     "wind_speed": 30 / 3.6,  # m/s, wind speed from requirement
     "rpm_max": 4200,  # rpm
     "T_max": 17.6 * 9.81,  # N, maximum thrust per motor.
+
 }
 inputs.update(stab_n_con_inputs)
 
