@@ -37,6 +37,8 @@ class Structures:
 
         self.M_to = inputs["M_to"]
 
+        self.mass_margin = inputs["mass_margin"]
+
         self.mass_payload = inputs["payload_mass"]
         # self.mass_hardware = inputs["mass_hardware"]
         self.mass_battery = inputs["mass_battery"]
@@ -64,23 +66,54 @@ class Structures:
 
     # ~~~ Intermediate Functions ~~~
 
-    def mass_fractions(self):
-        pass
-
 
     def calc_wing_mass(self) -> float:
         pass
 
-    
-    def total_mass(self) -> float:
-
-        self.mass_structure = 5 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-        self.mass_hardware = 3
+    def calc_structure_mass(self) -> float:
         
-        masses_nopay = np.array([self.mass_hardware, self.mass_battery, self.mass_propulsion, self.mass_structure])
-        mass_nopay = np.sum(masses_nopay)
+        MF_structure = 0.3  # THIS NEEDS TO BE UPDATED
+        self.mass_structure = self.M_to * MF_structure
 
-        self.leftover_for_payload = self.M_to - mass_nopay
+    def mass_fractions(self):
+        pass
+
+        """
+        Components:
+
+        - Sensors
+        - Propulsion
+        - Battery
+        - Structure + fuselage
+        - Wing_group (including tail)
+        - 
+        - Payload (aerogel)
+        """
+
+
+        mass_sensors = 10
+
+        self.MF_sensors = 10/self.M_to # NEEDS TO BE UPDATED
+        self.MF_propulsion = self.mass_propulsion / self.M_to
+        self.MF_winggroup = 6/self.M_to # NEEDS TO BE UPDATED
+        self.MF_battery = self.mass_battery / self.M_to
+        self.MF_structure = 5/self.M_to # NEEDS TO BE UPDATED
+        self.MF_payload = self.mass_payload / self.M_to
+
+        MF_non_payload = np.array([self.MF_sensors, self.MF_propulsion, self.MF_battery, self.MF_winggroup, self.MF_structure])
+        
+        #optimizing for max payload:
+        margin = 0.05  # 5% margin for uncertainties
+        self.MF_payload = 1 - np.sum(MF_non_payload) * margin
+
+        if self.MF_payload < 0:
+            raise ValueError("The mass fraction for the payload is negative. Please check the mass fractions of the other components.")
+
+        # Update payload mass
+        self.mass_payload = self.M_to * self.MF_payload
+        
+
+
 
     def NVM_cruise(self):
         """
@@ -327,9 +360,9 @@ class Structures:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         
-        self.total_mass()
+        self.mass_fractions()
 
-        self.outputs["payload_mass"] = self.leftover_for_payload   # updated mass of the payload (with an added margin to avoid exceeding the MTOW requirement)
+        self.outputs["payload_mass"] = self.mass_payload   # updated mass of the payload (with an added margin to avoid exceeding the MTOW requirement)
         self.outputs['mass_structure'] = self.mass_structure # kg
 
 

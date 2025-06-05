@@ -29,8 +29,8 @@ for _ in range(total_iterations):
     deployment = Deployment(outputs, strategy='perimeter', amt=outputs['mission_perimeter'])
     outputs = deployment.get_all()
 
-    hardware = Hardware(outputs)
-    outputs = hardware.get_all()
+    # hardware = Hardware(outputs)
+    # outputs = hardware.get_all()
 
     mission = Mission(outputs, verbose=False)
     outputs = mission.get_all()
