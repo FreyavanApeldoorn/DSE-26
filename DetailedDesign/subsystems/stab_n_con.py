@@ -19,10 +19,10 @@ import matplotlib.pyplot as plt
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT))
 
-from DetailedDesign.funny_inputs import constants_funny_inputs as constantsi
-from DetailedDesign.funny_inputs import stab_n_con_funny_inputs as fi
 
 # from DetailedDesign.funny_inputs import structures_funny_inputs as fi
+from DetailedDesign.inputs import constants_inputs as constantsi
+from DetailedDesign.inputs import requirements_inputs as requirementsi
 from DetailedDesign.inputs import hardware_inputs as hi
 from DetailedDesign.inputs import component_locations as pi
 from DetailedDesign.inputs import deployment_inputs as di
@@ -67,19 +67,16 @@ class StabCon:
 
         self.roll_rate_req = inputs["roll_rate_req"]
 
-        self.rho_sea = inputs["rho_sea"]
+        self.rho_sea = inputs["rho_0"]
         self.wind_speed = inputs["wind_speed"]
         # self.Propeller_diameter_VTOL = inputs["Propeller_diameter_VTOL"]
         self.T_max = inputs["T_max"]
-        self.mtow = inputs["mtow"]
+        self.mtow = inputs["MTOW"]
         self.n_prop_vtol = inputs["n_prop_vtol"]
 
         self.l_fus = inputs["l_fus"]
         self.mac = inputs["mac"]
-        self.x_cg_no_wing = inputs["x_cg_no_wing"]
-        self.mass_no_wing = inputs["mass_no_wing"]
-        self.wing_cg = inputs["wing_cg"]
-        self.wing_mass = inputs["wing_mass"]
+        
         self.x_ac_bar = inputs["x_ac_bar"]
 
         self.CL_alpha_h = inputs["CL_alpha_h"]
@@ -466,13 +463,14 @@ class StabCon:
         # Create an array with positions for lemac.
         x_lemac = np.linspace(0.0, self.l_fus - self.mac, 5)
 
-        x_cg = (
-            self.x_cg_no_wing * self.mass_no_wing
-            + (self.wing_cg + x_lemac) * self.wing_mass
-        ) / (self.mass_no_wing + self.wing_mass)
+        # x_cg = (
+        #     self.x_cg_no_wing * self.mass_no_wing
+        #     + (self.wing_cg + x_lemac) * self.wing_mass
+        # ) / (self.mass_no_wing + self.wing_mass)
 
-        x_cg_bar = (x_cg - x_lemac) / self.mac
-        print(x_cg_bar)
+        # x_cg_bar = (x_cg - x_lemac) / self.mac
+        # print(x_cg_bar)
+        x_cg_bar = np.linspace(0.0,1.0,100)
 
         sh_s_stability = (
             1.0
@@ -523,7 +521,7 @@ if __name__ == "__main__":  # pragma: no cover
 
     inputs = {}
     inputs.update(constantsi)
-    inputs.update(fi)
+    inputs.update(requirementsi)
     inputs.update(hi)
     inputs.update(pi)
     inputs.update(di)
@@ -538,7 +536,6 @@ if __name__ == "__main__":  # pragma: no cover
         f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
     )
 
-    """
 
     plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[0], label="Control")
     plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[1], label="Stability")
@@ -549,6 +546,8 @@ if __name__ == "__main__":  # pragma: no cover
     plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
     plt.legend()
     plt.grid()
+    plt.xlim(0, 1)
+    plt.ylim(0,1)
     plt.show()
     print("Scissor plot generated successfully.")
 
@@ -611,4 +610,4 @@ if __name__ == "__main__":  # pragma: no cover
     plt.grid(True)
     plt.xlim(0, 1)
     plt.show()
-    """
+    
