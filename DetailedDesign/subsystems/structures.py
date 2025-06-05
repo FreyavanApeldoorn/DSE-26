@@ -56,7 +56,7 @@ class Structures:
         self.titanium_density = inputs['titanium_density']
         self.titanium_E = inputs['titanium_E']
         self.max_deflection_VTOL_boom = inputs['max_deflection_VTOL_boom']
-        self.load_factor = inputs['load_factor']
+        self.load_factor = inputs['max_load_factor']
 
         self.VTOL_boom_thickness = self.determine_VTOL_boom_thickness()
 

@@ -150,6 +150,7 @@ aerodynamics_inputs = {
     "min_load_factor": -1.0,  # Minimum load factor for maneuvering
     "CL_max": 1.34,  # Maximum lift coefficient
     "wing_loading": 217,  # Wing loading in N/m^2
+    "CL_alpha": 0.09 * 180/np.pi * 0.85,  # Lift curve slope in 1/deg
 }
 inputs.update(aerodynamics_inputs)
 
