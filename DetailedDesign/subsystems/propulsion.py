@@ -122,10 +122,12 @@ class Propulsion:
 
         self.power_transition(vtol_power)
 
+        
+
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         self.outputs["power_required_VTOL"] = vtol_power
         self.outputs["power_required_cruise"] = optimal_cruise_power
-        self.outputs["power_required_hover"] = vtol_power # self.P_hov
+        self.outputs["power_required_hover"] = vtol_power # self.P_hov - this was changed as hover power is incorrect (apparently)
     
         self.outputs["power_available_VTOL"] = self.power_available_VTOL
         self.outputs["power_available_cruise"] = self.power_available_cruise
@@ -154,4 +156,3 @@ if __name__ == '__main__': # pragma: no cover
     print(math.isclose(res['power_required_cruise'], 2000, rel_tol=1000))
     print(math.isclose(res['propeller_diameter_cruise'], 0.45, rel_tol=0.5))
     print(res)
-    

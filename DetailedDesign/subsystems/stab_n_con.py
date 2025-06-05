@@ -19,10 +19,11 @@ import matplotlib.pyplot as plt
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT))
 
-from DetailedDesign.funny_inputs import constants_funny_inputs as constantsi
-from DetailedDesign.funny_inputs import stab_n_con_funny_inputs as fi
 
 # from DetailedDesign.funny_inputs import structures_funny_inputs as fi
+from DetailedDesign.inputs import constants_inputs as constantsi
+from DetailedDesign.inputs import requirements_inputs as requirementsi
+from DetailedDesign.inputs import uav_inputs as auvi
 from DetailedDesign.inputs import hardware_inputs as hi
 from DetailedDesign.inputs import component_locations as pi
 from DetailedDesign.inputs import deployment_inputs as di
@@ -51,7 +52,8 @@ class StabCon:
         self.inputs = inputs.copy()  # Copy to avoid mutating caller's data
 
         self.wing_span = inputs["wing_span"]
-        self.wing_chord = inputs["wing_chord"]
+        self.wing_root_chord = inputs["wing_root_chord"]
+        self.wing_tip_chord = inputs["wing_tip_chord"]
         self.wing_area = inputs["wing_area"]
         self.cl_alpha = inputs["cl_alpha"]
         self.cd_0 = inputs["cd_0"]
@@ -66,46 +68,37 @@ class StabCon:
 
         self.roll_rate_req = inputs["roll_rate_req"]
 
-        self.rho_sea = inputs["rho_sea"]
+        self.rho_sea = inputs["rho_0"]
         self.wind_speed = inputs["wind_speed"]
-        self.Propeller_diameter_VTOL = inputs["Propeller_diameter_VTOL"]
+        # self.Propeller_diameter_VTOL = inputs["Propeller_diameter_VTOL"]
         self.T_max = inputs["T_max"]
-        self.mtow = inputs["mtow"]
+        self.mtow = inputs["MTOW"]
         self.n_prop_vtol = inputs["n_prop_vtol"]
 
         self.l_fus = inputs["l_fus"]
         self.mac = inputs["mac"]
-        self.x_cg_no_wing = inputs["x_cg_no_wing"]
-        self.mass_no_wing = inputs["mass_no_wing"]
-        self.wing_cg = inputs["wing_cg"]
-        self.wing_mass = inputs["wing_mass"]
-        self.x_ac_bar = inputs["x_ac_bar"]
+        
+        self.x_ac_bar_wing = inputs["x_ac_bar_wing"]
 
         self.CL_alpha_h = inputs["CL_alpha_h"]
         self.CL_alpha_Ah = inputs["CL_alpha_Ah"]
         self.d_epsilon_d_alpha = inputs["d_epsilon_d_alpha"]
         self.lh = inputs["lh"]
         self.Vh_V = inputs["Vh_V"]
-        self.Cm_ac = inputs["Cm_ac"]
+        #self.Cm_ac = inputs["Cm_ac"] # this should be deleted as input because it is calculated based on other parameters
 
         self.ca_c = inputs["ca_c"]
-
-        self.lvt = inputs["lvt"]
-        self.Vv = inputs["Vv"]
-        self.ARvt = inputs["ARvt"]
-        self.taper_ratio_vt = inputs["taper_ratio_vt"]
-
-        # Prepare an outputs dictionary for later use
-        self._outputs: dict[str, Any] = self.inputs.copy()
-        self.inputs = inputs
-        # A simple `.get` keeps the attribute block short while still failing
-        # loudly if the key is missing.
-        for key, value in inputs.items():
-            setattr(self, key, value)
-
+        self.AR_h = inputs["AR_h"]
+        self.Cm_ac_wing = inputs["Cm_ac_wing"]
+        self.CL_Aminush = inputs["CL_A-h"]
+        self.V_cruise = inputs["V_cruise"]
+        self.fuselage_diameter = inputs["fuselage_diameter"]
+        
+        
         # Make a *copy* of the inputs dict so we do not mutate the caller’s data.
         self._outputs: dict[str, Any] = inputs.copy()
 
+        # initialize all attributes from inputs for cg calculation
         self.oil_sensor_mass = inputs["oil_sensor_mass"]
         self.oil_sensor_x = inputs["oil_sensor_x"]
         self.oil_sensor_y = inputs["oil_sensor_y"]
@@ -151,20 +144,10 @@ class StabCon:
         self.motor_cruise_y = inputs["motor_cruise_y"]
         self.motor_cruise_z = inputs["motor_cruise_z"]
         self.propeller_mass_cruise = inputs["propeller_mass_cruise"]
-        # self.propeller_cruise_x = inputs['propeller_cruise_x']
-        # self.propeller_cruise_y = inputs['propeller_cruise_y']
-        # self.propeller_cruise_z = inputs['propeller_cruise_z']
         self.motor_mass_VTOL = inputs["motor_mass_VTOL"]
         self.motor_front_VTOL_x = inputs["motor_front_VTOL_x"]
-        # self.motor_front_VTOL_y = inputs['motor_front_VTOL_y']
-        # self.motor_front_VTOL_z = inputs['motor_front_VTOL_z']
         self.motor_rear_VTOL_x = inputs["motor_rear_VTOL_x"]
-        # self.motor_rear_VTOL_y = inputs['motor_rear_VTOL_y']
-        # self.motor_rear_VTOL_z = inputs['motor_rear_VTOL_z']
-        self.propeller_mass_VTOL = inputs["propeller_mass_VTOL"]
-        # self.propeller_VTOL_x = inputs['propeller_VTOL_x']
-        # self.propeller_VTOL_y = inputs['propeller_VTOL_y']
-        # self.propeller_VTOL_z = inputs['propeller_VTOL_z']
+        self.propeller_mass_VTOL = inputs["propeller_mass_VTOL"] 
         self.battery_mass = inputs["battery_mass"]
         self.battery_x = inputs["battery_x"]
         self.battery_y = inputs["battery_y"]
@@ -218,8 +201,15 @@ class StabCon:
             raise ValueError(f"Invalid aileron stations: bi={self.bi}, bo={self.bo}")
 
         # Precompute arrays that stay constant
-        spanwise_stations = np.linspace(0.0, half_span, 1000)
-        chord = np.full_like(spanwise_stations, self.wing_chord)
+        spanwise_stations = np.linspace(0.0, half_span, 100)
+        chord = (
+            self.wing_root_chord
+            - ((self.wing_root_chord - self.wing_tip_chord) / half_span)
+            * spanwise_stations
+        )
+        print("spanwise_stations =", spanwise_stations)
+        print("chord =", chord)
+        print("roll_rate_req =", self.roll_rate_req)
 
         # Compute Cl_p once (unchanging with bo)
         Cl_p = -(
@@ -393,11 +383,11 @@ class StabCon:
                 + self.propeller_mass_cruise
                 # add structure, tail, landing gear
             )
-            print("numerator_x_fuselage =", numerator_x_fuselage)
-            print("fuselage_mass =", fuselage_mass)
+            # print("numerator_x_fuselage =", numerator_x_fuselage)
+            # print("fuselage_mass =", fuselage_mass)
 
             fuselage_x_cg = numerator_x_fuselage / fuselage_mass
-            print("fuselage_x_cg =", fuselage_x_cg)
+            # print("fuselage_x_cg =", fuselage_x_cg)
             # fuselage_y_cg = numerator_y_fuselage / fuselage_mass
             # fuselage_z_cg = numerator_z_fuselage / fuselage_mass
 
@@ -437,7 +427,7 @@ class StabCon:
 
     # ~~~ Loading diagram ~~~
     def loading_diagram(self) -> tuple[np.ndarray, np.ndarray]:
-        x_lemac = np.linspace(0.0, self.l_fus - self.mac, 10)
+        x_lemac = np.linspace(0.5, self.l_fus - 0.5, 10)
 
         results = {}
         for configuration in ["wildfire", "oil_spill"]:
@@ -469,37 +459,45 @@ class StabCon:
 
     def scissor_plot(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return the control & stability curves and the non-dimensional CG track."""
-        # Create an array with positions for lemac.
-        x_lemac = np.linspace(0.0, self.l_fus - self.mac, 5)
+        # Create an array with positions for lemac and the corresponding X_cg_bar values
+        
+        x_cg_bar = np.linspace(-0.5, 1.5, 100)
+        
+        # some preliminary calculations needed 
+        x_ac_bar =  self.x_ac_bar_wing  
+                #((1.8 * self.fuselage_diameter **2 * x_lemac )/ (self.CL_alpha_Ah * self.wing_span * self.mac )) #This would be the fuselage contribution - igor
 
-        x_cg = (
-            self.x_cg_no_wing * self.mass_no_wing
-            + (self.wing_cg + x_lemac) * self.wing_mass
-        ) / (self.mass_no_wing + self.wing_mass)
-
-        x_cg_bar = (x_cg - x_lemac) / self.mac
-        print(x_cg_bar)
-
+        # Calculate the stability curve
         sh_s_stability = (
             1.0
             / (
                 (self.CL_alpha_h / self.CL_alpha_Ah)
                 * (1.0 - self.d_epsilon_d_alpha)
                 * (self.lh / self.mac)
-                * self.Vh_V**2
+                * self.Vh_V # this is already the sqaured value
             )
-            * (x_cg_bar - self.x_ac_bar - 0.05)
+            * (x_cg_bar - x_ac_bar - 0.05)
         )
+        # Calculate the control curve 
+        CL_h = -0.35*self.AR_h**(1/3)
+        Cm_ac = self.Cm_ac_wing #+ -1.8*(1-(2.5*self.fuselage_diameter/self.l_fus))*(np.pi*self.fuselage_diameter**2*self.l_fus/(4*self.wing_span*self.mac))* 0.232/self.CL_alpha_Ah
 
         sh_s_control = (
-            1.0
+            (1.0
             / (
-                (self.CL_alpha_h / self.CL_alpha_Ah)
+                (CL_h / self.CL_Aminush)
                 * (self.lh / self.mac)
-                * self.Vh_V**2
+                * self.Vh_V) # this is already the sqaured value
             )
-            * (x_cg_bar + self.Cm_ac / self.CL_alpha_Ah - self.x_ac_bar)
+            * (x_cg_bar + (Cm_ac / self.CL_Aminush - x_ac_bar))
         )
+        control_slope = (1.0
+            / (
+                (CL_h / self.CL_Aminush)
+                * (self.lh / self.mac)
+                * self.Vh_V) # this is already the sqaured value
+            )
+        print("sh_s_control slope:", control_slope)
 
         return sh_s_control, sh_s_stability, x_cg_bar
 
@@ -529,7 +527,8 @@ if __name__ == "__main__":  # pragma: no cover
 
     inputs = {}
     inputs.update(constantsi)
-    inputs.update(fi)
+    inputs.update(requirementsi)
+    inputs.update(auvi)
     inputs.update(hi)
     inputs.update(pi)
     inputs.update(di)
@@ -537,7 +536,36 @@ if __name__ == "__main__":  # pragma: no cover
     inputs.update(sci)
     stabcon = StabCon(inputs)
 
-    #calculate c.g.
+    stabcon.size_ailerons()
+    print("Ailerons sized successfully.")
+    p_achieved, bo = stabcon.size_ailerons()
+    print(
+        f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
+    )
+
+
+    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[0], label="Control")
+    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[1], label="Stability")
+    plt.xlabel("Non-dimensional CG position (x_cg_bar)")
+    plt.ylabel("Sh/S")
+    plt.title("Scissor Plot")
+    plt.axhline(0, color="black", linestyle="--", linewidth=0.5)
+    plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
+    plt.legend()
+    plt.grid()
+    plt.xlim(-0.5, 1.5)
+    plt.ylim(0,1)
+    plt.show()
+    print("Scissor plot generated successfully.")
+
+    # print(stabcon.size_vertical_tailplane())
+    # print("Vertical tailplane area: ", stabcon.size_vertical_tailplane()[0])
+    # print("Vertical tailplane span: ", stabcon.size_vertical_tailplane()[1])
+    # print("Vertical tailplane MAC: ", stabcon.size_vertical_tailplane()[2])
+    # print("Vertical tailplane root chord: ", stabcon.size_vertical_tailplane()[3])
+    # print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
+
+    # CG calculation
     cg_results = stabcon.calculate_UAV_cg()
     for config, result in cg_results.items():
         setattr(stabcon, f"{config}_fuselage_x_cg", result["fuselage_x_cg"])
@@ -553,17 +581,17 @@ if __name__ == "__main__":  # pragma: no cover
 
     loading_results = stabcon.loading_diagram()
 
-    for configuration in ["wildfire", "oil_spill"]:
-        if configuration == "wildfire":
-            print("wildfire_fuselage_x_cg:", stabcon.wildfire_fuselage_x_cg)
-            print("wildfire_wing_x_cg:", stabcon.wildfire_wing_x_cg)
-            print("wildfire_fuselage_mass:", stabcon.wildfire_fuselage_mass)
-            print("wildfire_wing_mass:", stabcon.wildfire_wing_mass)
-        else:
-            print("oil_spill_fuselage_x_cg:", stabcon.oil_spill_fuselage_x_cg)
-            print("oil_spill_wing_x_cg:", stabcon.oil_spill_wing_x_cg)
-            print("oil_spill_fuselage_mass:", stabcon.oil_spill_fuselage_mass)
-            print("oil_spill_wing_mass:", stabcon.oil_spill_wing_mass)
+    # for configuration in ["wildfire", "oil_spill"]:
+    #     if configuration == "wildfire":
+    #         print("wildfire_fuselage_x_cg:", stabcon.wildfire_fuselage_x_cg)
+    #         print("wildfire_wing_x_cg:", stabcon.wildfire_wing_x_cg)
+    #         print("wildfire_fuselage_mass:", stabcon.wildfire_fuselage_mass)
+    #         print("wildfire_wing_mass:", stabcon.wildfire_wing_mass)
+    #     else:
+    #         print("oil_spill_fuselage_x_cg:", stabcon.oil_spill_fuselage_x_cg)
+    #         print("oil_spill_wing_x_cg:", stabcon.oil_spill_wing_x_cg)
+    #         print("oil_spill_fuselage_mass:", stabcon.oil_spill_fuselage_mass)
+    #         print("oil_spill_wing_mass:", stabcon.oil_spill_wing_mass)
 
     for config in loading_results:
         print(
@@ -587,40 +615,6 @@ if __name__ == "__main__":  # pragma: no cover
     plt.title("Loading Diagram for Both Configurations")
     plt.legend()
     plt.grid(True)
-    plt.xlim(0, 1)
+    plt.xlim(-0.5, 1.5)
     plt.show()
-
-    #Size ailerons
-    
-    stabcon.size_ailerons()
-    print("Ailerons sized successfully.")
-    p_achieved, bo = stabcon.size_ailerons()
-    print(
-        f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
-    )
-
-    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[0], label="Control")
-    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[1], label="Stability")
-    plt.xlabel("Non-dimensional CG position (x_cg_bar)")
-    plt.ylabel("Sh/S")
-    plt.title("Scissor Plot")
-    plt.axhline(0, color="black", linestyle="--", linewidth=0.5)
-    plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
-    plt.legend()
-    plt.grid()
-    plt.ylim(0,1)
-    plt.xlim(0, 1)
-    plt.show()
-    print("Scissor plot generated successfully.")
-
-    print(stabcon.size_vertical_tailplane())
-    print("Vertical tailplane area: ", stabcon.size_vertical_tailplane()[0])
-    print("Vertical tailplane span: ", stabcon.size_vertical_tailplane()[1])
-    print("Vertical tailplane MAC: ", stabcon.size_vertical_tailplane()[2])
-    print("Vertical tailplane root chord: ", stabcon.size_vertical_tailplane()[3])
-    print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
-
-
-    
-    # CG calculation
     
