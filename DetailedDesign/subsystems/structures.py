@@ -25,9 +25,10 @@ import numpy as np
 
 class Structures:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], verbose=False) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.verbose = verbose
 
         self.wing_span = inputs["wing_span"]
         self.mtow = self.inputs['MTOW']
@@ -93,18 +94,24 @@ class Structures:
 
         mass_sensors = 10
 
-        self.MF_sensors = 10/self.M_to # NEEDS TO BE UPDATED
+        self.MF_sensors = 5/self.M_to # NEEDS TO BE UPDATED
         self.MF_propulsion = self.mass_propulsion / self.M_to
-        self.MF_winggroup = 6/self.M_to # NEEDS TO BE UPDATED
+        self.MF_winggroup = 2/self.M_to # NEEDS TO BE UPDATED
         self.MF_battery = self.mass_battery / self.M_to
-        self.MF_structure = 5/self.M_to # NEEDS TO BE UPDATED
+        self.MF_structure = 4/self.M_to # NEEDS TO BE UPDATED
         self.MF_payload = self.mass_payload / self.M_to
 
-        MF_non_payload = np.array([self.MF_sensors, self.MF_propulsion, self.MF_battery, self.MF_winggroup, self.MF_structure])
-        
-        #optimizing for max payload:
-        margin = 0.05  # 5% margin for uncertainties
-        self.MF_payload = 1 - np.sum(MF_non_payload) * margin
+        MF_non_payload = np.array([self.mass_margin, self.MF_sensors, self.MF_propulsion, self.MF_battery, self.MF_winggroup, self.MF_structure])
+        self.MF_payload = 1 - np.sum(MF_non_payload)
+
+
+        print(f"Sensor mass fraction: {self.MF_sensors:.4f}")
+        print(f"Propulsion mass fraction: {self.MF_propulsion:.4f}")
+        print(f"Battery mass fraction: {self.MF_battery:.4f}")
+        print(f"Wing group mass fraction: {self.MF_winggroup:.4f}")
+        print(f"Structure mass fraction: {self.MF_structure:.4f}")
+        print(f"Payload mass fraction: {self.MF_payload:.4f}")
+
 
         if self.MF_payload < 0:
             raise ValueError("The mass fraction for the payload is negative. Please check the mass fractions of the other components.")
@@ -361,6 +368,7 @@ class Structures:
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         
         self.mass_fractions()
+        self.calc_structure_mass()
 
         self.outputs["payload_mass"] = self.mass_payload   # updated mass of the payload (with an added margin to avoid exceeding the MTOW requirement)
         self.outputs['mass_structure'] = self.mass_structure # kg
@@ -372,9 +380,9 @@ class Structures:
         #self.outputs["CG"] = ...
 
         return self.outputs
-
-        
-
+    
+    def req_structure(self):
+        pass
 
 if __name__ == "__main__":  # pragma: no cover
     a = Structures(fi)
