@@ -23,25 +23,57 @@ class Hardware:
 
     # ~~~ Intermediate Functions ~~~
 
-    def sensors(self):
+    def wildfire_components(self):
     
-        self.wildfire_sensor = {
-            "name": "Wildfire Sensor",
-            "mass": 0.1,  # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "power": 0.5,  # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "length": 0.2,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "width": 0.1,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "height": 0.05,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+
+        hardware = {
+            "wildfire_sensor": {
+                "wildfire_sensor_mass": None,
+                "wildfire_sensor_power": None
+            },
+            "propeller": {
+                "propeller_diameter_VTOL": None,
+                "propeller_diameter_cruise": None
+            },
+            "VTOL_motor": {
+                "VTOL_motor_mass": None,
+            }
         }
 
-        self.oil_sensor = {
-            "name": "Oil Sensor",
-            "mass": 0.2,  # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "power": 0.3,  # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "length": 0.15,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "width": 0.1,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "height": 0.05,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+
+        include_components = ["wildfire_sensor", "propeller"]
+
+
+        hardware_inputs = {}
+        for component in include_components:
+            if component in hardware:
+                for key, value in hardware[component].items():
+                    hardware_inputs[key] = value
+
+        return hardware_inputs
+
+
+    def oil_spill_components(self):
+        pass
+
+
+    def structure_components(self):
+
+        if self.mission_type == "wildfire":
+            hardware_inputs = self.wildfire_components()
+        elif self.mission_type == "oil_spill":
+            hardware_inputs = self.oil_spill_components()
+        else:
+            raise ValueError("Unsupported mission type. Please choose 'wildfire' or 'oil_spill'.")
+
+        required_components = {
+            "propeller_diameter_VTOL": None,
+            "propeller_diameter_cruise": None
         }
+
+        for key in hardware_inputs:
+            if key in wildfire_inputs:
+                required_components[key] = wildfire_inputs[key]
 
     # ~~~ Output functions ~~~ 
 
@@ -50,6 +82,8 @@ class Hardware:
         self.outputs["power_scan"] = 300 # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
         self.outputs["power_idle"] = 100 # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
 
+
+        self.outputs["mass_propulsion"]
         self.outputs["mass_hardware"] = 5.0 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
         
 
