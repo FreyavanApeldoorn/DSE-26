@@ -193,6 +193,9 @@ structures_funny_inputs = {
     "titanium_E": 110 * 10**9, #kg/m3
     "max_deflection_VTOL_boom": 0.02, #m, guesstimate
     "load_factor": 3.5, #due to gusts
+    "fuselage_diameter": 0.2, # m
+    "max_shear_titanium": 760*10**6, #Pa
+    "max_stress_titanium": 1.1*10**9 #Pa
 }
 
 funny_inputs.update(structures_funny_inputs)

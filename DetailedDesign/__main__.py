@@ -2,7 +2,7 @@ from inputs import initial_inputs
 from deployment import Deployment
 from hardware import Hardware
 from mission import Mission
-from uav import UAV
+from UAV import UAV
 from nest import Nest
 
 '''
