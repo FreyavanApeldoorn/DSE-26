@@ -80,7 +80,7 @@ class Aerodynamics:
         self.vertical_tail_root_chord = (2 * self.vertical_tail_chord) / (1 + self.taper_ratio_vertical_tail)  # Root chord length for vertical tail m
         self.vertical_tail_tip_chord = self.taper_ratio_vertical_tail * self.vertical_tail_root_chord  # Tip chord length for vertical tail m
         self.vertical_tail_MAC = (2 / 3) * self.vertical_tail_root_chord * ((1 + self.taper_ratio_vertical_tail + self.taper_ratio_vertical_tail**2) / (1 + self.taper_ratio_vertical_tail))  # Mean Aerodynamic Chord for vertical tail m
-
+        
     
     def manoeuvre_diagram(self, dive_factor: float) -> dict[str, float]:
         dive_velocity = self.cruise_velocity * dive_factor
@@ -221,7 +221,7 @@ class Aerodynamics:
         self.calculate_vertical_tail_parameters()
 
         self.outputs["Wing_area"] = self.wing_area
-        self.outputs["Wing_span"] = self.wing_span
+        self.outputs["Wing_span"] = self.wing_span  
         self.outputs["Wing_aspect_ratio"] = self.aspect_ratio
         self.outputs["Wing_taper_ratio"] = self.taper_ratio
         self.outputs["Wing_chord"] = self.wing_chord
@@ -259,9 +259,40 @@ class Aerodynamics:
         return self.outputs
     
 if __name__ == '__main__':
-    from DetailedDesign.funny_inputs import aerodynamics_funny_inputs
-    aerodynamics = Aerodynamics(aerodynamics_funny_inputs)
-    aerodynamics.manoeuvre_diagram(1.4) # Example dive factor
-    aerodynamics.gust_diagram(1.4, 8.33) # Example gust speed of 30 km/h
-    # Perform sanity checks here
-    ...
+    test_inputs = {
+    "AR": 7,  # Aspect ratio of the wing
+    "wing_area": 1.27,  # [m^2], Wing area
+    "taper_ratio": 0.85,  # Taper ratio of the wing
+    "sweep_angle": 0.0,  # Sweep angle of the wing in degrees
+    "thickness_to_chord_ratio": 0.12,  # Thickness to chord ratio for the wing max
+    "span_position": 0.3,  # Span position of interest main wing
+    "tail_length": 1.06,  # Length betweem ac tail horizontal and wing ac in m
+    "horizontal_tail_coefficient": 0.7,  # Coefficient for horizontal tail area calculation
+    "taper_ratio_horizontal_tail": 0,  # Taper ratio for horizontal tail
+    "sweep_angle_horizontal_tail": 0.0,  # Sweep angle of the horizontal tail in degrees
+    "relative_horizontal_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the horizontal tail to the wing
+    "vertical_tail_length": 1.06,  # Length betweem ac tail vertical and wing ac in m
+    "vertical_tail_coefficient": 0.032,  # Coefficient for vertical tail area calculation
+    "taper_ratio_vertical_tail": 0.58,  # Taper ratio for vertical tail
+    "sweep_angle_vertical_tail": 0.0,  # Sweep angle of the vertical tail in degrees
+    "relative_vertical_tail_aspect_ratio": 0.5,  # Relative aspect ratio of the vertical tail to the wing
+    "max_load_factor": 3.5,  # Maximum load factor for maneuvering
+    "min_load_factor": -1.0,  # Minimum load factor for maneuvering
+    "rho_0": 1.225,  # Air density in kg/m^3
+    "rho_service": 0.9093,  # Air density at 3000m in kg/m^3
+    "CL_max": 1.34,  # Maximum lift coefficient
+    "wing_loading": 217,  # Wing loading in N/m^2
+    "V_cruise": 100/3.6,  # Cruise speed in m/s
+    "MTOW": 30 * 9.81,  # Maximum takeoff weight in N  
+    "V_stall": 19,  # Stall speed in m/s
+    "CL_alpha": 0.09 * 180/np.pi * 0.85,  # Lift curve slope in 1/deg
+    }
+    aerodynamics = Aerodynamics(test_inputs)
+    #aerodynamics.manoeuvre_diagram(1.4) # Example dive factor
+    #aerodynamics.gust_diagram(1.4, 8.33) # Example gust speed of 30 km/
+    outputs = aerodynamics.get_all()
+    for key, value in outputs.items():
+        print(f"{key}: {value}")
+
+    
+    
