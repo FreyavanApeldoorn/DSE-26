@@ -427,7 +427,7 @@ class StabCon:
 
     # ~~~ Loading diagram ~~~
     def loading_diagram(self) -> tuple[np.ndarray, np.ndarray]:
-        x_lemac = np.linspace(0.0, self.l_fus - self.mac, 10)
+        x_lemac = np.linspace(0.5, self.l_fus - 0.5, 10)
 
         results = {}
         for configuration in ["wildfire", "oil_spill"]:
@@ -459,17 +459,13 @@ class StabCon:
 
     def scissor_plot(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return the control & stability curves and the non-dimensional CG track."""
-        # Create an array with positions for lemac.
-        number_of_points = 10
-        x_lemac = np.linspace(0.5, self.l_fus - 0.5, number_of_points)
-
-        x_cg_bar = np.linspace(-0.5,1.5,number_of_points)
-
+        # Create an array with positions for lemac and the corresponding X_cg_bar values
+        
+        x_cg_bar = np.linspace(-0.5, 1.5, 100)
+        
         # some preliminary calculations needed 
-        x_ac_bar = ( self.x_ac_bar_wing - 
-                ((1.8 * self.fuselage_diameter **2 * x_lemac )/ (self.CL_alpha_Ah * self.wing_span * self.mac ))
-                )
-        print("x_ac_bar =", x_ac_bar)
+        x_ac_bar =  self.x_ac_bar_wing  
+                #((1.8 * self.fuselage_diameter **2 * x_lemac )/ (self.CL_alpha_Ah * self.wing_span * self.mac )) #This would be the fuselage contribution - igor
 
         # Calculate the stability curve
         sh_s_stability = (
@@ -478,23 +474,30 @@ class StabCon:
                 (self.CL_alpha_h / self.CL_alpha_Ah)
                 * (1.0 - self.d_epsilon_d_alpha)
                 * (self.lh / self.mac)
-                * self.Vh_V**2
+                * self.Vh_V # this is already the sqaured value
             )
             * (x_cg_bar - x_ac_bar - 0.05)
         )
         # Calculate the control curve 
-        CL_h = -0.35*self.AR_h**3
-        Cm_ac = self.Cm_ac_wing + -1.8*(1-(2.5*self.fuselage_diameter/self.l_fus))*(np.pi*self.fuselage_diameter**2*self.l_fus/(4*self.wing_span*self.mac))* 0.232/self.CL_alpha_Ah
+        CL_h = -0.35*self.AR_h**(1/3)
+        Cm_ac = self.Cm_ac_wing #+ -1.8*(1-(2.5*self.fuselage_diameter/self.l_fus))*(np.pi*self.fuselage_diameter**2*self.l_fus/(4*self.wing_span*self.mac))* 0.232/self.CL_alpha_Ah
 
         sh_s_control = (
-            1.0
+            (1.0
             / (
                 (CL_h / self.CL_Aminush)
                 * (self.lh / self.mac)
-                * self.Vh_V**2
+                * self.Vh_V) # this is already the sqaured value
             )
-            * (x_cg_bar + Cm_ac / self.CL_Aminush - x_ac_bar)
+            * (x_cg_bar + (Cm_ac / self.CL_Aminush - x_ac_bar))
         )
+        control_slope = (1.0
+            / (
+                (CL_h / self.CL_Aminush)
+                * (self.lh / self.mac)
+                * self.Vh_V) # this is already the sqaured value
+            )
+        print("sh_s_control slope:", control_slope)
 
         return sh_s_control, sh_s_stability, x_cg_bar
 
@@ -550,8 +553,8 @@ if __name__ == "__main__":  # pragma: no cover
     plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
     plt.legend()
     plt.grid()
-    # plt.xlim(0, 1)
-    # plt.ylim(0,1)
+    plt.xlim(-0.5, 1.5)
+    plt.ylim(0,1)
     plt.show()
     print("Scissor plot generated successfully.")
 
@@ -612,6 +615,6 @@ if __name__ == "__main__":  # pragma: no cover
     plt.title("Loading Diagram for Both Configurations")
     plt.legend()
     plt.grid(True)
-    plt.xlim(0, 1)
+    plt.xlim(-0.5, 1.5)
     plt.show()
     
