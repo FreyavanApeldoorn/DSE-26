@@ -78,6 +78,11 @@ class Thermal:
         # In steady-state, 0 = heat_int + (T_amb - T_set)/R_tot + Q_hold
         # So Q_hold = - [heat_int + (T_amb - T_set)/R_tot]
         return - (self.heat_int + (self.T_amb_cruise - self.T_int_cruise_set) / R_tot)
+    
+    def get_deployment_heat_environment(self) -> float:
+
+        R_tot = self._compute_resistances()
+        return (self.T_amb_deploy - self.T_int_cruise_set) / R_tot
 
     def simulate_deploy_phase(self, Q_therm: float) -> float:
         '''
