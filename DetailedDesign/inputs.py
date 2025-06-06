@@ -282,7 +282,7 @@ hardware_inputs = {
     # buoy
     "buoy_mass": 0.5,  # kg, mass of the buoy
 }
-inputs.update(hardware_inputs)
+#inputs.update(hardware_inputs)
 
 component_locations = {
     # Wildfire Sensor
@@ -347,7 +347,7 @@ component_locations = {
     "payload_y": None,  # m, y-location w.r.t. front of fuselage
     "payload_z": None,  # m, z-location w.r.t. front of fuselage
 }
-inputs.update(component_locations)
+#inputs.update(component_locations)
 
 stab_n_con_inputs = {
     "ca_c": 0.4,  # Aileron chord to wing chord ratio

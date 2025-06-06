@@ -49,14 +49,20 @@ class Hardware:
 
     def add_component_to_inputs(self):
 
-        for comp in self.hardware_components:
-            comp_dict = self.hardware.get(comp, {})
-            if isinstance(comp_dict, dict):
-                for key, value in comp_dict.items():
+        def flatten_and_add(d):
+            for key, value in d.items():
+                if isinstance(value, dict):
+                    flatten_and_add(value)
+                else:
                     self.outputs[key] = value
+    
+        for comp in self.hardware:
+            value = self.hardware[comp]
+            if isinstance(value, dict):
+                flatten_and_add(value)
             else:
-                self.outputs[comp] = comp_dict
-
+                self.outputs[comp] = value
+    
         return self.outputs
 
 
@@ -113,11 +119,13 @@ class Hardware:
 if __name__ == '__main__': 
     # Perform sanity checks here
     
-    from uav_inputs import components
+    from DetailedDesign.hardware_inputs import components
 
     inputs = {}
 
-    hardware = Hardware(inputs, components, include_components=True)
+    hardware = Hardware(inputs, components)
     outputs = hardware.get_all()
     for key, value in outputs.items():
         print(f"{key}: {value}")
+
+

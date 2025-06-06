@@ -1,5 +1,5 @@
 from inputs import initial_inputs
-from uav_inputs import components
+from hardware_inputs import components
 
 from deployment import Deployment
 from hardware import Hardware
