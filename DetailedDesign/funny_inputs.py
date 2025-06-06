@@ -193,9 +193,17 @@ structures_funny_inputs = {
     "titanium_E": 110 * 10**9, #kg/m3
     "max_deflection_VTOL_boom": 0.02, #m, guesstimate
     "load_factor": 3.5, #due to gusts
-    "fuselage_diameter": 0.2, # m
+    "fuselage_diameter": 0.4, # m
     "max_shear_titanium": 760*10**6, #Pa
-    "max_stress_titanium": 1.1*10**9 #Pa
+    "max_stress_titanium": 1.1*10**9, #Pa
+
+    "conductivity_alu": 138, # W/(m*K)
+    "conductivity_foam": 0.04, # W/(m*K)
+    "shear_strength_foam": 1 * 10**6, #Pa
+    "shear_strength_alu": 138 * 10**6, #Pa 
+    "tensile_strength_foam": 1.7 * 10**6, #Pa
+    "tensile_strength_alu": 193 * 10**6, #Pa
+    "tensile_strength_reduction_temp": 0.9, #- https://firesciencereviews.springeropen.com/articles/10.1186/s40038-015-0007-5#:~:text=This%20concern%20is%20exacerbated%20for,(Langhelle%20and%20Amdahl%202001).
 }
 
 funny_inputs.update(structures_funny_inputs)
