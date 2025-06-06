@@ -38,7 +38,7 @@ class Structures:
 
         self.M_to = inputs["M_to"]
 
-        # self.mass_margin = inputs["mass_margin"]
+        self.mass_margin = inputs["mass_margin"]
 
         self.mass_payload = inputs["payload_mass"]
         self.mass_hardware = inputs["mass_hardware"]

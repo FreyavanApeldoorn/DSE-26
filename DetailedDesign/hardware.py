@@ -47,6 +47,18 @@ class Hardware:
 
     #     return hardware_inputs
 
+    def add_component_to_inputs(self):
+
+        for comp in self.hardware_components:
+            comp_dict = self.hardware.get(comp, {})
+            if isinstance(comp_dict, dict):
+                for key, value in comp_dict.items():
+                    self.outputs[key] = value
+            else:
+                self.outputs[comp] = comp_dict
+
+        return self.outputs
+
 
     def calculate_mass_hardware(self) -> float:
         """
@@ -83,6 +95,9 @@ class Hardware:
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
+
+
+        self.outputs = self.add_component_to_inputs()
 
         #self.outputs = self.select_components()
 

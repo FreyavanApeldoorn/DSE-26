@@ -46,18 +46,18 @@ class Thermal:
         self.c_p_int = inputs["c_p_int"]  # Specific heat capacity (J/(kg·K))
 
         # Exposure time in deploy region (s)
-        # self.t_exposure = inputs["time_deploy"] + inputs["time_ascent"] + inputs["time_descent"]  # assuming exposure includes ascent and descent phases
-        self.t_exposure = inputs["t_exposure"]
+        self.t_exposure = inputs["time_deploy"] + inputs["time_ascent"] + inputs["time_descent"]  # assuming exposure includes ascent and descent phases
+        #self.t_exposure = inputs["t_exposure"]
         
         # Cruise leg duration (s) for both outbound and return
         # self.t_cruise_max = inputs["time_uav_max"] - self.t_exposure  
         # self.t_cruise_min = inputs["time_uav_min"] - self.t_exposure
-        self.t_cruise_min = inputs["t_cruise_min"]
+        self.t_cruise_min = inputs["time_cruise_min"]
 
 
         # Maximum thermal power available (positive = heating, negative = cooling) (W)
-        # self.Q_therm = - inputs["power_thermal_required"]     # Maximum heating/cooling capacity (W)
-        self.Q_therm = - inputs["Q_therm"]
+        self.Q_therm = - inputs["power_thermal_required"]     # Maximum heating/cooling capacity (W)
+        #self.Q_therm = - inputs["Q_therm"]
 
 
     # ~~~ Intermediate Functions ~~~
