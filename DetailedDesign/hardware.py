@@ -17,28 +17,84 @@ class Hardware:
     
     """
 
-    def __init__(self, hardware: dict[str, float], include_components) -> None:
+    def __init__(self, inputs, hardware: dict[str, float]) -> None:
         self.hardware = hardware
-        self.include_components = include_components
+        self.outputs = inputs.copy()
+        #self.include_components = include_components
+
+        self.hardware_components = [
+            "wildfire_camera",
+            "oil_spill_camera",
+            "buoy",
+            "gymbal_connection",
+            "flight_controller",
+            "OBC",
+            "GPS",
+            "Mesh_network_module",
+            "SATCOM_module",
+            "PBD"
+        ]
 
     # ~~~ Intermediate Functions ~~~
 
-    def wildfire_components(self, include_components=None):
-        pass
+    # def select_components(self):
 
-    def oil_spill_components(self):
-        pass
+    #     hardware_inputs = {}
+    #     for component in self.include_components:
+    #         if component in self.hardware:
+    #             for key, value in self.hardware[component].items():
+    #                 hardware_inputs[key] = value
+
+    #     return hardware_inputs
+
+    def add_component_to_inputs(self):
+
+        def flatten_and_add(d):
+            for key, value in d.items():
+                if isinstance(value, dict):
+                    flatten_and_add(value)
+                else:
+                    self.outputs[key] = value
+    
+        for comp in self.hardware:
+            value = self.hardware[comp]
+            if isinstance(value, dict):
+                flatten_and_add(value)
+            else:
+                self.outputs[comp] = value
+    
+        return self.outputs
 
 
-    def select_components(self):
+    def calculate_mass_hardware(self) -> float:
+        """
+        Calculates the total mass of the selected hardware components.
+        Sums all values in self.outputs whose keys end with '_mass' and are not None.
+        """
+        total_mass = 0.0
+        for comp in self.hardware_components:
+            comp_dict = self.hardware.get(comp, {})
+            if isinstance(comp_dict, dict):
+                for key, value in comp_dict.items():
+                    if key.endswith("_mass") and value is not None:
+                        total_mass += value
+                    else:
+                        print(f"Warning: {key} in {comp} does not end with '_mass' or is None. Skipping this component.")
+        return total_mass
+    
+    def calculate_power_hardware(self) -> float:
 
-        hardware_inputs = {}
-        for component in self.include_components:
-            if component in hardware:
-                for key, value in hardware[component].items():
-                    hardware_inputs[key] = value
-
-        return hardware_inputs
+        total_power = 0.0
+        for comp in self.hardware_components:
+            comp_dict = self.hardware.get(comp, {})
+            if isinstance(comp_dict, dict):
+                for key, value in comp_dict.items():
+                    if key.endswith("_power") and value is not None:
+                        total_power += value
+                    else: 
+                        print(f"Warning: {key} in {comp} does not end with '_power' or is None. Skipping this component.")
+        return total_power
+        
 
 
 
@@ -46,11 +102,30 @@ class Hardware:
 
     def get_all(self) -> dict[str, float]:
 
-        hardware_inputs = self.structure_components()
+
+        self.outputs = self.add_component_to_inputs()
+
+        #self.outputs = self.select_components()
+
+        self.outputs["power_scan"] = 100 # 
+        self.outputs["power_deploy"] = 100 # PLACEHOLDER
+        self.outputs["power_idle"] = 100 # 
+
+        self.outputs["mass_hardware"] = self.calculate_mass_hardware()   # kg, mass of hardware components (excluding payload, propulsion, structure, etc)
         
 
         return self.outputs
     
 if __name__ == '__main__': 
     # Perform sanity checks here
-    ...
+    
+    from DetailedDesign.hardware_inputs import components
+
+    inputs = {}
+
+    hardware = Hardware(inputs, components)
+    outputs = hardware.get_all()
+    for key, value in outputs.items():
+        print(f"{key}: {value}")
+
+

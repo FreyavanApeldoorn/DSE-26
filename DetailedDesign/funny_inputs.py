@@ -226,6 +226,11 @@ thermal_funny_inputs = {
     "m_int": 10.0,
     "c_p_int": 500.0,
     "power_thermal_required": -300.0,  # Negative = cooling ; Positive = heating
+    "n_battery": 4,
+    "battery_capacity": 10., # Ah
+    "battery_potential": 44.4, # V
+    
+
 }
 
 funny_inputs.update(thermal_funny_inputs)
