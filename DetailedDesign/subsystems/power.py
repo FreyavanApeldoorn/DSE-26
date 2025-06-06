@@ -107,6 +107,7 @@ class Power:
 
     # ~~~ Output functions ~~~ 
 
+
     def get_all(self) -> dict[str, float]:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
@@ -114,11 +115,12 @@ class Power:
         self.calculate_required_capacity()
         self.calculate_battery_mass()
 
-        self.outputs["mass_battery"] = (self.battery_mass if self.outputs.get("mass_battery") is None else self.outputs["mass_battery"])
+        self.outputs["mass_battery"] = self.battery_mass # if self.hardware["battery_mass"] is None else self.hardware["battery_mass"]
         self.outputs["required_capacity_wh"] = self.trip_capacity_wh
         self.outputs["battery_capacity"] = self.trip_capacity_wh   # updated true capacity (might increase after choosing a battery)
 
         return self.outputs
+
     
 if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here

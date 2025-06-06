@@ -115,6 +115,9 @@ power_inputs = {
     "DOD_fraction": 0.8,  # Depth of discharge fraction
     "eta_battery": 0.8,  # Battery efficiency
     "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
+
+    "power_scan": 2700,
+    "power_idle": 100
 }
 inputs.update(power_inputs)
 
@@ -163,6 +166,8 @@ structures_inputs = {
     "titanium_density": 4.43 * 1000,  # kg/m3
     "titanium_E": 110 * 10**9,  # kg/m3
     "max_deflection_VTOL_boom": 0.05,  # m, guesstimate
+
+    "mass_structure": 5.0 # kg, initial mass of the structure, to be updated later
 }
 inputs.update(structures_inputs)
 
