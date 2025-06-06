@@ -61,7 +61,7 @@ class Structures:
         self.load_factor = inputs['max_load_factor']
 
         self.fuselage_diameter = inputs['fuselage_diameter']
-        self.y_prop = self.propeller_diameter_VTOL / 2 - self.fuselage_diameter / 2
+        self.y_prop = max(self.propeller_diameter_VTOL / 2 - self.fuselage_diameter / 2, self.battery_length*2)
         self.max_shear_titanium = 214*10**6 # inputs['max_shear_titanium']
         self.max_stress_titanium = inputs['max_stress_titanium']
         self.wind_speed = inputs['wind_speed']
