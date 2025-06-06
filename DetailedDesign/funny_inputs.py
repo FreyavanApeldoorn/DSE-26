@@ -221,6 +221,7 @@ thermal_funny_inputs = {
     "n_battery": 4,
     "battery_capacity": 10., # Ah
     "battery_potential": 44.4, # V
+    "battery_resistance": 0.015, # Ohm, based on guessing
     
 
 }
