@@ -28,7 +28,7 @@ class Structures:
     def __init__(self, inputs: dict[str, float], verbose=False) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
-        self.verbose = verbose
+        self.verbose = False
 
         self.wing_span = inputs["wing_span"]
         self.mtow = self.inputs['MTOW']
@@ -113,13 +113,13 @@ class Structures:
         MF_non_payload = np.array([self.mass_margin, self.MF_sensors, self.MF_propulsion, self.MF_battery, self.MF_winggroup, self.MF_structure])
         self.MF_payload = 1 - np.sum(MF_non_payload)
 
-
-        print(f"Sensor mass fraction: {self.MF_sensors:.4f}")
-        print(f"Propulsion mass fraction: {self.MF_propulsion:.4f}")
-        print(f"Battery mass fraction: {self.MF_battery:.4f}")
-        print(f"Wing group mass fraction: {self.MF_winggroup:.4f}")
-        print(f"Structure mass fraction: {self.MF_structure:.4f}")
-        print(f"Payload mass fraction: {self.MF_payload:.4f}")
+        if self.verbose:
+            print(f"Sensor mass fraction: {self.MF_sensors:.4f}")
+            print(f"Propulsion mass fraction: {self.MF_propulsion:.4f}")
+            print(f"Battery mass fraction: {self.MF_battery:.4f}")
+            print(f"Wing group mass fraction: {self.MF_winggroup:.4f}")
+            print(f"Structure mass fraction: {self.MF_structure:.4f}")
+            print(f"Payload mass fraction: {self.MF_payload:.4f}")
 
 
         if self.MF_payload < 0:
