@@ -427,6 +427,7 @@ class StabCon:
 
     # ~~~ Loading diagram ~~~
     def loading_diagram(self) -> tuple[np.ndarray, np.ndarray]:
+        '''Calculate the loading diagram for the UAV for different configurations.'''
         x_lemac = np.linspace(0.5, self.l_fus - 0.5, 10)
 
         results = {}
@@ -497,8 +498,7 @@ class StabCon:
                 * (self.lh / self.mac)
                 * self.Vh_V) # this is already the sqaured value
             )
-        print("sh_s_control slope:", control_slope)
-
+        
         return sh_s_control, sh_s_stability, x_cg_bar
 
     # ---------------------------------------------------------------------#
@@ -543,30 +543,15 @@ if __name__ == "__main__":  # pragma: no cover
         f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
     )
 
-
-    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[0], label="Control")
-    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[1], label="Stability")
-    plt.xlabel("Non-dimensional CG position (x_cg_bar)")
-    plt.ylabel("Sh/S")
-    plt.title("Scissor Plot")
-    plt.axhline(0, color="black", linestyle="--", linewidth=0.5)
-    plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
-    plt.legend()
-    plt.grid()
-    plt.xlim(-0.5, 1.5)
-    plt.ylim(0,1)
-    plt.show()
-    print("Scissor plot generated successfully.")
-
-    # print(stabcon.size_vertical_tailplane())
-    # print("Vertical tailplane area: ", stabcon.size_vertical_tailplane()[0])
-    # print("Vertical tailplane span: ", stabcon.size_vertical_tailplane()[1])
-    # print("Vertical tailplane MAC: ", stabcon.size_vertical_tailplane()[2])
-    # print("Vertical tailplane root chord: ", stabcon.size_vertical_tailplane()[3])
-    # print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
-
-    # CG calculation
-    cg_results = stabcon.calculate_UAV_cg()
+    #Horizontal tailplane sizing tailplace sizing
+        # ~~~ Explanation ~~~
+        # The sizing starts with the calculation of the c.g. location in the longitudinal direction. 
+        # Then based on the c.g. of the fuselage and the wing, the loading diagram is generated.
+        # The loading diagram shows the variation of the c.g. for both configurations depending on the LEMAC
+        # The scissor plot shows the stability and control constraints to determine the tailplane size.
+        # Code produces the plots but they have to be overlaid manually to find the optimal position.
+        
+    
     for config, result in cg_results.items():
         setattr(stabcon, f"{config}_fuselage_x_cg", result["fuselage_x_cg"])
         setattr(stabcon, f"{config}_wing_x_cg", result["wing_x_cg"])
@@ -579,27 +564,8 @@ if __name__ == "__main__":  # pragma: no cover
         print(f"  Wing mass: {result['wing_mass']:.3f} kg")
         print(f"  Wing CG (x): {result['wing_x_cg']:.3f} m")
 
+    #Generate the loading diagram
     loading_results = stabcon.loading_diagram()
-
-    # for configuration in ["wildfire", "oil_spill"]:
-    #     if configuration == "wildfire":
-    #         print("wildfire_fuselage_x_cg:", stabcon.wildfire_fuselage_x_cg)
-    #         print("wildfire_wing_x_cg:", stabcon.wildfire_wing_x_cg)
-    #         print("wildfire_fuselage_mass:", stabcon.wildfire_fuselage_mass)
-    #         print("wildfire_wing_mass:", stabcon.wildfire_wing_mass)
-    #     else:
-    #         print("oil_spill_fuselage_x_cg:", stabcon.oil_spill_fuselage_x_cg)
-    #         print("oil_spill_wing_x_cg:", stabcon.oil_spill_wing_x_cg)
-    #         print("oil_spill_fuselage_mass:", stabcon.oil_spill_fuselage_mass)
-    #         print("oil_spill_wing_mass:", stabcon.oil_spill_wing_mass)
-
-    for config in loading_results:
-        print(
-            f"{config} x_cg_bar: min={np.min(loading_results[config]['x_cg_bar'])}, max={np.max(loading_results[config]['x_cg_bar'])}"
-        )
-        print(
-            f"{config} x_lemac / l_fus: min={np.min(loading_results[config]['x_lemac'] / stabcon.l_fus)}, max={np.max(loading_results[config]['x_lemac'] / stabcon.l_fus)}"
-        )
 
     for config in loading_results:
         x_vals = loading_results[config][
@@ -617,4 +583,39 @@ if __name__ == "__main__":  # pragma: no cover
     plt.grid(True)
     plt.xlim(-0.5, 1.5)
     plt.show()
+
+    # Generate the scissor plot
+    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[0], label="Control")
+    plt.plot(stabcon.scissor_plot()[2], stabcon.scissor_plot()[1], label="Stability")
+    plt.xlabel("Non-dimensional CG position (x_cg_bar)")
+    plt.ylabel("Sh/S")
+    plt.title("Scissor Plot")
+    plt.axhline(0, color="black", linestyle="--", linewidth=0.5)
+    plt.axvline(0, color="black", linestyle="--", linewidth=0.5)
+    plt.legend()
+    plt.grid()
+    plt.xlim(-0.5, 1.5)
+    plt.ylim(0,1)
+    plt.show()
+    print("Scissor plot generated successfully. Now overlay the graphs to find the optimal tail size and determine LEMAC position")
+
+    user_input = float(input("Please enter the x_lemac/fuselage_length: "))
+    user_input2 = float(input("Please enter the x_cg_bar: "))
+    x_cg_location = user_input * stabcon.l_fus + user_input2 * stabcon.mac
+    print(f"The x_cg location is: {x_cg_location:.3f} m")
+
+    # print(stabcon.size_vertical_tailplane())
+    # print("Vertical tailplane area: ", stabcon.size_vertical_tailplane()[0])
+    # print("Vertical tailplane span: ", stabcon.size_vertical_tailplane()[1])
+    # print("Vertical tailplane MAC: ", stabcon.size_vertical_tailplane()[2])
+    # print("Vertical tailplane root chord: ", stabcon.size_vertical_tailplane()[3])
+    # print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
+
+    
+
+    
+
+
+
+    
     
