@@ -40,12 +40,10 @@ class Structures:
         self.rho = self.inputs['rho_0']
         # self.V_max = self.inputs['V_cruise']
 
-        self.M_to = inputs["M_to"]
-
-        #self.mass_margin = inputs["mass_margin"]
+        # self.mass_margin = inputs["mass_margin"]
 
         self.mass_payload = inputs["payload_mass"]
-        self.mass_hardware = inputs["mass_hardware"]
+        # self.mass_hardware = inputs["mass_hardware"]
         self.mass_battery = inputs["mass_battery"]
         self.battery_length = inputs['battery_length']
         self.mass_propulsion = inputs["mass_propulsion"]
@@ -66,8 +64,6 @@ class Structures:
 
         self.fuselage_diameter = inputs['fuselage_diameter']
         self.y_prop = max(self.propeller_diameter_VTOL / 2 - self.fuselage_diameter / 2, self.battery_length*2)
-        self.max_shear_titanium = 214*10**6 # inputs['max_shear_titanium']
-        self.max_stress_titanium = inputs['max_stress_titanium']
         self.wind_speed = inputs['wind_speed']
         self.rho_0 = inputs['rho_0']
         self.wing_area = inputs['wing_area']
@@ -78,6 +74,10 @@ class Structures:
         self.shear_strength_alu = inputs['shear_strength_alu']
         self.tensile_strength_foam = inputs['tensile_strength_foam']
         self.tensile_strength_alu = inputs['tensile_strength_alu']
+        self.E_foam = inputs['E_foam']
+        self.E_alu = inputs['E_alu']
+        self.density_alu = inputs['density_alu']
+        self.boom_inner_diameter = inputs['boom_inner_diameter']
 
         self.root_chord = inputs['root_chord']#0.458 # [m] 
         self.first_spar_position = inputs['first_spar_position'] * self.root_chord
@@ -85,6 +85,8 @@ class Structures:
 
 
         self.VTOL_boom_thickness = self.determine_VTOL_boom_thickness()
+        self.VTOL_boom_mass = (np.pi*(self.boom_inner_diameter + self.VTOL_boom_thickness)**2 - np.pi*self.boom_inner_diameter**2)*self.VTOL_boom_length*self.density_alu
+
 
 
     # ~~~ Intermediate Functions ~~~
@@ -172,13 +174,13 @@ class Structures:
 
         # Point load from the propellers
 
-        F_prop = 9.81*2*(self.propeller_mass_VTOL + self.motor_mass_VTOL)
+        F_prop = 9.81*(2*(self.propeller_mass_VTOL + self.motor_mass_VTOL) + self.VTOL_boom_mass)
 
         V_prop = [F_prop if i < self.y_prop else 0 for i in y]
 
         # Distributed lift load from the lift assuming elliptical lift distribution
         L_y = -self.load_factor*((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span)**2)
-        total_forces = W_wing + L_y + W_batt
+        total_forces = W_batt +L_y + W_wing
         forces_rev = total_forces[::-1]
 
         V_rev = integrate.cumulative_simpson(forces_rev, x=y)  + V_prop[::-1][:-1]
@@ -249,7 +251,7 @@ class Structures:
 
         # Point load from the propellers
 
-        F_prop = 9.81*2*(self.propeller_mass_VTOL + self.motor_mass_VTOL) - 0.5*self.mtow
+        F_prop = 9.81*(2*(self.propeller_mass_VTOL + self.motor_mass_VTOL) + self.VTOL_boom_mass) - 0.5*self.mtow
 
 
         V_prop = [F_prop if i < self.y_prop else 0 for i in y]
@@ -299,14 +301,10 @@ class Structures:
     def NVM_propeller_boom(self, size_thickness = False) -> float | None:
         """
         This function calculates the NVM (Normal, Shear, and Bending Moment) for the boom that supports the VTOL propellers.
-        It considers the distributed loads from the boom weight, the weight from the propellers and motors and the lift that those generate.
+        It considers the distributed loads from the wind, the boom weight, the weight from the propellers and motors and the lift that those generate.
         It then plots the distributed load, shear force, and bending moment along the span of the wing.
 
-        load factor is from the gust loads
-
         Down is considered positive in this context, as per the provided reference and convention for aircraft coordinate systems.
-
-        The load factor is 1
         """
 
         # https://uotechnology.edu.iq/dep-MechanicsandEquipment/Lectures%20and%20Syllabus/Lectures/Aircraft/Foruth%20Grade/Aircraft%20Design3.pdf
@@ -316,18 +314,20 @@ class Structures:
 
         # Distributed load from the boom weight
 
-        I_circle = (np.pi / 64)*self.VTOL_boom_thickness**4
-        boom_weight = (0.5*self.VTOL_boom_thickness)**2 * np.pi * self.VTOL_boom_length * self.titanium_density *9.81
+        I_circle = (np.pi / 4)* ((self.boom_inner_diameter/2+self.VTOL_boom_thickness)**4 - (self.boom_inner_diameter/2)**4)
+        boom_weight = (0.5*self.VTOL_boom_thickness)**2 * np.pi * self.VTOL_boom_length * self.density_alu *9.81
         #print('boom_mass', boom_weight / 9.81)
         W_boom = np.array([boom_weight / self.VTOL_boom_length for _ in y])
 
+        F_gust = -0.5*self.rho_0* self.wind_speed**2 * (self.boom_inner_diameter + 2*self.VTOL_boom_thickness / 2)
+        W_gust = np.array([F_gust / self.VTOL_boom_length for _ in y])
+
         # Point load from the propeller
 
-        F_prop = self.load_factor*9.81*(self.propeller_mass_VTOL + self.motor_mass_VTOL) - 0.25*self.mtow
-
+        F_prop = 9.81*(self.propeller_mass_VTOL + self.motor_mass_VTOL) - 0.25*self.mtow
         V_prop = [-F_prop if i < 0 else F_prop for i in y]
 
-        total_forces = W_boom
+        total_forces = W_boom + W_gust
         forces_rev = W_boom[::-1]
 
         V_left = integrate.cumulative_simpson(total_forces, x=y) - V_prop[:-1]
@@ -340,8 +340,8 @@ class Structures:
 
         M = np.concatenate((-M_left[:len(y)//2], -M_rev[::-1][len(y)//2:]))
 
-        deflection_left = -(1/(self.titanium_E*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_left, x=y[:-2]), x=y[:-3])
-        deflection_rev = -(1/(self.titanium_E*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_rev, x=y[:-2]), x=y[:-3])
+        deflection_left = -(1/(self.E_alu*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_left, x=y[:-2]), x=y[:-3])
+        deflection_rev = -(1/(self.E_alu*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_rev, x=y[:-2]), x=y[:-3])
 
         deflection = np.concatenate((deflection_rev[::-1][len(y)//2:], deflection_left[:len(y)//2]))
 
@@ -381,12 +381,12 @@ class Structures:
         return None
     
     def determine_VTOL_boom_thickness(self) -> float:
-        t_range = np.linspace(00.001, 0.1, 100)
+        t_range = np.linspace(0.001, 0.05, 100)
         for t in t_range:
             self.VTOL_boom_thickness = t
             deflection = self.NVM_propeller_boom(size_thickness=True)
             if deflection <= self.max_deflection_VTOL_boom:
-                return t
+                return round(t, 4) #rounded to half a mm
         return None
     
     def determine_fuselage_thickness(self) -> float:
@@ -418,32 +418,17 @@ class Structures:
         alu_t = np.array([0.8, 1, 1.25, 1.5]) / 1000
         core_t = np.array([3, 5, 10, 20]) / 1000
 
-        # Fuselage
-        _, V_cruise_root, M_cruise_root = self.NVM_cruise(return_root_values=True)
-        _, V_VTOL_root, M_VTOL_root = self.NVM_VTOL(return_root_values=True)
-
-        V_fus = 2 * max(abs(V_cruise), abs(V_VTOL))
-        M_fus = 2 * max(abs(M_cruise), abs(M_VTOL))
-
-        t_V_fus = V / (self.max_shear_titanium*np.pi*self.fuselage_diameter)
-        t_M_fus = (8*M) / (np.pi*self.fuselage_diameter**3*self.max_stress_titanium)
+        viable = []
 
         for t_a in alu_t:
             for t_c in core_t:
                 k_eff = (2*t_a + t_c) / (2*t_a / self.conductivity_alu + t_c / self.conductivity_foam)
                 max_tensile_load = max(2*t_a*self.tensile_strength_alu, t_c*self.tensile_strength_foam)
                 max_shear_load = self.shear_strength_foam*t_c #This is per meter width
-                print(f'Aluminium thickness: {t_a*1000} mm, Core thickness: {t_c*1000} mm, Effective conductivity: {round(k_eff, 3)} W/mK, max tensile stress: {max_tensile_load} N, max shear load / meter: {max_shear_load}')
+                E = (self.E_alu*t_a*2 + self.E_foam*t_c) / (2*t_a + t_c)
+                print(f'Aluminium thickness: {t_a*1000} mm, Core thickness: {t_c*1000} mm, Effective conductivity: {round(k_eff, 3)} W/mK, max tensile stress: {max_tensile_load} N, max shear load / meter: {max_shear_load}, E: {E / 10**9}')
 
-        # wing
-
-        _, V_cruise, M_cruise = self.NVM_cruise(return_max_values=True)
-        _, V_VTOL, M_VTOL = self.NVM_VTOL(return_max_values=True)
-
-        V = 2 * max(abs(V_cruise), abs(V_VTOL))
-        M = 2 * max(abs(M_cruise), abs(M_VTOL))
-
-        return ...
+        return 
 
     def get_airfoil_coordinates(self): 
         with open("DetailedDesign\data\e1212_Lednicer.DAT", 'r') as f:
@@ -666,8 +651,9 @@ class Structures:
 
 if __name__ == "__main__":  # pragma: no cover
     a = Structures(fi)
-    # print(a.determine_VTOL_boom_thickness())
-    # a.NVM_VTOL()
-    # a.NVM_cruise()
-    # a.NVM_propeller_boom()
-    a.sandwich()
+    #print(a.determine_VTOL_boom_thickness())
+    a.NVM_VTOL()
+    a.NVM_cruise()
+    a.NVM_propeller_boom()
+    # a.sandwich()
+    print(a.mass_battery)

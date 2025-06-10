@@ -204,11 +204,10 @@ structures_funny_inputs = {
     "tensile_strength_foam": 1.7 * 10**6, #Pa
     "tensile_strength_alu": 193 * 10**6, #Pa
     "tensile_strength_reduction_temp": 0.9, #- https://firesciencereviews.springeropen.com/articles/10.1186/s40038-015-0007-5#:~:text=This%20concern%20is%20exacerbated%20for,(Langhelle%20and%20Amdahl%202001).
-    "root_chord": 0.458, #m 
-    "first_spar_position": 0.14, #percentage
-    "second_spar_position": 0.5, #percentage
-    "V_cruise": 27.77, #m/s
-
+    "E_foam": 0.123*10**9, #Pa
+    "E_alu": 70.3 * 10**9, #Pa
+    "density_alu": 2.68 * 1000, #kg/m3
+    "boom_inner_diameter": 0.015 #m
 }
 
 funny_inputs.update(structures_funny_inputs)
@@ -372,10 +371,6 @@ final_outputs = {
     "volume_fueltank": 1.8296442000000004,
     "refills_for_mission": 0,
 }
-funny_inputs.update(final_outputs)
-
-
-funny_inputs.update()
 
 # ~~~ Hardware ~~~
 
