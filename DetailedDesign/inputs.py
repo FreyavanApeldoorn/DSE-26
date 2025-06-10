@@ -104,7 +104,7 @@ propulsion_inputs = {
     "propeller_mass_VTOL": 0.073,  # kg  # - selected from components
     "propeller_mass_cruise": 0.0100,  # kg   # - selected from components
     "power_available_VTOL": 1418,  # W    # - selected from components
-    "power_available_cruise": 2552,  # W   # - selected from components
+    "power_available_cruise": 2552  # W   # - selected from components
 }
 inputs.update(propulsion_inputs)
 
@@ -117,7 +117,7 @@ power_inputs = {
     "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
     "power_deploy": 0, #W, power usage of hardware during deploy phase, updated in "hardware.py"
     "power_scan": 0, #W, power usage of hardware during scan phase, updated in "hardware.py"
-    "power_idle": 100 , # W, power usage of hardware during idle phase, estimated
+    "power_idle": 100 # W, power usage of hardware during idle phase, estimated
 }
 inputs.update(power_inputs)
 
@@ -153,7 +153,7 @@ aerodynamics_inputs = {
     "min_load_factor": -1.0,  # Minimum load factor for maneuvering
     "CL_max": 1.34,  # Maximum lift coefficient
     "wing_loading": 217,  # Wing loading in N/m^2
-    "CL_alpha": 0.09 * 180/np.pi * 0.85,  # Lift curve slope in 1/deg
+    "CL_alpha": 0.09 * 180/np.pi * 0.85  # Lift curve slope in 1/deg
 }
 inputs.update(aerodynamics_inputs)
 
@@ -172,9 +172,16 @@ structures_inputs = {
     "max_shear_titanium": 760*10**6, #Pa
     "max_stress_titanium": 1.1*10**9, #Pa
 
+    "conductivity_alu": 138, # W/(m*K)
+    "conductivity_foam": 0.04, # W/(m*K)
+    "shear_strength_foam": 1 * 10**6, #Pa
+    "shear_strength_alu": 138 * 10**6, #Pa 
+    "tensile_strength_foam": 1.7 * 10**6, #Pa
+    "tensile_strength_alu": 193 * 10**6, #Pa
+    "tensile_strength_reduction_temp": 0.9 #- https://firesciencereviews.springeropen.com/articles/10.1186/s40038-015-0007-5#:~:text=This%20concern%20is%20exacerbated%20for,(Langhelle%20and%20Amdahl%202001).
+
     "mass_margin": 0.05, # 5% mass margin for structures
     "mass_structure": 5.0 # kg, initial mass of the structure, to be updated later
-
 }
 inputs.update(structures_inputs)
 
@@ -198,7 +205,7 @@ thermal_inputs = {
     "heat_coeff_ext": 45.0,
     "heat_int": 200.0,
     "m_int": 10.0,  # COMES FROM HARDWARE
-    "c_p_int": 500.0,
+    "c_p_int": 500.0
 }
 inputs.update(thermal_inputs)
 
@@ -221,7 +228,7 @@ nest_inputs = {
     "nest_height": 2.39,
     "nest_empty_mass": 100.0,
     "generator_efficiency": 0.85,
-    "diesel_energy_density": 9.94,
+    "diesel_energy_density": 9.94
 }
 inputs.update(nest_inputs)
 
@@ -280,7 +287,7 @@ hardware_inputs = {
     "battery_width": 0.1,  # m, width of the battery
     "battery_height": 0.05,  # m, height of the battery
     # buoy
-    "buoy_mass": 0.5,  # kg, mass of the buoy
+    "buoy_mass": 0.5  # kg, mass of the buoy
 }
 #inputs.update(hardware_inputs)
 
@@ -345,7 +352,7 @@ component_locations = {
     # Payload
     "payload_x": 0.95,  # m, x-location w.r.t. front of fuselage
     "payload_y": None,  # m, y-location w.r.t. front of fuselage
-    "payload_z": None,  # m, z-location w.r.t. front of fuselage
+    "payload_z": None  # m, z-location w.r.t. front of fuselage
 }
 #inputs.update(component_locations)
 
@@ -391,7 +398,7 @@ stab_n_con_inputs = {
     #other parameters
     "wind_speed": 30 / 3.6,  # m/s, wind speed from requirement
     "rpm_max": 4200,  # rpm
-    "T_max": 17.6 * 9.81,  # N, maximum thrust per motor.
+    "T_max": 17.6 * 9.81  # N, maximum thrust per motor.
 
 }
 inputs.update(stab_n_con_inputs)
