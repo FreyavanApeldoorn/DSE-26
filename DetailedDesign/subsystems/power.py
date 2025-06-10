@@ -11,9 +11,10 @@ import numpy as np
 
 class Power:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], hardware=None) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = hardware
 
         self.M_to = inputs["M_to"]
         self.DOD_fraction = self.inputs["DOD_fraction"] 
@@ -28,18 +29,28 @@ class Power:
         self.time_scan = inputs["time_scan"]
         self.time_idle = inputs["time_turnaround"]
 
-        self.power_cruise = inputs["power_required_cruise"]
+        
         self.power_ascent = inputs["power_required_VTOL"]
         self.power_descent = inputs["power_required_hover"]  # assuming hover power is used for descent
         self.power_deploy = inputs["power_deploy"]
         self.power_transition = inputs["power_transition"]
         self.power_scan = inputs["power_scan"]
         self.power_idle = inputs["power_idle"]
+        self.power_cruise_hardware = inputs["power_cruise_hardware"]  # Power required for cruise operations from hardware
 
+        self.power_required_VTOL = inputs["power_required_VTOL"]  # Power required for VTOL operations
+        self.power_required_cruise = inputs["power_required_cruise"]  # Power required for cruise operations
+        self.power_required_hover = inputs["power_required_hover"]  # Power required for hover operations
+
+        #Calculate the total power 
+        self.power_scan_total = self.power_scan + self.power_required_VTOL
+        self.power_deploy_total = self.power_deploy + self.power_required_VTOL
+        self.power_cruise_total = self.power_cruise_hardware + self.power_required_cruise
 
     # ~~~ Intermediate Functions ~~~
 
     def calculate_required_capacity(self) -> float:
+        
         
         times = np.array([
             self.time_cruise,
@@ -51,12 +62,12 @@ class Power:
             self.time_idle
         ])
         powers = np.array([
-            self.power_cruise,
+            self.power_cruise_total,
             self.power_ascent,
             self.power_descent,
-            self.power_deploy,
+            self.power_deploy_total,
             self.power_transition,
-            self.power_scan,
+            self.power_scan_total,
             self.power_idle
 
         ])
@@ -107,6 +118,7 @@ class Power:
 
     # ~~~ Output functions ~~~ 
 
+
     def get_all(self) -> dict[str, float]:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
@@ -114,11 +126,12 @@ class Power:
         self.calculate_required_capacity()
         self.calculate_battery_mass()
 
-        self.outputs["mass_battery"] = (self.battery_mass if self.outputs.get("mass_battery") is None else self.outputs["mass_battery"])
+        self.outputs["mass_battery"] = self.battery_mass # if self.hardware["battery_mass"] is None else self.hardware["battery_mass"]
         self.outputs["required_capacity_wh"] = self.trip_capacity_wh
         self.outputs["battery_capacity"] = self.trip_capacity_wh   # updated true capacity (might increase after choosing a battery)
 
         return self.outputs
+
     
 if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
