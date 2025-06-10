@@ -154,7 +154,7 @@ class Hardware:
 if __name__ == '__main__': 
     # Perform sanity checks here
     
-    from DetailedDesign.hardware_inputs import components
+    from hardware_inputs import components
 
     inputs = {}
 

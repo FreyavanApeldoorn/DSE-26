@@ -143,7 +143,7 @@ otoher_components = {
         "SATCOM_module_z": None  # m, z-location w.r.t. front of fuselage
     },
     "PBD": {   # Power distribution board
-        "PBD_name": "FLIGHTCORE MK2"
+        "PBD_name": "FLIGHTCORE MK2",
         "PDB_mass": 0.015,
         "PDB_power": None,  # W, power consumption of the PDB
         "PDB_cost": None,  # Cost of the PDB, if available
@@ -270,6 +270,47 @@ component_inputs.update(structure)
 
 
 components = component_inputs.copy()
+
+
+nest_components = {
+    "container": {
+        "container_name": "ISO Container",
+        "container_mass": None,
+        "container_cost": None,  # Cost of the container, if available
+        "container_length": None,  # m, length of the container
+        "container_width": None,  # m, width of the container
+        "container_height": None  # m, height of the container
+    }
+    
+    "generator": {
+        "generator_name": "CAT DE65 GC",
+        "generator_mass": None,
+        "generator_power": None,  # W, power output of the generator
+        "generator_cost": None,  # Cost of the generator, if available
+        "generator_length": None,  # m, length of the generator
+        "generator_width": None,  # m, width of the generator
+        "generator_height": None,  # m, height of the generator
+        # Positioning:
+        "generator_x": None,  # m, x-location w.r.t. front of fuselage
+        "generator_y": None,  # m, y-location w.r.t. front of fuselage
+        "generator_z": None  # m, z-location w.r.t. front of fuselage
+    },
+    "fuel_tank": {
+        "fuel_tank_name": "",
+        "fuel_tank_mass": None,
+        "fuel_tank_capacity": None,  # L, fuel capacity of the tank
+        "fuel_tank_cost": None,  # Cost of the fuel tank, if available
+        "fuel_tank_length": None,  # m, length of the fuel tank
+        "fuel_tank_width": None,  # m, width of the fuel tank
+        "fuel_tank_height": None,  # m, height of the fuel tank
+        # Positioning:
+        "fuel_tank_x": None,  # m, x-location w.r.t. front of fuselage
+        "fuel_tank_y": None,  # m, y-location w.r.t. front of fuselage
+        "fuel_tank_z": None  # m, z-location w.r.t. front of fuselage
+    },
+    ""
+}
+
 
 if __name__ == '__main__':
 
