@@ -234,7 +234,8 @@ thermal_funny_inputs = {
     "battery_capacity": 10., # Ah
     "battery_potential": 44.4, # V
     "battery_resistance": 0.015, # Ohm, based on guessing
-    
+    "processor_heat_dissipated": 40., # W, guesstimate which should eventually come from the chosen processor
+    "winch_eff": 0.65, # Winch efficiency fraction (0.35=35% efficiency) used to compute the heat generated
 
 }
 
