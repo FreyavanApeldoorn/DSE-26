@@ -79,7 +79,7 @@ class Structures:
         self.density_alu = inputs['density_alu']
         self.boom_inner_diameter = inputs['boom_inner_diameter']
 
-        self.root_chord = inputs['root_chord']#0.458 # [m] 
+        self.root_chord = inputs['root_chord']    
         self.first_spar_position = inputs['first_spar_position'] * self.root_chord
         self.second_spar_position = inputs['second_spar_position'] *self.root_chord
 
