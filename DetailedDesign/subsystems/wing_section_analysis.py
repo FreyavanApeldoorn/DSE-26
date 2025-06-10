@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Path to the .DAT file
-file_path = r"C:\Users\wiets\OneDrive\Documenten\TU Delft\BEP\DSE-26\DetailedDesign\data\e1212_Lednicer.DAT"
+#file_path = r"C:\Users\wiets\OneDrive\Documenten\TU Delft\BEP\DSE-26\DetailedDesign\data\e1212_Lednicer.DAT"
+file_path = file_path = r"C:\Users\Sanne\OneDrive\Documenten\e1212.dat"
 
 # Read lines, skip headers
 with open(file_path, 'r') as f:
@@ -38,12 +39,12 @@ else:
         raise ValueError("Could not split upper and lower surfaces.")
 
 # Convert to DataFrames
-upper_df = pd.DataFrame(upper, columns=["x", "y"])
-lower_df = pd.DataFrame(lower, columns=["x", "y"])
+upper_df = 0.458*pd.DataFrame(upper, columns=["x", "y"])
+lower_df = 0.458*pd.DataFrame(lower, columns=["x", "y"])
 
 # Parametrize spar locations (as fraction of chord)
-forward_spar = 0.25  # 25% chord
-aft_spar = 0.7       # 70% chord
+forward_spar = 0.14*0.458  # 25% chord
+aft_spar = 0.7*0.458       # 70% chord
 
 def get_spar_points(df, spar_x):
     """Interpolate to find y at spar_x for both upper and lower surfaces."""
