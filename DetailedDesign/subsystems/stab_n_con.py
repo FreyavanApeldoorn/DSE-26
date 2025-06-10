@@ -48,8 +48,9 @@ class StabCon:
     # Construction helpers                                                 #
     # ---------------------------------------------------------------------#
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], hardware=None) -> None:
         self.inputs = inputs.copy()  # Copy to avoid mutating caller's data
+        self.hardware = hardware
 
         self.wing_span = inputs["wing_span"]
         self.wing_root_chord = inputs["wing_root_chord"]

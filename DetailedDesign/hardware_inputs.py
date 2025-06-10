@@ -154,15 +154,21 @@ component_inputs.update(deployment_components)
 
 propulsion = {
     "propeller_cruise": {
+        "propeller_cruise_mass": None,
+        "propeller_cruise_efficiency": None
         
     },
     "motor_cruise": {
+        "motor_cruise_mass": None,
+        "motor_cruise_power_available": None,
         # Positioning:
         "motor_cruise_x": 2,  # m, x-location w.r.t. front of the fuselage
         "motor_cruise_y": None,  # m, y-location w.r.t. vertical centerline of the fuselage
         "motor_cruise_z": None  # m, z-location w.r.t. horizontal centerline of the fuselage
     },
     "propeller_VTOL": {
+        "propeller_vtol_mass": None,
+        "propeller_vtol_efficiency": None
 
     },
     "motor_VTOL": {

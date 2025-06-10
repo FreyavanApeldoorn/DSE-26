@@ -11,9 +11,10 @@ import numpy as np
 
 class Power:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], hardware=None) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = hardware
 
         self.M_to = inputs["M_to"]
         self.DOD_fraction = self.inputs["DOD_fraction"] 
