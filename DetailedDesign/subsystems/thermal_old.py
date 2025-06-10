@@ -20,14 +20,11 @@ class Thermal:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
 
-        # deploy-region ambient temperature (°C)
-        self.T_amb_deploy = inputs["T_amb_deploy"]
-        # Cruise-region ambient temperature (°C)
-        self.T_amb_cruise = inputs["T_amb_cruise"]
-        # Initial internal temperature before deploy region (°C)
-        self.T_int_init = inputs["T_int_init"]
-        # Cruise internal set-point after deploy region (°C)
-        self.T_int_cruise_set = inputs["T_int_cruise_set"]
+        
+        self.T_amb_deploy = inputs["T_amb_deploy"] # deploy-region ambient temperature (°C)
+        self.T_amb_cruise = inputs["T_amb_cruise"]  # Cruise-region ambient temperature (°C)
+        self.T_int_init = inputs["T_int_init"]  # Initial internal temperature before deploy region (°C)
+        self.T_int_cruise_set = inputs["T_int_cruise_set"] # Cruise internal set-point after deploy region (°C)
 
         # Shell geometry and materials
         self.A_heat_shell = inputs["A_heat_shell"]    # Effective heat-transfer area (m²)
