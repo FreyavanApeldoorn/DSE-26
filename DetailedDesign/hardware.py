@@ -35,6 +35,15 @@ class Hardware:
             "PBD"
         ]
 
+        self.wildfire_sensor_power = self.hardware["wildfire_camera"]["wildfire_sensor_power"]
+        self.GPS_power = self.hardware["GPS"]["GPS_power"]
+        self.flight_controller_power = self.hardware["flight_controller"]["flight_controller_power"]
+        self.Mesh_network_module_power = self.hardware["Mesh_network_module"]["Mesh_network_module_power"]
+        self.SATCOM_module_power = self.hardware["SATCOM_module"]["SATCOM_module_power"]
+        self.OBC_power = self.hardware["OBC"]["OBC_power"]
+        self.winch_motor_power = self.hardware["winch_motor"]["Winch_motor_power"]  # W, power consumption of the winch motor
+        self.oil_spill_sensor_power = self.hardware["oil_spill_camera"]["oil_sensor_power"]  # W, power consumption of the wildfire sensor
+
     # ~~~ Intermediate Functions ~~~
 
     # def select_components(self):
@@ -94,8 +103,34 @@ class Hardware:
                     else: 
                         print(f"Warning: {key} in {comp} does not end with '_power' or is None. Skipping this component.")
         return total_power
+    
+    def calculate_power_hardware_during_scan(self) -> float:
+        """
+        Calculates the total power consumption of the hardware components during the scan phase.
+        """
+        power_hardware_scan = self.wildfire_sensor_power + self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power 
         
+        return power_hardware_scan
+    
+    def calculate_power_hardware_during_deploy(self) -> float:
+        """
+        Calculates the total power consumption of the hardware components during the deploy phase.
+        """
 
+        power_hardware_deploy = self.wildfire_sensor_power + self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power + self.winch_motor_power
+        
+        return power_hardware_deploy
+    
+    def calculate_power_hardware_cruise(self) -> float:
+        """
+        Calculates the total power consumption of the hardware components during the cruise phase.
+        """
+        power_hardware_cruise =  self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power 
+        
+        return power_hardware_cruise
+    
+    
+          
 
 
     # ~~~ Output functions ~~~ 
@@ -107,9 +142,9 @@ class Hardware:
 
         #self.outputs = self.select_components()
 
-        self.outputs["power_scan"] = 100 # 
-        self.outputs["power_deploy"] = 100 # PLACEHOLDER
-        self.outputs["power_idle"] = 100 # 
+        self.outputs["power_scan"] = self.calculate_power_hardware_during_scan()  # W, power consumption of the hardware during the scan phase
+        self.outputs["power_deploy"] = self.calculate_power_hardware_during_deploy()
+        self.outputs["power_idle"] = self.calculate_power_hardware_cruise()  # W, power consumption of the hardware during the cruise phase
 
         self.outputs["mass_hardware"] = self.calculate_mass_hardware()   # kg, mass of hardware components (excluding payload, propulsion, structure, etc)
         

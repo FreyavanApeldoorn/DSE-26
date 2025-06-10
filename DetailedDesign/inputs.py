@@ -115,9 +115,9 @@ power_inputs = {
     "DOD_fraction": 0.8,  # Depth of discharge fraction
     "eta_battery": 0.8,  # Battery efficiency
     "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
-
-    "power_scan": 2700,
-    "power_idle": 100
+    "power_deploy": 0, #W, power usage of hardware during deploy phase, updated in "hardware.py"
+    "power_scan": 0, #W, power usage of hardware during scan phase, updated in "hardware.py"
+    "power_idle": 100 , # W, power usage of hardware during idle phase, estimated
 }
 inputs.update(power_inputs)
 

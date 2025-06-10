@@ -36,10 +36,17 @@ class Power:
         self.power_scan = inputs["power_scan"]
         self.power_idle = inputs["power_idle"]
 
+        self.power_required_VTOL = inputs["power_required_VTOL"]  # Power required for VTOL operations
+        self.power_required_cruise = inputs["power_required_cruise"]  # Power required for cruise operations
+        self.power_required_hover = inputs["power_required_hover"]  # Power required for hover operations
+
 
     # ~~~ Intermediate Functions ~~~
 
     def calculate_required_capacity(self) -> float:
+        
+        power_scan = self.power_scan + self.power_required_VTOL
+        power_deploy = self.power_deploy
         
         times = np.array([
             self.time_cruise,
@@ -56,7 +63,7 @@ class Power:
             self.power_descent,
             self.power_deploy,
             self.power_transition,
-            self.power_scan,
+            power_scan,
             self.power_idle
 
         ])
