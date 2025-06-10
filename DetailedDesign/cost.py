@@ -4,17 +4,18 @@ This is the file for the thermal subsystem. It contains a single class.
 
 class Costs:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], hardware) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = hardware
 
     # ~~~ Intermediate Functions ~~~
 
-    def example_function(self):
+    def cost_breakdown(self):
         '''
         This is an example intermediate function
         '''
-        return True
+        
 
     # ~~~ Output functions ~~~ 
 

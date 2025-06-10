@@ -13,14 +13,15 @@ from subsystems.power import Power
 from subsystems.stab_n_con import StabCon
 from subsystems.aerodynamics import Aerodynamics
 from subsystems.structures import Structures
-from subsystems.thermal import Thermal
+#from subsystems.thermal import Thermal
 
 
 class UAV:
 
-    def __init__(self, inputs: dict[str, float], iterations: int, history: bool = False, verbose : bool = False) -> None:
+    def __init__(self, inputs: dict[str, float], hardware: dict[str, float], iterations: int, history: bool = False, verbose : bool = False) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = hardware
         self.iterations = iterations
         self.verbose = verbose
         
@@ -36,29 +37,31 @@ class UAV:
             
             outputs = self.inputs.copy()
 
-            constraints = Constraints(outputs)
+            constraints = Constraints(outputs, self.hardware)
             outputs = constraints.get_all()
             
-            propulsion = Propulsion(outputs)
+            propulsion = Propulsion(outputs, self.hardware)
             outputs = propulsion.get_all()
 
-            power = Power(outputs)
+            power = Power(outputs, self.hardware)
             outputs = power.get_all()
 
             #stab_n_con = StabnCon()
             
-            #aerodynamics = Aerodynamics(outputs)
-            #outputs = aerodynamics.get_all()
+            aerodynamics = Aerodynamics(outputs, self.hardware)
+            outputs = aerodynamics.get_all()
 
-            structures = Structures(outputs)
+            structures = Structures(outputs, self.hardware)
             outputs = structures.get_all()
 
-            thermal = Thermal(outputs)
-            outputs = thermal.get_all()
+            #thermal = Thermal(outputs)
+            #outputs = thermal.get_all()
 
             if self.history:
                 self.history_data.update(outputs)  
 
+        # performance = Performance(outputs) # - potentially add the final performance metrics here
+        # outputs = structures.get_all()
 
         if self.verbose:
             print("UAV sizing completed after", self.iterations, "iterations.")

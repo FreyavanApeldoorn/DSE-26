@@ -25,9 +25,11 @@ import numpy as np
 
 class Structures:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], hardware: dict[str, float] = None, verbose=False) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = hardware
+        self.verbose = False
 
         self.wing_span = inputs["wing_span"]
         self.mtow = self.inputs['MTOW']
@@ -37,25 +39,43 @@ class Structures:
 
         self.M_to = inputs["M_to"]
 
+        self.mass_margin = inputs["mass_margin"]
+
         self.mass_payload = inputs["payload_mass"]
         self.mass_hardware = inputs["mass_hardware"]
         self.mass_battery = inputs["mass_battery"]
         self.battery_length = inputs['battery_length']
         self.mass_propulsion = inputs["mass_propulsion"]
-        #self.taper_ratio = inputs['taper_ratio']
+        self.taper_ratio = inputs['taper_ratio']
         
         self.wing_span = inputs["wing_span"]
-        self.mass_wing = inputs['mass_wing']
+        self.mass_wing = 3
 
         self.motor_mass_VTOL = inputs['motor_mass_VTOL']
         self.propeller_mass_VTOL = inputs['propeller_mass_VTOL']
         self.propeller_diameter_VTOL = inputs['propeller_diameter_VTOL']
-        self.y_prop = inputs['y_prop']
 
         self.VTOL_boom_length = inputs['VTOL_boom_length']
         self.titanium_density = inputs['titanium_density']
         self.titanium_E = inputs['titanium_E']
         self.max_deflection_VTOL_boom = inputs['max_deflection_VTOL_boom']
+        self.load_factor = inputs['max_load_factor']
+
+        self.fuselage_diameter = inputs['fuselage_diameter']
+        self.y_prop = max(self.propeller_diameter_VTOL / 2 - self.fuselage_diameter / 2, self.battery_length*2)
+        self.max_shear_titanium = 214*10**6 # inputs['max_shear_titanium']
+        self.max_stress_titanium = inputs['max_stress_titanium']
+        self.wind_speed = inputs['wind_speed']
+        self.rho_0 = inputs['rho_0']
+        self.wing_area = inputs['wing_area']
+
+        self.conductivity_alu = inputs['conductivity_alu']
+        self.conductivity_foam = inputs['conductivity_foam']
+        self.shear_strength_foam = inputs['shear_strength_foam']
+        self.shear_strength_alu = inputs['shear_strength_alu']
+        self.tensile_strength_foam = inputs['tensile_strength_foam']
+        self.tensile_strength_alu = inputs['tensile_strength_alu']
+
 
         self.VTOL_boom_thickness = self.determine_VTOL_boom_thickness()
 
@@ -63,25 +83,68 @@ class Structures:
 
     # ~~~ Intermediate Functions ~~~
 
+
+    def calc_wing_mass(self) -> float:
+        pass
+
+    def calc_structure_mass(self) -> float:
+        
+        MF_structure = 0.3  # THIS NEEDS TO BE UPDATED
+        self.mass_structure = self.M_to * MF_structure
+
     def mass_fractions(self):
         pass
 
+        """
+        Components:
 
-    
-    def total_mass(self) -> float:
+        - Sensors
+        - Propulsion
+        - Battery
+        - Structure + fuselage
+        - Wing_group (including tail)
+        - 
+        - Payload (aerogel)
+        """
 
-        self.mass_structure = 9.95 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+
+        mass_sensors = 10
+
+        self.MF_sensors = 5/self.M_to # NEEDS TO BE UPDATED
+        self.MF_propulsion = self.mass_propulsion / self.M_to
+        self.MF_winggroup = 2/self.M_to # NEEDS TO BE UPDATED
+        self.MF_battery = self.mass_battery / self.M_to
+        self.MF_structure = 4/self.M_to # NEEDS TO BE UPDATED
+        self.MF_payload = self.mass_payload / self.M_to
+
+        MF_non_payload = np.array([self.mass_margin, self.MF_sensors, self.MF_propulsion, self.MF_battery, self.MF_winggroup, self.MF_structure])
+        self.MF_payload = 1 - np.sum(MF_non_payload)
+
+        if self.verbose:
+            print(f"Sensor mass fraction: {self.MF_sensors:.4f}")
+            print(f"Propulsion mass fraction: {self.MF_propulsion:.4f}")
+            print(f"Battery mass fraction: {self.MF_battery:.4f}")
+            print(f"Wing group mass fraction: {self.MF_winggroup:.4f}")
+            print(f"Structure mass fraction: {self.MF_structure:.4f}")
+            print(f"Payload mass fraction: {self.MF_payload:.4f}")
+
+
+        if self.MF_payload < 0:
+            raise ValueError("The mass fraction for the payload is negative. Please check the mass fractions of the other components.")
+
+        # Update payload mass
+        self.mass_payload = self.M_to * self.MF_payload
         
-        masses_nopay = np.array([self.mass_hardware, self.mass_battery, self.mass_propulsion, self.mass_structure])
-        mass_nopay = np.sum(masses_nopay)
 
-        self.leftover_for_payload = self.M_to - mass_nopay
 
-    def NVM_cruise(self):
+
+    def NVM_cruise(self, return_root_values=False, return_max_values=False) -> None:
         """
         This function calculates the NVM (Normal, Shear, and Bending Moment) for the UAV wing during cruise flight.
         It considers the distributed loads from the wing weight, battery weight and lift, and the point loads from the propellers.
         It then plots the distributed load, shear force, and bending moment along the span of the wing.
+
+        load factor is from the gust loads
 
         Down is considered positive in this context, as per the provided reference and convention for aircraft coordinate systems.
 
@@ -111,7 +174,7 @@ class Structures:
         V_prop = [F_prop if i < self.y_prop else 0 for i in y]
 
         # Distributed lift load from the lift assuming elliptical lift distribution
-        L_y = -((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span)**2)
+        L_y = -self.load_factor*((4*self.mtow) / (np.pi*self.span)) * np.sqrt(1 - ((2*y)/self.span)**2)
         total_forces = W_wing + L_y + W_batt
         forces_rev = total_forces[::-1]
 
@@ -123,9 +186,14 @@ class Structures:
                 
         fig, axs = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
 
+        if return_root_values:
+            return total_forces[0], V[0], M[0]
+        elif return_max_values:
+            return max(total_forces), max(V), max(M)
+
         axs[0].plot(y, total_forces, color='tab:blue', linewidth=2, label="Distributed Load")
         axs[0].fill_between(y, total_forces, color='tab:blue', alpha=0.3)
-        axs[0].set_ylabel("Load [N/m]")
+        axs[0].set_ylabel("Load [N]")
         axs[0].set_xlabel("Spanwise Position $y$ (m)")
         axs[0].grid(True)
 
@@ -145,17 +213,18 @@ class Structures:
         plt.savefig("DetailedDesign/subsystems/Plots/NVM_plot_cruise.png", dpi=300)
         plt.show()
 
-        return None
+        if return_root_values:
+            return total_forces[0], V[0], M[0]
     
-    def NVM_VTOL(self):
+    def NVM_VTOL(self, return_root_values=False, return_max_values=False) -> None:
         """
         This function calculates the NVM (Normal, Shear, and Bending Moment) for the UAV during cruise hover.
-        It considers the distributed loads from the wing weight, battery weight and lift, which is now generated by the propellers.
+        It considers the distributed loads from the wing weight, battery weight gust loads and lift, which is now generated by the propellers.
         It then plots the distributed load, shear force, and bending moment along the span of the wing.
 
         Down is considered positive in this context, as per the provided reference and convention for aircraft coordinate systems.
 
-        The load factor is 1
+        Gust loads are considered for a 30 km/h wind from straight below.
         """
 
         # https://uotechnology.edu.iq/dep-MechanicsandEquipment/Lectures%20and%20Syllabus/Lectures/Aircraft/Foruth%20Grade/Aircraft%20Design3.pdf
@@ -170,7 +239,10 @@ class Structures:
         # Distributed load from the wing weight
 
         x_0 = self.mass_wing*9.81 / (half_span*(self.taper_ratio + 0.5*(1-self.taper_ratio)))
-        W_wing = [-(((1-self.taper_ratio)*x_0 / half_span)* i - x_0) for i in y]
+        W_wing = np.array([-(((1-self.taper_ratio)*x_0 / half_span)* i - x_0) for i in y])
+
+        F_gust = -0.5*self.rho_0* self.wind_speed**2 * (self.wing_area / 2)
+        W_gust = np.array([F_gust / self.span for _ in y])
 
         # Point load from the propellers
 
@@ -179,7 +251,7 @@ class Structures:
 
         V_prop = [F_prop if i < self.y_prop else 0 for i in y]
 
-        total_forces = W_wing + W_batt
+        total_forces = W_wing + W_batt + W_gust
         forces_rev = total_forces[::-1]
 
         # V = integrate.cumulative_simpson(total_forces, x=y)
@@ -194,9 +266,14 @@ class Structures:
                 
         fig, axs = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
 
+        if return_root_values:
+            return total_forces[0], V[0], M[0]
+        elif return_max_values:
+            return max(total_forces), max(V), max(M)
+
         axs[0].plot(y, total_forces, color='tab:blue', linewidth=2, label="Distributed Load")
         axs[0].fill_between(y, total_forces, color='tab:blue', alpha=0.3)
-        axs[0].set_ylabel("Load [N/m]")
+        axs[0].set_ylabel("Load [N]")
         axs[0].set_xlabel("Spanwise Position $y$ (m)")
         axs[0].grid(True)
 
@@ -216,13 +293,14 @@ class Structures:
         plt.savefig("DetailedDesign/subsystems/Plots/NVM_plot_hover.png", dpi=300)
         plt.show()
 
-        return None
     
-    def NVM_propeller_boom(self, size_thickness = False):
+    def NVM_propeller_boom(self, size_thickness = False) -> float | None:
         """
         This function calculates the NVM (Normal, Shear, and Bending Moment) for the boom that supports the VTOL propellers.
         It considers the distributed loads from the boom weight, the weight from the propellers and motors and the lift that those generate.
         It then plots the distributed load, shear force, and bending moment along the span of the wing.
+
+        load factor is from the gust loads
 
         Down is considered positive in this context, as per the provided reference and convention for aircraft coordinate systems.
 
@@ -238,12 +316,12 @@ class Structures:
 
         I_circle = (np.pi / 64)*self.VTOL_boom_thickness**4
         boom_weight = (0.5*self.VTOL_boom_thickness)**2 * np.pi * self.VTOL_boom_length * self.titanium_density *9.81
-        print('boom_mass', boom_weight / 9.81)
+        #print('boom_mass', boom_weight / 9.81)
         W_boom = np.array([boom_weight / self.VTOL_boom_length for _ in y])
 
         # Point load from the propeller
 
-        F_prop = 9.81*(self.propeller_mass_VTOL + self.motor_mass_VTOL) - 0.25*self.mtow
+        F_prop = self.load_factor*9.81*(self.propeller_mass_VTOL + self.motor_mass_VTOL) - 0.25*self.mtow
 
         V_prop = [-F_prop if i < 0 else F_prop for i in y]
 
@@ -295,12 +373,12 @@ class Structures:
         axs[3].grid(True)
 
         plt.tight_layout(rect=[0, 0, 1, 0.97])
-        plt.savefig("DetailedDesign/subsystems/Plots/NVM_plot_propeller_bom.png", dpi=300)
+        plt.savefig("DetailedDesign/subsystems/Plots/NVM_plot_propeller_boom.png", dpi=300)
         plt.show()
 
         return None
     
-    def determine_VTOL_boom_thickness(self):
+    def determine_VTOL_boom_thickness(self) -> float:
         t_range = np.linspace(00.001, 0.1, 100)
         for t in t_range:
             self.VTOL_boom_thickness = t
@@ -308,6 +386,62 @@ class Structures:
             if deflection <= self.max_deflection_VTOL_boom:
                 return t
         return None
+    
+    def determine_fuselage_thickness(self) -> float:
+        '''
+        This function determines the thickness of the fuselage based on the maximum shear and stress limits of titanium.
+        It calculates the required thickness based on the maximum shear force and bending moment during cruise and VTOL operations, 
+        which occurs at the connection to the wing.
+        
+        Thin walled approx.
+        '''
+
+        _, V_cruise, M_cruise = self.NVM_cruise(return_root_values=True)
+        _, V_VTOL, M_VTOL = self.NVM_VTOL(return_root_values=True)
+
+        V = 2 * max(abs(V_cruise), abs(V_VTOL))
+        M = 2 * max(abs(M_cruise), abs(M_VTOL))
+
+        t_V = V / (self.max_shear_titanium*np.pi*self.fuselage_diameter)
+        t_M = (8*M) / (np.pi*self.fuselage_diameter**3*self.max_stress_titanium)
+
+        # Because of manufacturing
+        if max(t_V, t_M) >= 0.001:
+            return max(t_V, t_M)
+        else:
+            return 0.001
+        
+    def sandwich(self):
+
+        alu_t = np.array([0.8, 1, 1.25, 1.5]) / 1000
+        core_t = np.array([3, 5, 10, 20]) / 1000
+
+        # Fuselage
+        _, V_cruise_root, M_cruise_root = self.NVM_cruise(return_root_values=True)
+        _, V_VTOL_root, M_VTOL_root = self.NVM_VTOL(return_root_values=True)
+
+        V_fus = 2 * max(abs(V_cruise), abs(V_VTOL))
+        M_fus = 2 * max(abs(M_cruise), abs(M_VTOL))
+
+        t_V_fus = V / (self.max_shear_titanium*np.pi*self.fuselage_diameter)
+        t_M_fus = (8*M) / (np.pi*self.fuselage_diameter**3*self.max_stress_titanium)
+
+        for t_a in alu_t:
+            for t_c in core_t:
+                k_eff = (2*t_a + t_c) / (2*t_a / self.conductivity_alu + t_c / self.conductivity_foam)
+                max_tensile_load = max(2*t_a*self.tensile_strength_alu, t_c*self.tensile_strength_foam)
+                max_shear_load = self.shear_strength_foam*t_c #This is per meter width
+                print(f'Aluminium thickness: {t_a*1000} mm, Core thickness: {t_c*1000} mm, Effective conductivity: {round(k_eff, 3)} W/mK, max tensile stress: {max_tensile_load} N, max shear load / meter: {max_shear_load}')
+
+        # wing
+
+        _, V_cruise, M_cruise = self.NVM_cruise(return_max_values=True)
+        _, V_VTOL, M_VTOL = self.NVM_VTOL(return_max_values=True)
+
+        V = 2 * max(abs(V_cruise), abs(V_VTOL))
+        M = 2 * max(abs(M_cruise), abs(M_VTOL))
+
+        return ...
 
     # ~~~ Output functions ~~~
 
@@ -316,9 +450,10 @@ class Structures:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         
-        self.total_mass()
+        self.mass_fractions()
+        self.calc_structure_mass()
 
-        self.outputs["payload_mass"] = self.leftover_for_payload   # updated mass of the payload (with an added margin to avoid exceeding the MTOW requirement)
+        self.outputs["payload_mass"] = self.mass_payload   # updated mass of the payload (with an added margin to avoid exceeding the MTOW requirement)
         self.outputs['mass_structure'] = self.mass_structure # kg
 
 
@@ -328,13 +463,14 @@ class Structures:
         #self.outputs["CG"] = ...
 
         return self.outputs
-
-        
-
+    
+    def req_structure(self):
+        pass
 
 if __name__ == "__main__":  # pragma: no cover
     a = Structures(fi)
-    a.NVM_VTOL()
-    a.NVM_cruise()
-    a.NVM_propeller_boom()
-    # Perform sanity checks here
+    # print(a.determine_VTOL_boom_thickness())
+    # a.NVM_VTOL()
+    # a.NVM_cruise()
+    # a.NVM_propeller_boom()
+    a.sandwich()

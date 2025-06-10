@@ -10,6 +10,7 @@ test_inputs = {}
 constants_test_inputs = {
     'g': 9.81,           # Gravitational constant [m/s2]
     'rho': 0.9093,       # Density at 3000m [kg/m^3]
+    'rho_0': 1.225,       # Density at sea level
     'mtow': 30*9.81      # maximum takeoff weight [kg]
 }
 
@@ -112,7 +113,22 @@ test_inputs.update(stab_n_con_test_inputs)
 
 # ~~~ Structures ~~~ 
 
-structures_test_inputs = {}
+structures_test_inputs = {
+    "wing_span": 3.0,  # m, guesstimate
+    "mass_battery": 2.800 , # kg
+    "battery_length": 0.182, # m 
+    "mass_wing": 3, #kg
+    "taper_ratio": 0.83, #-
+    "propeller_diameter_VTOL": 0.66, #m
+    "mass_propulsion": 5, #kg
+    "propeller_mass_VTOL": 0.073, #kg
+    "y_prop": 0.66 / 2, #m, how far out from the root chord the propeller beam is placed. 
+    "VTOL_boom_thickness": 0.05, #m
+    "VTOL_boom_length": 0.66 * 2, #m, based on 1 propeller diameter between propellers
+    "titanium_density": 4.43 * 1000, #kg/m3
+    "titanium_E": 110 * 10**9, #kg/m3
+    "max_deflection_VTOL_boom": 0.02, #m, guesstimate
+}
 
 test_inputs.update(structures_test_inputs)
 

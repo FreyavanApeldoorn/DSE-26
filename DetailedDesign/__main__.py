@@ -1,4 +1,6 @@
 from inputs import initial_inputs
+from hardware_inputs import components
+
 from deployment import Deployment
 from hardware import Hardware
 from mission import Mission
@@ -22,20 +24,26 @@ inputs['mission_type'] = 'wildfire'
 total_iterations = 10  # Define the total number of iterations
 history = False
 
+
+
 outputs = inputs.copy()  # Initialize outputs with inputs
+
+hardware = Hardware(inputs, components)
+outputs = hardware.get_all()
+
 
 for _ in range(total_iterations):
 
     deployment = Deployment(outputs, strategy='perimeter', amt=outputs['mission_perimeter'])
     outputs = deployment.get_all()
 
-    hardware = Hardware(outputs)
-    outputs = hardware.get_all()
+    # hardware = Hardware(outputs, components)
+    # outputs = hardware.get_all()
 
     mission = Mission(outputs, verbose=False)
     outputs = mission.get_all()
 
-    uav = UAV(outputs, iterations=10, history=False, verbose=False)
+    uav = UAV(outputs, hardware, iterations=10, history=False, verbose=False)
     outputs = uav.get_all()
 
     # nest = Nest(outputs)

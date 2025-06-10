@@ -17,44 +17,150 @@ class Hardware:
     
     """
 
-    def __init__(self, inputs: dict[str, float]) -> None:
-        self.inputs = inputs
-        self.outputs = self.inputs.copy()
+    def __init__(self, inputs, hardware: dict[str, float]) -> None:
+        self.hardware = hardware
+        self.outputs = inputs.copy()
+        #self.include_components = include_components
+
+        self.hardware_components = [
+            "wildfire_camera",
+            "oil_spill_camera",
+            "buoy",
+            "gymbal_connection",
+            "flight_controller",
+            "OBC",
+            "GPS",
+            "Mesh_network_module",
+            "SATCOM_module",
+            "PBD"
+        ]
+
+        self.wildfire_sensor_power = self.hardware["wildfire_camera"]["wildfire_sensor_power"]
+        self.GPS_power = self.hardware["GPS"]["GPS_power"]
+        self.flight_controller_power = self.hardware["flight_controller"]["flight_controller_power"]
+        self.Mesh_network_module_power = self.hardware["Mesh_network_module"]["Mesh_network_module_power"]
+        self.SATCOM_module_power = self.hardware["SATCOM_module"]["SATCOM_module_power"]
+        self.OBC_power = self.hardware["OBC"]["OBC_power"]
+        self.winch_motor_power = self.hardware["winch_motor"]["Winch_motor_power"]  # W, power consumption of the winch motor
+        self.oil_spill_sensor_power = self.hardware["oil_spill_camera"]["oil_sensor_power"]  # W, power consumption of the wildfire sensor
 
     # ~~~ Intermediate Functions ~~~
 
-    def sensors(self):
-    
-        self.wildfire_sensor = {
-            "name": "Wildfire Sensor",
-            "mass": 0.1,  # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "power": 0.5,  # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "length": 0.2,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "width": 0.1,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "height": 0.05,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-        }
+    # def select_components(self):
 
-        self.oil_sensor = {
-            "name": "Oil Sensor",
-            "mass": 0.2,  # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "power": 0.3,  # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "length": 0.15,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "width": 0.1,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-            "height": 0.05,  # m - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-        }
+    #     hardware_inputs = {}
+    #     for component in self.include_components:
+    #         if component in self.hardware:
+    #             for key, value in self.hardware[component].items():
+    #                 hardware_inputs[key] = value
+
+    #     return hardware_inputs
+
+    def add_component_to_inputs(self):
+
+        def flatten_and_add(d):
+            for key, value in d.items():
+                if isinstance(value, dict):
+                    flatten_and_add(value)
+                else:
+                    self.outputs[key] = value
+    
+        for comp in self.hardware:
+            value = self.hardware[comp]
+            if isinstance(value, dict):
+                flatten_and_add(value)
+            else:
+                self.outputs[comp] = value
+    
+        return self.outputs
+
+
+    def calculate_mass_hardware(self) -> float:
+        """
+        Calculates the total mass of the selected hardware components.
+        Sums all values in self.outputs whose keys end with '_mass' and are not None.
+        """
+        total_mass = 0.0
+        for comp in self.hardware_components:
+            comp_dict = self.hardware.get(comp, {})
+            if isinstance(comp_dict, dict):
+                for key, value in comp_dict.items():
+                    if key.endswith("_mass") and value is not None:
+                        total_mass += value
+                    else:
+                        print(f"Warning: {key} in {comp} does not end with '_mass' or is None. Skipping this component.")
+        return total_mass
+    
+    def calculate_power_hardware(self) -> float:
+
+        total_power = 0.0
+        for comp in self.hardware_components:
+            comp_dict = self.hardware.get(comp, {})
+            if isinstance(comp_dict, dict):
+                for key, value in comp_dict.items():
+                    if key.endswith("_power") and value is not None:
+                        total_power += value
+                    else: 
+                        print(f"Warning: {key} in {comp} does not end with '_power' or is None. Skipping this component.")
+        return total_power
+    
+    def calculate_power_hardware_during_scan(self) -> float:
+        """
+        Calculates the total power consumption of the hardware components during the scan phase.
+        """
+        power_hardware_scan = self.wildfire_sensor_power + self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power 
+        
+        return power_hardware_scan
+    
+    def calculate_power_hardware_during_deploy(self) -> float:
+        """
+        Calculates the total power consumption of the hardware components during the deploy phase.
+        """
+
+        power_hardware_deploy = self.wildfire_sensor_power + self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power + self.winch_motor_power
+        
+        return power_hardware_deploy
+    
+    def calculate_power_hardware_cruise(self) -> float:
+        """
+        Calculates the total power consumption of the hardware components during the cruise phase.
+        """
+        power_hardware_cruise =  self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power 
+        
+        return power_hardware_cruise
+    
+    
+          
+
 
     # ~~~ Output functions ~~~ 
 
     def get_all(self) -> dict[str, float]:
 
-        self.outputs["power_scan"] = 300 # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
-        self.outputs["power_idle"] = 100 # W - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
 
-        self.outputs["mass_hardware"] = 5.0 # kg - THIS IS AN ESTIMATE, NEEDS TO BE UPDATED
+        self.outputs = self.add_component_to_inputs()
+
+        #self.outputs = self.select_components()
+
+        self.outputs["power_scan"] = self.calculate_power_hardware_during_scan()  # W, power consumption of the hardware during the scan phase
+        self.outputs["power_deploy"] = self.calculate_power_hardware_during_deploy()
+        #self.outputs["power_idle"] =   # W, power consumption of the hardware during the cruise phase
+        self.outputs["power_cruise_hardware"] = self.calculate_power_hardware_cruise()  # W, power consumption of the hardware during the cruise phase
+        self.outputs["mass_hardware"] = self.calculate_mass_hardware()   # kg, mass of hardware components (excluding payload, propulsion, structure, etc)
         
 
         return self.outputs
     
 if __name__ == '__main__': 
     # Perform sanity checks here
-    ...
+    
+    from DetailedDesign.hardware_inputs import components
+
+    inputs = {}
+
+    hardware = Hardware(inputs, components)
+    outputs = hardware.get_all()
+    for key, value in outputs.items():
+        print(f"{key}: {value}")
+
+
