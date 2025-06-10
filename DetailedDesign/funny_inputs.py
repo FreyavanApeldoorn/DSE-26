@@ -204,6 +204,11 @@ structures_funny_inputs = {
     "tensile_strength_foam": 1.7 * 10**6, #Pa
     "tensile_strength_alu": 193 * 10**6, #Pa
     "tensile_strength_reduction_temp": 0.9, #- https://firesciencereviews.springeropen.com/articles/10.1186/s40038-015-0007-5#:~:text=This%20concern%20is%20exacerbated%20for,(Langhelle%20and%20Amdahl%202001).
+    "root_chord": 0.458, #m 
+    "first_spar_position": 0.14, #percentage
+    "second_spar_position": 0.5, #percentage
+    "V_cruise": 27.77, #m/s
+
 }
 
 funny_inputs.update(structures_funny_inputs)
