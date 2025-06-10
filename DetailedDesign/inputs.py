@@ -381,6 +381,8 @@ stab_n_con_inputs = {
     "oil_spill_fuselage_mass": 0,  # kg, initially set to 0 and updated later
     "wildfire_wing_mass": 0,  # kg, initially set to 0 and updated later
     "oil_spill_wing_mass": 0,  # kg, initially set to 0 and updated later
+    "no_payload_fuselage_x_cg": 0,  # m, x-location of the center of gravity without payload
+    "no_payload_fuselages_mass": 0,  # kg, mass of the fuselage without payload
     
     #control and stability curve parameters
     "l_fus": 2,  # m, length of the fuselage
