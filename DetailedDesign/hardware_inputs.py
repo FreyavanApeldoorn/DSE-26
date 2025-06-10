@@ -143,7 +143,7 @@ otoher_components = {
         "SATCOM_module_z": None  # m, z-location w.r.t. front of fuselage
     },
     "PBD": {   # Power distribution board
-        "PBD_name": "FLIGHTCORE MK2"
+        "PBD_name": "FLIGHTCORE MK2",
         "PDB_mass": 0.015,
         "PDB_power": None,  # W, power consumption of the PDB
         "PDB_cost": None,  # Cost of the PDB, if available

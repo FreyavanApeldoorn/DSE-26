@@ -117,6 +117,7 @@ power_inputs = {
     "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
     "power_deploy": 0, #W, power usage of hardware during deploy phase, updated in "hardware.py"
     "power_scan": 0, #W, power usage of hardware during scan phase, updated in "hardware.py"
+    "power_cruise_hardware": 0,  # W, power usage of hardware during cruise phase, updated in "hardware.py"
     "power_idle": 100 # W, power usage of hardware during idle phase, estimated
 }
 inputs.update(power_inputs)
@@ -178,7 +179,7 @@ structures_inputs = {
     "shear_strength_alu": 138 * 10**6, #Pa 
     "tensile_strength_foam": 1.7 * 10**6, #Pa
     "tensile_strength_alu": 193 * 10**6, #Pa
-    "tensile_strength_reduction_temp": 0.9 #- https://firesciencereviews.springeropen.com/articles/10.1186/s40038-015-0007-5#:~:text=This%20concern%20is%20exacerbated%20for,(Langhelle%20and%20Amdahl%202001).
+    "tensile_strength_reduction_temp": 0.9, #- https://firesciencereviews.springeropen.com/articles/10.1186/s40038-015-0007-5#:~:text=This%20concern%20is%20exacerbated%20for,(Langhelle%20and%20Amdahl%202001).
 
     "mass_margin": 0.05, # 5% mass margin for structures
     "mass_structure": 5.0 # kg, initial mass of the structure, to be updated later
