@@ -17,9 +17,11 @@ def powerLoading(T_W, V, n_p):
 
 
 class Constraints:
-    def __init__(self, inputs: dict[str, float])-> None:
+    def __init__(self, inputs: dict[str, float], hardware=None)-> None:
 
-        self.inputs = inputs
+        self.inputs = inputs.copy()
+        self.hardware = hardware
+
         self.V_stall = inputs['V_stall']
         self.V_max = inputs['V_cruise'] 
         self.e = inputs ['e']

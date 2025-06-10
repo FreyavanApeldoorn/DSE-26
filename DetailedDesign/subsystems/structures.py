@@ -25,9 +25,10 @@ import numpy as np
 
 class Structures:
 
-    def __init__(self, inputs: dict[str, float], verbose=False) -> None:
+    def __init__(self, inputs: dict[str, float], hardware: dict[str, float] = None, verbose=False) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = hardware
         self.verbose = False
 
         self.wing_span = inputs["wing_span"]

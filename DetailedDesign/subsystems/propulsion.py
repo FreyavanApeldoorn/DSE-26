@@ -14,9 +14,10 @@ from DetailedDesign.subsystems.constraints import Constraints
 
 class Propulsion:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], hardware = None) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = hardware
 
 
         self.wing_loading = inputs['wing_loading']

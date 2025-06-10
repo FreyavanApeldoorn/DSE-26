@@ -15,8 +15,9 @@ class Thermal:
     The thermal class contains the thermal subsystem sizing. 
     '''
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], hardware=None) -> None:
         self.inputs = inputs
+        self.hardware = hardware
         
         # Power required for each phase
         self.power_required_VTOL = inputs["power_required_VTOL"]

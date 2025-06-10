@@ -43,7 +43,7 @@ for _ in range(total_iterations):
     mission = Mission(outputs, verbose=False)
     outputs = mission.get_all()
 
-    uav = UAV(outputs, iterations=10, history=False, verbose=False)
+    uav = UAV(outputs, hardware, iterations=10, history=False, verbose=False)
     outputs = uav.get_all()
 
     # nest = Nest(outputs)

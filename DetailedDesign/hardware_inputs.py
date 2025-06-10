@@ -16,7 +16,7 @@ component_inputs = {}
 components_wildfires = {
     "wildfire_camera": {
         "wildfire_sensor_mass": 0.92,  # kg, mass of the wildfire sensor
-        "wildfire_sensor_power": None,  # W, power consumption of the wildfire sensor
+        "wildfire_sensor_power": 28,  # W, power consumption of the wildfire sensor
         "wildfire_sensor_length": 0.169,  # m, length of the wildfire sensor
         "wildfire_sensor_width": 0.152,  # m, width of the wildfire sensor
         "wildfire_sensor_height": 0.110,  # m, height of the wildfire sensor
@@ -33,7 +33,7 @@ component_inputs.update(components_wildfires)
 components_oldspills = {
     "oil_spill_camera": {
         "oil_sensor_mass": 0.905,  # kg, mass of the oil sensor
-        "oil_sensor_power": None,  # W, power consumption of the oil sensor
+        "oil_sensor_power": 28,  # W, power consumption of the oil sensor
         "oil_sensor_length": 0.155,  # m, length of the oil sensor
         "oil_sensor_width": 0.128,  # m, width of the oil sensor
         "oil_sensor_height": 0.176,  # m, height of the oil sensor
@@ -66,7 +66,7 @@ otoher_components = {
     },
     "flight_controller": {
         "flight_controller_mass": 0.100,  # kg, mass of the flight controller
-        "flight_controller_power": None,  # W, power consumption of the flight controller
+        "flight_controller_power": 7.5,  # W, power consumption of the flight controller
         "flight_controller_length": 0.0923,  # m, length of the flight controller
         "flight_controller_width": 0.0402,  # m, width of the flight controller
         "flight_controller_height": 0.02343,  # m, height of the flight controller
@@ -77,7 +77,7 @@ otoher_components = {
     },
     "OBC": {
         "OBC_mass": 0.2270,  # kg, mass of the OBC
-        "OBC_power": None,  # W, power consumption of the OBC
+        "OBC_power": 60,  # W, power consumption of the OBC
         "OBC_length": 0.1651,  # m, length of the OBC
         "OBC_width": 0.13716,  # m, width of the OBC
         "OBC_height": 0.06985,  # m, height of the OBC
@@ -88,7 +88,7 @@ otoher_components = {
     },
     "GPS": {
         "GPS_mass": 0.117,  # kg, mass of the GPS
-        "GPS_power": None,  # W, power consumption of the GPS
+        "GPS_power": 1.25,  # W, power consumption of the GPS
         "GPS_diameter": 0.078,  # m, diameter of the GPS
         "GPS_height": 0.022,  # m, height of the GPS
         # Positioning:
@@ -98,7 +98,7 @@ otoher_components = {
     },
     "Mesh_network_module": {   
         "Mesh_network_module_mass": 0.060,  # kg, mass of the mesh network module
-        "Mesh_network_module_power": None,  # W, power consumption of the mesh network module
+        "Mesh_network_module_power": 5,  # W, power consumption of the mesh network module
         "Mesh_network_module_length": 0.123,  # m, length of the mesh network module
         "Mesh_network_module_width": 0.077,  # m, width of the mesh network module
         "Mesh_network_module_height": 0.03,  # m, height of the mesh network module
@@ -109,7 +109,7 @@ otoher_components = {
     },
     "SATCOM_module": {   # Satellite communication module
         "SATCOM_module_mass": 0.036,  # kg, mass of the SATCOM module
-        "SATCOM_module_power": None,  # W, power consumption of the SATCOM module
+        "SATCOM_module_power": 2.25,  # W, power consumption of the SATCOM module
         "SATCOM_module_length": 0.045,  # m, length of the SATCOM module
         "SATCOM_module_width": 0.045,  # m, width of the SATCOM module
         "SATCOM_module_height": 0.017,  # m, height of the SATCOM module
@@ -135,7 +135,7 @@ component_inputs.update(otoher_components)
 deployment_components = {
     "winch_motor": {
         "Winch_motor_mass": 1.117,
-        "Winch_motor_power": None,  # W, power consumption of the winch motor
+        "Winch_motor_power": 60,  # W, power consumption of the winch motor
         "Winch_motor_length": 0.17,
         "Winch_motor_width": 0.142,
         "Winch_motor_height": 0.11,
@@ -154,15 +154,21 @@ component_inputs.update(deployment_components)
 
 propulsion = {
     "propeller_cruise": {
+        "propeller_cruise_mass": None,
+        "propeller_cruise_efficiency": None
         
     },
     "motor_cruise": {
+        "motor_cruise_mass": None,
+        "motor_cruise_power_available": None,
         # Positioning:
         "motor_cruise_x": 2,  # m, x-location w.r.t. front of the fuselage
         "motor_cruise_y": None,  # m, y-location w.r.t. vertical centerline of the fuselage
         "motor_cruise_z": None  # m, z-location w.r.t. horizontal centerline of the fuselage
     },
     "propeller_VTOL": {
+        "propeller_vtol_mass": None,
+        "propeller_vtol_efficiency": None
 
     },
     "motor_VTOL": {

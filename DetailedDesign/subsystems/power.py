@@ -11,9 +11,10 @@ import numpy as np
 
 class Power:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], hardware=None) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = hardware
 
         self.M_to = inputs["M_to"]
         self.DOD_fraction = self.inputs["DOD_fraction"] 
@@ -36,10 +37,17 @@ class Power:
         self.power_scan = inputs["power_scan"]
         self.power_idle = inputs["power_idle"]
 
+        self.power_required_VTOL = inputs["power_required_VTOL"]  # Power required for VTOL operations
+        self.power_required_cruise = inputs["power_required_cruise"]  # Power required for cruise operations
+        self.power_required_hover = inputs["power_required_hover"]  # Power required for hover operations
+
 
     # ~~~ Intermediate Functions ~~~
 
     def calculate_required_capacity(self) -> float:
+        
+        power_scan = self.power_scan + self.power_required_VTOL
+        power_deploy = self.power_deploy
         
         times = np.array([
             self.time_cruise,
@@ -56,7 +64,7 @@ class Power:
             self.power_descent,
             self.power_deploy,
             self.power_transition,
-            self.power_scan,
+            power_scan,
             self.power_idle
 
         ])
