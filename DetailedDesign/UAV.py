@@ -13,7 +13,7 @@ from subsystems.power import Power
 from subsystems.stab_n_con import StabCon
 from subsystems.aerodynamics import Aerodynamics
 from subsystems.structures import Structures
-from subsystems.thermal import Thermal
+#from subsystems.thermal import Thermal
 
 
 class UAV:

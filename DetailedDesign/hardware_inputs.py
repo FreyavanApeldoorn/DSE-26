@@ -15,8 +15,11 @@ component_inputs = {}
 
 components_wildfires = {
     "wildfire_camera": {
+        "wildfire_sensor_name": "DJI Zenmuse H30T",
         "wildfire_sensor_mass": 0.92,  # kg, mass of the wildfire sensor
         "wildfire_sensor_power": 28,  # W, power consumption of the wildfire sensor
+        "wildfire_sensor_cost": 13_500,  # Cost of the wildfire sensor, if available
+        
         "wildfire_sensor_length": 0.169,  # m, length of the wildfire sensor
         "wildfire_sensor_width": 0.152,  # m, width of the wildfire sensor
         "wildfire_sensor_height": 0.110,  # m, height of the wildfire sensor
@@ -32,8 +35,10 @@ component_inputs.update(components_wildfires)
 
 components_oldspills = {
     "oil_spill_camera": {
+        "oil_sensor_name": "DJI Zenmuse L2",
         "oil_sensor_mass": 0.905,  # kg, mass of the oil sensor
         "oil_sensor_power": 28,  # W, power consumption of the oil sensor
+        "oil_sensor_cost": 14_280,
         "oil_sensor_length": 0.155,  # m, length of the oil sensor
         "oil_sensor_width": 0.128,  # m, width of the oil sensor
         "oil_sensor_height": 0.176,  # m, height of the oil sensor
@@ -43,6 +48,7 @@ components_oldspills = {
         "oil_sensor_z": None,  # m, z-location w.r.t. front of fuselage
     },
     "buoy": { 
+        "buoy_name": "",
         "buoy_mass": 0.5,  # kg, mass of the buoy
 
         # Positioning:
@@ -56,7 +62,10 @@ component_inputs.update(components_oldspills)
 
 otoher_components = {
     "gymbal_connection": {
+        "gymbal_connection_name": "",
         "gymbal_connection_mass": 0.07,  # kg, mass of the gimbal connection
+        "gymbal_connection_cost": None,  # Cost of the gimbal connection, if available
+        
         "gymbal_connection_diameter": 0.05,  # m, diameter of the gimbal connection
         "gymbal_connection_height": 0.044,  # m, height of the gimbal connection
         # Positioning:
@@ -65,8 +74,11 @@ otoher_components = {
         "gymbal_connection_z": None  # m, z-location w.r.t. front of fuselage
     },
     "flight_controller": {
+        "flight_controller_name": "",
         "flight_controller_mass": 0.100,  # kg, mass of the flight controller
         "flight_controller_power": 7.5,  # W, power consumption of the flight controller
+        "flight_controller_cost": None,  # Cost of the flight controller, if available
+        
         "flight_controller_length": 0.0923,  # m, length of the flight controller
         "flight_controller_width": 0.0402,  # m, width of the flight controller
         "flight_controller_height": 0.02343,  # m, height of the flight controller
@@ -76,8 +88,11 @@ otoher_components = {
         "flight_controller_z": None  # m, z-location w.r.t. front of fuselage
     },
     "OBC": {
+        "OBC_name": "",
         "OBC_mass": 0.2270,  # kg, mass of the OBC
         "OBC_power": 60,  # W, power consumption of the OBC
+        "OBC_cost": None,  # Cost of the OBC, if available
+
         "OBC_length": 0.1651,  # m, length of the OBC
         "OBC_width": 0.13716,  # m, width of the OBC
         "OBC_height": 0.06985,  # m, height of the OBC
@@ -87,8 +102,11 @@ otoher_components = {
         "OBC_z": None  # m, z-location w.r.t. front of fuselage
     },
     "GPS": {
+        "GPS_name": "",
         "GPS_mass": 0.117,  # kg, mass of the GPS
         "GPS_power": 1.25,  # W, power consumption of the GPS
+        "GPS_cost": None,  # Cost of the GPS, if available
+        
         "GPS_diameter": 0.078,  # m, diameter of the GPS
         "GPS_height": 0.022,  # m, height of the GPS
         # Positioning:
@@ -97,8 +115,11 @@ otoher_components = {
         "GPS_z": None  # m, z-location w.r.t. front of fuselage
     },
     "Mesh_network_module": {   
+        "Mesh_network_module_name": "",
         "Mesh_network_module_mass": 0.060,  # kg, mass of the mesh network module
         "Mesh_network_module_power": 5,  # W, power consumption of the mesh network module
+        "Mesh_network_module_cost": None,  # Cost of the mesh network module, if available
+        
         "Mesh_network_module_length": 0.123,  # m, length of the mesh network module
         "Mesh_network_module_width": 0.077,  # m, width of the mesh network module
         "Mesh_network_module_height": 0.03,  # m, height of the mesh network module
@@ -108,8 +129,11 @@ otoher_components = {
         "Mesh_network_module_z": None  # m, z-location w.r.t. front of fuselage
     },
     "SATCOM_module": {   # Satellite communication module
+        "SATCOM_module_name": "",
         "SATCOM_module_mass": 0.036,  # kg, mass of the SATCOM module
         "SATCOM_module_power": 2.25,  # W, power consumption of the SATCOM module
+        "SATCOM_module_cost": None,  # Cost of the SATCOM module, if available
+        
         "SATCOM_module_length": 0.045,  # m, length of the SATCOM module
         "SATCOM_module_width": 0.045,  # m, width of the SATCOM module
         "SATCOM_module_height": 0.017,  # m, height of the SATCOM module
@@ -119,7 +143,11 @@ otoher_components = {
         "SATCOM_module_z": None  # m, z-location w.r.t. front of fuselage
     },
     "PBD": {   # Power distribution board
+        "PBD_name": "FLIGHTCORE MK2"
         "PDB_mass": 0.015,
+        "PDB_power": None,  # W, power consumption of the PDB
+        "PDB_cost": None,  # Cost of the PDB, if available
+
         "PDB_length": 0.116,
         "PDB_width": 0.11,
         "PDB_height": 0.025,
@@ -134,8 +162,11 @@ component_inputs.update(otoher_components)
 
 deployment_components = {
     "winch_motor": {
+        "Winch_motor_name": "",
         "Winch_motor_mass": 1.117,
         "Winch_motor_power": 60,  # W, power consumption of the winch motor
+        "Winch_motor_cost": None,  # Cost of the winch motor, if available
+        
         "Winch_motor_length": 0.17,
         "Winch_motor_width": 0.142,
         "Winch_motor_height": 0.11,
@@ -145,6 +176,12 @@ deployment_components = {
         "Winch_motor_z": None  # m, z-location w.r.t. front of fuselage
     },
     "winch_cable": {
+        "winch_cable_name": "",
+        "winch_cable_mass": None,  # kg, mass of the winch cable
+        "winch_cable_cost": None,  # Cost of the winch cable, if available
+
+        "winch_cable_length": None,  # m, length of the winch cable
+        "winch_cable_diameter": None,  # m, diameter of the winch cable
     },
     "aerogel": {
         "payload_mass": 5 # kg, mass of the aerogel payload 
@@ -154,24 +191,38 @@ component_inputs.update(deployment_components)
 
 propulsion = {
     "propeller_cruise": {
+        "propeller_cruise_name": "",
         "propeller_cruise_mass": None,
+        "propeller_cruise_cost": None,  # Cost of the propeller, if available
+
         "propeller_cruise_efficiency": None
         
     },
     "motor_cruise": {
+        "motor_cruise_name": "",
         "motor_cruise_mass": None,
         "motor_cruise_power_available": None,
+        "motor_cruise_cost": None,  # Cost of the motor, if available
+
         # Positioning:
         "motor_cruise_x": 2,  # m, x-location w.r.t. front of the fuselage
         "motor_cruise_y": None,  # m, y-location w.r.t. vertical centerline of the fuselage
         "motor_cruise_z": None  # m, z-location w.r.t. horizontal centerline of the fuselage
     },
     "propeller_VTOL": {
+        "propeller_VTOL_name": "",
         "propeller_vtol_mass": None,
+        "propeller_VTOL_cost": None,  # Cost of the propeller, if available
+
         "propeller_vtol_efficiency": None
 
     },
     "motor_VTOL": {
+        "motor_VTOL_name": "",
+        "motor_VTOL_mass": None,  # kg, mass of the VTOL
+        "motor_VTOL_power_available": None,  # W, power available for VTOL
+        "motor_VTOL_cost": None,  # Cost of the motor, if available
+
         # Positioning:
         "motor_front_VTOL_x": -0.44,  # m, x-location w.r.t. leading edge of the wing
         "motor_rear_VTOL_x": 0.88,  # m, x-location w.r.t. leading edge of the wing
@@ -185,7 +236,10 @@ component_inputs.update(propulsion)
 
 
 battery = {
+    "battery_name": "",
     "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
+    "battery_cost": None, 
+    
     "battery_mass": 2.8*4,  # kg, mass of the battery
     "battery_length": 0.2,  # m, length of the battery
     "battery_width": 0.1,  # m, width of the battery
@@ -199,13 +253,13 @@ battery = {
 }
 component_inputs.update(battery)
 
-wings = {
+wing_group = {
 
     # Positioning:
 
 
 }
-component_inputs.update(wings)
+component_inputs.update(wing_group)
 
 structure = {
 
