@@ -33,7 +33,7 @@ components_wildfires = {
 component_inputs.update(components_wildfires)
 
 
-components_oldspills = {
+components_oilspills = {
     "oil_spill_camera": {
         "oil_sensor_name": "DJI Zenmuse L2",
         "oil_sensor_mass": 0.905,  # kg, mass of the oil sensor
@@ -57,10 +57,10 @@ components_oldspills = {
         "buoy_z": None  # m, z-location w.r.t. front of fuselage
     }
 }
-component_inputs.update(components_oldspills)
+component_inputs.update(components_oilspills)
 
 
-otoher_components = {
+other_components = {
     "gymbal_connection": {
         "gymbal_connection_name": "",
         "gymbal_connection_mass": 0.07,  # kg, mass of the gimbal connection
@@ -158,7 +158,7 @@ otoher_components = {
     }
 
 }
-component_inputs.update(otoher_components)
+component_inputs.update(other_components)
 
 deployment_components = {
     "winch_motor": {
@@ -254,9 +254,23 @@ battery = {
 component_inputs.update(battery)
 
 wing_group = {
+    "aileron_actuation":{
+        "aileron_actuation_mass":0.025,  # kg, mass of the aileron actuation system
+        "aileron_actuation_power": None,  # W, power consumption of the aileron actuation system
+        # Positioning:
+        "aileron_actuation_x": 0.2,  # m, x-location w.r.t. leading edge of the wing
+        "aileron_actuation_y": None,  # m, y-location w.r.t. leading edge of the wing
+        "aileron_actuation_z": None,  # m, z-location w.r.t. leading edge of the wing
+    },
 
-    # Positioning:
-
+    "wing_lights":{
+        "wing_lights_mass": None,  # kg, mass of the wing lights
+        "wing_lights_power": None, # W, power consumption of the wing lights
+        # Positioning:
+        "wing_lights_x": 0.0,  # m, x-location w.r.t. leading edge of the wing
+        "wing_lights_y": None,  # m, y-location w.r.t. leading edge of the wing
+        "wing_lights_z": None,  # m, z-location w.r.t. leading edge of the wing
+    }
 
 }
 component_inputs.update(wing_group)

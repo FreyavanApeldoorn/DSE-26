@@ -144,8 +144,8 @@ class Hardware:
 
         self.outputs["power_scan"] = self.calculate_power_hardware_during_scan()  # W, power consumption of the hardware during the scan phase
         self.outputs["power_deploy"] = self.calculate_power_hardware_during_deploy()
-        self.outputs["power_idle"] = self.calculate_power_hardware_cruise()  # W, power consumption of the hardware during the cruise phase
-
+        #self.outputs["power_idle"] =   # W, power consumption of the hardware during the cruise phase
+        self.outputs["power_cruise_hardware"] = self.calculate_power_hardware_cruise()  # W, power consumption of the hardware during the cruise phase
         self.outputs["mass_hardware"] = self.calculate_mass_hardware()   # kg, mass of hardware components (excluding payload, propulsion, structure, etc)
         
 

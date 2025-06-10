@@ -29,25 +29,28 @@ class Power:
         self.time_scan = inputs["time_scan"]
         self.time_idle = inputs["time_turnaround"]
 
-        self.power_cruise = inputs["power_required_cruise"]
+        
         self.power_ascent = inputs["power_required_VTOL"]
         self.power_descent = inputs["power_required_hover"]  # assuming hover power is used for descent
         self.power_deploy = inputs["power_deploy"]
         self.power_transition = inputs["power_transition"]
         self.power_scan = inputs["power_scan"]
         self.power_idle = inputs["power_idle"]
+        self.power_cruise_hardware = inputs["power_cruise_hardware"]  # Power required for cruise operations from hardware
 
         self.power_required_VTOL = inputs["power_required_VTOL"]  # Power required for VTOL operations
         self.power_required_cruise = inputs["power_required_cruise"]  # Power required for cruise operations
         self.power_required_hover = inputs["power_required_hover"]  # Power required for hover operations
 
+        #Calculate the total power 
+        self.power_scan_total = self.power_scan + self.power_required_VTOL
+        self.power_deploy_total = self.power_deploy + self.power_required_VTOL
+        self.power_cruise_total = self.power_cruise_hardware + self.power_required_cruise
 
     # ~~~ Intermediate Functions ~~~
 
     def calculate_required_capacity(self) -> float:
         
-        power_scan = self.power_scan + self.power_required_VTOL
-        power_deploy = self.power_deploy
         
         times = np.array([
             self.time_cruise,
@@ -59,12 +62,12 @@ class Power:
             self.time_idle
         ])
         powers = np.array([
-            self.power_cruise,
+            self.power_cruise_total,
             self.power_ascent,
             self.power_descent,
-            self.power_deploy,
+            self.power_deploy_total,
             self.power_transition,
-            power_scan,
+            self.power_scan_total,
             self.power_idle
 
         ])

@@ -117,7 +117,7 @@ class Thermal:
         processor_heat_dict['deploy'] = processor_deploy_q
 
         return processor_heat_dict
-
+    
 
 
     # ~~~ Output functions ~~~ 
@@ -145,4 +145,4 @@ if __name__ == '__main__':
     funny_inputs = deployment.get_all()
 
     thermal = Thermal(funny_inputs)
-    outputs = thermal.get_all()
+    outputs = thermal.get_all() 
