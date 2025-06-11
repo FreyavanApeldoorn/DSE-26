@@ -1,5 +1,5 @@
 from inputs import initial_inputs
-from hardware_inputs import components
+from hardware_inputs import components, nest_components
 
 from deployment import Deployment
 from hardware import Hardware
@@ -46,7 +46,7 @@ for _ in range(total_iterations):
     uav = UAV(outputs, hardware, iterations=10, history=False, verbose=False)
     outputs = uav.get_all()
 
-    # nest = Nest(outputs)
+    # nest = Nest(outputs, nest_components)
     # outputs = nest.get_all()
 
     print(f"Iteration percentage: {(_ + 1) / total_iterations * 100:.2f}%")
