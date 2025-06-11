@@ -6,7 +6,7 @@ This is the file for the nest. It contains a single class.
 
 class Nest:
 
-    def __init__(self, inputs: dict[str, float], verbose: bool = False) -> None:
+    def __init__(self, inputs: dict[str, float], nest_components, verbose: bool = False) -> None:
 
         self.verbose = verbose
         self.inputs = inputs
@@ -18,7 +18,6 @@ class Nest:
 
         self.mission_energy = inputs["required_capacity_wh"]
         self.nest_energy = self.mission_energy * self.number_of_trips  # minimum power the nest must be able to provide
-
 
 
         # UAV Dimensions 
@@ -34,25 +33,46 @@ class Nest:
         self.aerogel_width = inputs["aerogel_width"]  # width of the aerogel
         self.aerogel_diameter = inputs["aerogel_diameter"]  # diameter of the aerogel
 
+
         # Generator parameters
-        self.generator_efficiency = inputs["generator_efficiency"] 
+        #self.generator_efficiency = inputs["generator_efficiency"] 
         self.diesel_energy_density = inputs["biodiesel_energy_density"] # in Wh/kg
         self.diesel_density = inputs["biodiesel_density"] # in kg/liter
-        self.generator_length = inputs["generator_length"] # 
-        self.generator_width = inputs["generator_width"]
-        self.generator_height = inputs["generator_height"]
-        self.power_generator = inputs["generator_power"] * inputs["generator_power_factor"] # in W, assumed power output of the generator
-        self.mass_generator = inputs["generator_mass"]
-        self.internal_fuel_tank_volume = inputs["generator_internal_fuel_tank"]
+        #self.generator_length = inputs["generator_length"] # 
+        #self.generator_width = inputs["generator_width"]
+        #self.generator_height = inputs["generator_height"]
+        #self.power_generator = inputs["generator_power"] * inputs["generator_power_factor"] # in W, assumed power output of the generator
+        #self.mass_generator = inputs["generator_mass"]
+        #self.internal_fuel_tank_volume = inputs["generator_internal_fuel_tank"]
+
+
+        self.generator_efficiency = nest_components["generator"]["generator_efficiency"]
+        self.generator_length = nest_components["generator"]["generator_length"]
+        self.generator_width = nest_components["generator"]["generator_width"]
+        self.generator_height = nest_components["generator"]["generator_height"]
+        self.generator_power_output = nest_components["generator"]["generator_power_output"]
+        self.generator_power_factor = nest_components["generator"]["generator_power_factor"]
+        self.generator_mass = nest_components["generator"]["generator_mass"]
+        self.generator_fuel_tank_volume = nest_components["generator"]["generator_fuel_tank"]
+
+        self.generator_x = nest_components["generator"]["generator_x"]
+        self.generator_y = nest_components["generator"]["generator_y"]
+        self.generator_z = nest_components["generator"]["generator_z"]
 
         # Misc parameters
 
 
-        # Nest contraints
-        self.nest_length = inputs["nest_length"]
-        self.nest_width = inputs["nest_width"]
-        self.nest_height = inputs["nest_height"]
-        self.nest_mass = inputs["nest_empty_mass"]
+        # Container
+        #self.nest_length = inputs["nest_length"]
+        #self.nest_width = inputs["nest_width"]
+        #self.nest_height = inputs["nest_height"]
+        #self.nest_mass = inputs["nest_empty_mass"]
+
+        self.nest_length = nest_components["container"]["container_length"]
+        self.nest_width = nest_components["container"]["container_width"]
+        self.nest_height = nest_components["container"]["container_height"]
+        self.container_mass = nest_components["container"]["container_tare_mass"]
+
 
         self.available_volume_per_container = self.nest_length * self.nest_width * self.nest_height
 
@@ -89,19 +109,18 @@ class Nest:
         """
 
         # Generator volume:
-        self.volume_generator = self.generator_length * self.generator_width * self.generator_height    # calculating the volume of the generator in m^3
+        self.generator_volume = self.generator_length * self.generator_width * self.generator_height    # calculating the volume of the generator in m^3
 
         # Fuel tank: 
         fuel_tank_margin = 0.1 # margin added for the fuel tank volume, to account for the space taken by the fuel tank structure and fittings
         self.external_fuel_tank_volume = self.generator_width * (self.nest_width * (1 - fuel_tank_margin)) * ((self.nest_height - self.generator_height) * (1 - fuel_tank_margin))
+        self.external_fuel_tank_volume = 0 # Excluding the external fuel tank for now, as it is not needed for the mission
 
         diesel_volumetric_energy_density = self.diesel_energy_density * self.diesel_density  # in Wh/m^3, converting from Wh/kg to Wh/m^3 
         
-        self.total_fuel_tank_volume = self.internal_fuel_tank_volume + self.external_fuel_tank_volume
-        
-        self.external_fuel_tank_capacity = self.external_fuel_tank_volume * diesel_volumetric_energy_density  # in Wh, total energy capacity of the fuel tank
-        
-        self.total_available_energy = (self.internal_fuel_tank + self.external_fuel_tank_capacity) * self.generator_efficiency
+        self.total_fuel_tank_volume = self.generator_fuel_tank_volume + self.external_fuel_tank_volume
+        self.total_fuel_capacity = (self.total_fuel_tank_volume) * diesel_volumetric_energy_density  # in Wh, total energy capacity of the fuel tank
+        self.total_available_energy = self.total_fuel_capacity * self.generator_efficiency
 
         percentage_energy_achieved = self.total_available_energy / self.mission_energy
 
@@ -118,12 +137,17 @@ class Nest:
 
 
         if self.verbose:
-            print(f"Volume of generator: {self.volume_generator:.2f} m^3")
+            print(f"Generator volume: {self.generator_volume:.2f} m^3")
+            print(f"Internal fuel tank volume: {self.generator_fuel_tank_volume:.2f} m^3")
             print(f"External fuel tank volume: {self.external_fuel_tank_volume:.2f} m^3")
-            print(f"Internal fuel tank capacity: {self.internal_fuel_tank:.2f} L")
-            print(f"External fuel tank capacity: {self.external_fuel_tank_capacity:.2f} Wh")
-            print(f"Total available energy: {self.total_available_energy:.2f} Wh")
-            print(f"Refills needed for the mission: {self.refills_for_mission}")
+            print(f"Total fuel tank volume: {self.total_fuel_tank_volume:.2f} m^3")
+            print(f"Total fuel capacity (Wh): {self.total_fuel_capacity:.2f} Wh")
+            print(f"Total available energy (after efficiency): {self.total_available_energy:.2f} Wh")
+            print(f"Mission energy requirement: {self.mission_energy:.2f} Wh")
+            print(f"Percentage of mission energy achieved: {percentage_energy_achieved*100:.2f}%")
+            print(f"Refills required for mission: {self.refills_for_mission}")
+            print(f"Nest trips capacity: {self.nest_trips_capacity:.2f}")
+            print(f"Remaining length after generator: {self.l_minus_gen:.2f} m")
 
 
 
@@ -198,7 +222,7 @@ class Nest:
         self.misc_sizing()
         
 
-        v_op_gen = available_volume_per_nest - self.volume_generator - self.v_locker - self.v_operating_space_gen
+        v_op_gen = available_volume_per_nest - self.generator_volume - self.v_locker - self.v_operating_space_gen
         v_op_nogen = available_volume_per_nest - self.v_locker - self.v_operating_space_nogen
         
 
@@ -265,7 +289,7 @@ class Nest:
             print(f"Number of nests needed: {self.n_nests}")
             print(f"Number of extra slots in the last nest: {self.n_extra}")
             print(f"Volume available per nest: {available_volume_per_nest:.2f} m^3")
-            print(f"Volume of generator: {self.volume_generator:.2f} m^3")
+            print(f"Volume of generator: {self.generator_volume:.2f} m^3")
             print(f"Volume of electronics and equipment (locker): {self.v_locker:.2f} m^3")
             print(f"Volume of operating space with generator: {self.v_operating_space_gen:.2f} m^3")
             print(f"Volume of operating space without generator: {self.v_operating_space_nogen:.2f} m^3")
@@ -276,9 +300,18 @@ class Nest:
 
         pass
 
+        # Calculate the mass of the nest
+        masses = [
+            self.container_mass,
+        ]
 
-    def energy_sizing(self):
+
+    def power_sizing(self):
         pass
+        
+        power_generator = self.generator_power_output * self.generator_power_factor  # in W
+
+        max_power_required = ... 
 
     def deployment_time():
         pass
@@ -294,7 +327,7 @@ class Nest:
         #self.outputs["number_of_UAVs"] = self.n_drones
 
         self.outputs["nests_volume"] = self.nests_volume
-        self.outputs["volume_fueltank"] = self.fuel_tank_volume
+        self.outputs["volume_fueltank"] = self.total_fuel_tank_volume
         self.outputs["refills_for_mission"] = self.refills_for_mission
         
         #self.outputs["Nest_mass"] = ...
@@ -303,6 +336,8 @@ class Nest:
     
 if __name__ == '__main__':
     # Example usage
+
+    from hardware_inputs import nest_components
 
     misc_elemenets = {
         "mop_": 0.5 
@@ -355,7 +390,7 @@ if __name__ == '__main__':
 
     }
 
-    nest = Nest(inputs, verbose=True)
+    nest = Nest(inputs, nest_components, verbose=True)
     outputs = nest.get_all()
     for key, value in outputs.items():
         print(f"{key}: {value}")

@@ -289,27 +289,52 @@ components = component_inputs.copy()
 nest_components = {
     "container": {
         "container_name": "ISO Container",
-        "container_mass": None,
-        "container_cost": None,  # Cost of the container, if available
-        "container_length": None,  # m, length of the container
-        "container_width": None,  # m, width of the container
-        "container_height": None  # m, height of the container
-    }
-    
-    "generator": {
-        "generator_name": "CAT DE65 GC",
-        "generator_mass": None,
-        "generator_power": None,  # W, power output of the generator
-        "generator_cost": None,  # Cost of the generator, if available
-        "generator_length": None,  # m, length of the generator
-        "generator_width": None,  # m, width of the generator
-        "generator_height": None,  # m, height of the generator
-        # Positioning:
-        "generator_x": None,  # m, x-location w.r.t. front of fuselage
-        "generator_y": None,  # m, y-location w.r.t. front of fuselage
-        "generator_z": None  # m, z-location w.r.t. front of fuselage
+        "container_tare_mass": 2250, # kg, tare mass of the container
+        "container_max_payload": 28350,  # kg, maximum payload of the container
+        "container_cost": 2250,  # Cost of the container, if available
+
+        "container_length": 6.06,  # m, length of the container
+        "container_width": 2.44,  # m, width of the container
+        "container_height": 2.59,  # m, height of the container
+        "container_door_height": 2.28,  # m, height of the container door'
+        "container_door_width": 2.335  # m, width of the container door    
+
+        # https://cboxcontainers.nl/en/products/18/20ft-shipping-storage-container-new-quality/buy?srsltid=AfmBOopZXrURUbtfCdl9pfyDBGAyZVzbZAWWjGdkKIF_sBslERpoMJNV
     },
-    "fuel_tank": {
+    "battery_charger": {
+        "battery_charger_name": "Tattu TA1000",
+        "battery_charger_mass": 1.7,  # kg, mass of the battery charger
+        "battery_charger_power": 500,  # W, power consumption of the battery charger
+        "battery_charger_cost": 260,  # Cost of the battery charger, if available ($)
+
+        "battery_charger_length": 0.186,  # m, length of the battery charger
+        "battery_charger_width": 0.174,  # m, width of the battery charger
+        "battery_charger_height": 0.095,  # m, height of the battery charger
+        # Positioning:
+        "battery_charger_x": None,  # m, x-location w.r.t. doors
+        "battery_charger_y": None,  # m, y-location w.r.t. doors
+        "battery_charger_z": None  # m, z-location w.r.t. doors
+    },
+    "generator": {
+        "generator_name": "GENPOWERUSA GPR-J50-60T4iF-002",
+        "generator_mass": 1514,
+        "generator_fuel_tank": 340, #L , fuel tank capacity of the generator 
+        
+        "generator_power_output": 60_000,  # W, power output of the generator
+        "generator_power_factor": 0.8,  # Fraction of power output that is available for the payload
+        "generator_efficiency": 0.3,  # Efficiency of the generator
+        
+
+        "generator_cost": 53_500,  # Cost of the generator, if available
+        "generator_length": 2.440,  # m, length of the generator
+        "generator_width": 0.9,  # m, width of the generator
+        "generator_height": 1.332,  # m, height of the generator
+        # Positioning:
+        "generator_x": None,  # m, x-location w.r.t. doors
+        "generator_y": None,  # m, y-location w.r.t. doors
+        "generator_z": None  # m, z-location w.r.t. doors
+    },
+    "fuel_tank": { # Fuel tank not implemented yet!
         "fuel_tank_name": "",
         "fuel_tank_mass": None,
         "fuel_tank_capacity": None,  # L, fuel capacity of the tank
@@ -318,11 +343,126 @@ nest_components = {
         "fuel_tank_width": None,  # m, width of the fuel tank
         "fuel_tank_height": None,  # m, height of the fuel tank
         # Positioning:
-        "fuel_tank_x": None,  # m, x-location w.r.t. front of fuselage
-        "fuel_tank_y": None,  # m, y-location w.r.t. front of fuselage
-        "fuel_tank_z": None  # m, z-location w.r.t. front of fuselage
+        "fuel_tank_x": None,  # m, x-location w.r.t. doors
+        "fuel_tank_y": None,  # m, y-location w.r.t. doors
+        "fuel_tank_z": None  # m, z-location w.r.t. doors
     },
-    ""
+    "fuel_pump": { # Fuel pump not implemented yet!
+        "fuel_pump_name": "",
+        "fuel_pump_mass": None,  # kg, mass of the fuel pump
+        "fuel_pump_power": None,  # W, power consumption of the fuel pump
+        "fuel_pump_cost": None,  # Cost of the fuel pump, if available
+
+        "fuel_pump_length": None,  # m, length of the fuel pump
+        "fuel_pump_width": None,  # m, width of the fuel pump
+        "fuel_pump_height": None,  # m, height of the fuel pump
+        # Positioning:
+        "fuel_pump_x": None,  # m, x-location w.r.t. doors
+        "fuel_pump_y": None,  # m, y-location w.r.t. doors
+        "fuel_pump_z": None  # m, z-location w.r.t. doors
+    },
+    "heating_system": {
+        "heating_system_name": "Stelpro ASCH48T",
+        "heating_system_mass": 13*0.453592,  # kg, mass of the heating system
+        "heating_system_power": 4800,  # W, power consumption of the heating system
+        "heating_system_cost": 230,  # Cost of the heating system, if available
+
+        "heating_system_length": 9.63*0.0254,  # m, length of the heating system
+        "heating_system_width": 10.53*0.0254,  # m, width of the heating system
+        "heating_system_height": 11.06*0.0254,  # m, height of the heating system
+
+        # Positioning:
+        "heating_system_x": None,  # m, x-location w.r.t. doors
+        "heating_system_y": None,  # m, y-location w.r.t. doors
+        "heating_system_z": None  # m, z-location w.r.t. doors
+    },
+    "computer": {
+        "computer_name": "Lambda Scalar MGX AMD",
+        "computer_mass": 30.6,  # kg, mass of the computer
+        "computer_power": 8000,  # W, power consumption of the computer
+        "computer_cost": 104_000,  # Cost of the computer, if available
+
+        "computer_length": 0.737,  # m, length of the computer
+        "computer_width": 0.437,  # m, width of the computer
+        "computer_height": 0.2225,  # m, height of the computer
+        # Positioning:
+        "computer_x": None,  # m, x-location w.r.t. doors
+        "computer_y": None,  # m, y-location w.r.t. doors
+        "computer_z": None  # m, z-location w.r.t. doors
+    },
+    "RF_antenna": {
+        "RF_antenna_name": "OmniLOG® PRO H",
+        "RF_antenna_mass": 0.6,  # kg, mass of the RF communication system
+        "RF_antenna_power": 100,  # W, power consumption of the RF communication system
+        "RF_antenna_cost": 400,  # Cost of the RF communication system, if available
+
+        "RF_antenna_length": 0.084,  # m, length of the RF communication system
+        "RF_antenna_width": 0.084,  # m, width of the RF communication system
+        "RF_antenna_height": 0.096,  # m, height of the RF communication system
+        # Positioning:
+        "RF_antenna_x": None,  # m, x-location w.r.t. doors
+        "RF_antenna_y": None,  # m, y-location w.r.t. doors
+        "RF_antenna_z": None  # m, z-location w.r.t. doors
+    },
+    "4G_antenna": {
+        "4G_antenna_name": "Panorama B4BE 5G/4G/3G/2G antenne",
+        "4G_antenna_mass": 0.39,  # kg, mass of the 4G communication system
+        "4G_antenna_power": None,  # W, power consumption of the 4G communication system
+        "4G_antenna_cost": None,  # Cost of the 4G communication system, if available
+
+        "4G_antenna_length": 0.048,  # m, length of the 4G communication system
+        "4G_antenna_width": 0.048,  # m, width of the 4G communication system
+        "4G_antenna_height": 0.164,  # m, height of the 4G communication system
+        # Positioning:
+        "4G_antenna_x": None,  # m, x-location w.r.t. doors
+        "4G_antenna_y": None,  # m, y-location w.r.t. doors
+        "4G_antenna_z": None  # m, z-location w.r.t. doors
+    },
+    "Satellite_antenna": {
+        "Satellite_antenna_name": "Selfsat H30D",
+        "Satellite_antenna_mass": 1.1,  # kg, mass of the satellite communication system
+        "Satellite_antenna_power": 0,  # W, power consumption of the satellite communication system
+        "Satellite_antenna_cost": 0,  # Cost of the satellite communication system, if available
+
+        "Satellite_antenna_length": 0.547,  # m, length of the satellite communication system
+        "Satellite_antenna_width": 0.277,  # m, width of the satellite communication system
+        "Satellite_antenna_height": 0.058,  # m, height of the satellite communication system
+        # Positioning:
+        "Satellite_antenna_x": None,  # m, x-location w.r.t. doors
+        "Satellite_antenna_y": None,  # m, y-location w.r.t. doors
+        "Satellite_antenna_z": None  # m, z-location w.r.t. doors
+    },
+    "ventilation_system": {
+        "ventilation_system_name": "VEVOR Afzuigventilator",
+        "ventilation_system_mass": 3.66,  # kg, mass of the ventilation system
+        "ventilation_system_power": 40,  # W, power consumption of the ventilation system
+        "ventilation_system_cost": 100,  # Cost of the ventilation system, if available
+
+        "ventilation_system_length": 0.380,  # m, length of the ventilation system
+        "ventilation_system_width": 0.380,  # m, width of the ventilation system
+        "ventilation_system_height": 0.190,  # m, height of the ventilation system
+        # Positioning:
+        "ventilation_system_x": None,  # m, x-location w.r.t. doors
+        "ventilation_system_y": None,  # m, y-location w.r.t. doors
+        "ventilation_system_z": None  # m, z-location w.r.t. doors
+    },
+    "lighting_system": {
+        "lighting_system_name": "",
+        "lighting_system_mass": None,  # kg, mass of the lighting system
+        "lighting_system_power": None,  # W, power consumption of the lighting system
+        "lighting_system_cost": None,  # Cost of the lighting system, if available
+
+        "lighting_system_length": None,  # m, length of the lighting system
+        "lighting_system_width": None,  # m, width of the lighting system
+        "lighting_system_height": None,  # m, height of the lighting system
+        # Positioning:
+        "lighting_system_x": None,  # m, x-location w.r.t. doors
+        "lighting_system_y": None,  # m, y-location w.r.t. doors
+        "lighting_system_z": None  # m, z-location w.r.t. doors
+    },
+    "tools": {
+
+    }
 }
 
 
