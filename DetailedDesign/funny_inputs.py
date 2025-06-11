@@ -219,26 +219,38 @@ funny_inputs.update(structures_funny_inputs)
 # ~~~ Thermal control ~~~
 
 thermal_funny_inputs = {
-    "T_amb_deploy": 140.0,
-    "T_amb_cruise": 45.0,
-    "T_int_init": 30.0,
-    "T_int_cruise_set": 30.0,
-    "A_heat_shell": 0.5,
-    "t_shell": 0.002,
-    "k_Ti": 6.7,
+    # Theo's things
+    "T_amb_deploy": 140.0, # C
+    "T_amb_cruise": 45.0, # C
+    "T_int_init": 30.0, # C
+    "T_int_cruise_set": 30.0, # C
+    "shell_eff_area": 0.5, # m^2, effective heat transfer area
+    "shell_thickness": 0.002, # m, structural material thickness
+    "shell_k": 6.7, # W/(mK), structural material conductivity
     "include_insulation": True,
-    "t_insulation": 0.01,
-    "k_insulation": 0.017,
-    "heat_coeff_ext": 45.0,
-    "heat_int": 200.0,
-    "m_int": 10.0,
-    "c_p_int": 500.0,
+    "insulation_thickness": 0.01, # m
+    "insulation_k": 0.017, # W/(mK), insulation conductivity
+    "heat_coeff_ext": 45.0, # W/(m^2 K), external convective coefficient
+    "heat_int": 200.0, # W, internal dissipation
+    "m_int": 10.0,  # kg, mass of components
+    "c_p_int": 500.0, # J/(kgK), specific heat capacity
     "power_thermal_required": -300.0,  # Negative = cooling ; Positive = heating
+    
+    # Maria's things
+    "wing_eff_area": 1., # m, effective surface area for conduction
+    "fuselage_eff_area": 1., # m, effective surface area for conduction
+    "T_amb_onsite": 140. + 273.15, # K, temperature in the onsite deployment zone
+    "T_amb_enroute": 40. + 273.15, # K, ambient temperature outside of deployment zone
+    "T_int": 40. + 273.15, # K, temperature inside the fuselage+wing structure
+    "thickness_foam_wing": 0.03, # m, thickness of the foam inbetween the aluminium shell
+    "thickness_alu_wing": 0.0008, # m, thickness of one layer of the aluminium shell structure
+    "thickness_foam_fuselage": 0.03, # m
+    "thickness_alu_fuselage": 0.0008, # m
     "n_battery": 4,
     "battery_capacity": 10., # Ah
     "battery_potential": 44.4, # V
     "battery_resistance": 0.015, # Ohm, based on guessing
-    "processor_heat_dissipated": 40., # W, guesstimate which should eventually come from the chosen processor
+    "processor_heat_diss": 40., # W, guesstimate which should eventually come from the chosen processor
     "winch_eff": 0.65, # Winch efficiency fraction (0.35=35% efficiency) used to compute the heat generated
 
 }
@@ -251,6 +263,7 @@ final_outputs = {
     "M_to": 30,
     "MTOW": 294.3,
     "R_max": 20000,
+    "R_min": 2000, #just a trial run
     "mission_type": "wildfire",
     "mission_perimeter": 1000,
     "number_of_UAVs": 20,
