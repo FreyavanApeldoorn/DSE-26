@@ -48,6 +48,9 @@ class Power:
         self.power_cruise_total = self.power_cruise_hardware + self.power_required_cruise
 
     # ~~~ Intermediate Functions ~~~
+    def power_consumptions_motors(self) -> float:
+
+        return
 
     def calculate_required_capacity(self) -> float:
         
