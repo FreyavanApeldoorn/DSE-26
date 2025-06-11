@@ -164,9 +164,11 @@ class StabCon:
         self.wildfire_fuselage_x_cg = inputs["wildfire_fuselage_x_cg"]
         self.oil_spill_fuselage_x_cg = inputs["oil_spill_fuselage_x_cg"]
         self.wildfire_wing_x_cg = inputs["wildfire_wing_x_cg"]
+        self.no_payload_fuselage_x_cg = inputs["no_payload_fuselage_x_cg"]
         self.oil_spill_wing_x_cg = inputs["oil_spill_wing_x_cg"]
         self.wildfire_fuselage_mass = inputs["wildfire_fuselage_mass"]
         self.oil_spill_fuselage_mass = inputs["oil_spill_fuselage_mass"]
+        self.no_payload_fuselage_mass = inputs["no_payload_fuselage_mass"]
         self.wildfire_wing_mass = inputs["wildfire_wing_mass"]
         self.oil_spill_wing_mass = inputs["oil_spill_wing_mass"]
         self.mac = inputs["mac"]
@@ -298,12 +300,23 @@ class StabCon:
         """Calculate the center of gravity (c.g.) of the UAV for different configurations."""
 
         results = {}
-        for configuration in ["wildfire", "oil_spill"]:
+        for configuration in ["wildfire", "oil_spill","no_payload"]:
             if configuration == "wildfire":
                 sensor_mass = self.wildfire_sensor_mass
                 sensor_x = self.wildfire_sensor_x
                 sensor_y = self.wildfire_sensor_y
                 sensor_z = self.wildfire_sensor_z
+                payload_mass = self.payload_mass
+                buoy_mass = 0
+                buoy_x = 0
+                buoy_y = 0
+                buoy_z = 0
+            elif configuration == "no_payload":
+                sensor_mass = self.wildfire_sensor_mass
+                sensor_x = self.wildfire_sensor_x
+                sensor_y = self.wildfire_sensor_y
+                sensor_z = self.wildfire_sensor_z
+                payload_mass = 0
                 buoy_mass = 0
                 buoy_x = 0
                 buoy_y = 0
@@ -330,7 +343,7 @@ class StabCon:
                 + self.Winch_motor_mass * self.Winch_motor_x
                 + (self.motor_mass_cruise + self.propeller_mass_cruise)
                 * self.motor_cruise_x
-                + self.payload_mass * self.payload_x
+                + payload_mass * self.payload_x
                 + buoy_mass * buoy_x
                 # add structure, tail, landing gear
             )
@@ -378,7 +391,7 @@ class StabCon:
                 + self.Mesh_network_module_mass
                 + self.SATCOM_module_mass
                 + self.Winch_motor_mass
-                + self.payload_mass
+                + payload_mass
                 + buoy_mass
                 + self.motor_mass_cruise
                 + self.propeller_mass_cruise
@@ -432,11 +445,16 @@ class StabCon:
         x_lemac = np.linspace(0.5, self.l_fus - 0.5, 10)
 
         results = {}
-        for configuration in ["wildfire", "oil_spill"]:
+        for configuration in ["wildfire", "oil_spill", "no_payload"]:
             if configuration == "wildfire":
                 fuselage_x_cg = self.wildfire_fuselage_x_cg
                 wing_x_cg = self.wildfire_wing_x_cg
                 fuselage_mass = self.wildfire_fuselage_mass
+                wing_mass = self.wildfire_wing_mass
+            elif configuration == "no_payload":
+                fuselage_x_cg = self.no_payload_fuselage_x_cg
+                wing_x_cg = self.wildfire_wing_x_cg
+                fuselage_mass = self.no_payload_fuselage_mass
                 wing_mass = self.wildfire_wing_mass
             else:
                 fuselage_x_cg = self.oil_spill_fuselage_x_cg
@@ -552,7 +570,7 @@ if __name__ == "__main__":  # pragma: no cover
         # The scissor plot shows the stability and control constraints to determine the tailplane size.
         # Code produces the plots but they have to be overlaid manually to find the optimal position.
         
-    
+    cg_results = stabcon.calculate_UAV_cg()
     for config, result in cg_results.items():
         setattr(stabcon, f"{config}_fuselage_x_cg", result["fuselage_x_cg"])
         setattr(stabcon, f"{config}_wing_x_cg", result["wing_x_cg"])

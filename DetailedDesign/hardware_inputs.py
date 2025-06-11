@@ -33,7 +33,7 @@ components_wildfires = {
 component_inputs.update(components_wildfires)
 
 
-components_oldspills = {
+components_oilspills = {
     "oil_spill_camera": {
         "oil_sensor_name": "DJI Zenmuse L2",
         "oil_sensor_mass": 0.905,  # kg, mass of the oil sensor
@@ -57,10 +57,10 @@ components_oldspills = {
         "buoy_z": None  # m, z-location w.r.t. front of fuselage
     }
 }
-component_inputs.update(components_oldspills)
+component_inputs.update(components_oilspills)
 
 
-otoher_components = {
+other_components = {
     "gymbal_connection": {
         "gymbal_connection_name": "",
         "gymbal_connection_mass": 0.07,  # kg, mass of the gimbal connection
@@ -143,7 +143,7 @@ otoher_components = {
         "SATCOM_module_z": None  # m, z-location w.r.t. front of fuselage
     },
     "PBD": {   # Power distribution board
-        "PBD_name": "FLIGHTCORE MK2"
+        "PBD_name": "FLIGHTCORE MK2",
         "PDB_mass": 0.015,
         "PDB_power": None,  # W, power consumption of the PDB
         "PDB_cost": None,  # Cost of the PDB, if available
@@ -158,7 +158,7 @@ otoher_components = {
     }
 
 }
-component_inputs.update(otoher_components)
+component_inputs.update(other_components)
 
 deployment_components = {
     "winch_motor": {
@@ -254,9 +254,23 @@ battery = {
 component_inputs.update(battery)
 
 wing_group = {
+    "aileron_actuation":{
+        "aileron_actuation_mass":0.025,  # kg, mass of the aileron actuation system
+        "aileron_actuation_power": None,  # W, power consumption of the aileron actuation system
+        # Positioning:
+        "aileron_actuation_x": 0.2,  # m, x-location w.r.t. leading edge of the wing
+        "aileron_actuation_y": None,  # m, y-location w.r.t. leading edge of the wing
+        "aileron_actuation_z": None,  # m, z-location w.r.t. leading edge of the wing
+    },
 
-    # Positioning:
-
+    "wing_lights":{
+        "wing_lights_mass": None,  # kg, mass of the wing lights
+        "wing_lights_power": None, # W, power consumption of the wing lights
+        # Positioning:
+        "wing_lights_x": 0.0,  # m, x-location w.r.t. leading edge of the wing
+        "wing_lights_y": None,  # m, y-location w.r.t. leading edge of the wing
+        "wing_lights_z": None,  # m, z-location w.r.t. leading edge of the wing
+    }
 
 }
 component_inputs.update(wing_group)
@@ -270,6 +284,47 @@ component_inputs.update(structure)
 
 
 components = component_inputs.copy()
+
+
+nest_components = {
+    "container": {
+        "container_name": "ISO Container",
+        "container_mass": None,
+        "container_cost": None,  # Cost of the container, if available
+        "container_length": None,  # m, length of the container
+        "container_width": None,  # m, width of the container
+        "container_height": None  # m, height of the container
+    }
+    
+    "generator": {
+        "generator_name": "CAT DE65 GC",
+        "generator_mass": None,
+        "generator_power": None,  # W, power output of the generator
+        "generator_cost": None,  # Cost of the generator, if available
+        "generator_length": None,  # m, length of the generator
+        "generator_width": None,  # m, width of the generator
+        "generator_height": None,  # m, height of the generator
+        # Positioning:
+        "generator_x": None,  # m, x-location w.r.t. front of fuselage
+        "generator_y": None,  # m, y-location w.r.t. front of fuselage
+        "generator_z": None  # m, z-location w.r.t. front of fuselage
+    },
+    "fuel_tank": {
+        "fuel_tank_name": "",
+        "fuel_tank_mass": None,
+        "fuel_tank_capacity": None,  # L, fuel capacity of the tank
+        "fuel_tank_cost": None,  # Cost of the fuel tank, if available
+        "fuel_tank_length": None,  # m, length of the fuel tank
+        "fuel_tank_width": None,  # m, width of the fuel tank
+        "fuel_tank_height": None,  # m, height of the fuel tank
+        # Positioning:
+        "fuel_tank_x": None,  # m, x-location w.r.t. front of fuselage
+        "fuel_tank_y": None,  # m, y-location w.r.t. front of fuselage
+        "fuel_tank_z": None  # m, z-location w.r.t. front of fuselage
+    },
+    ""
+}
+
 
 if __name__ == '__main__':
 

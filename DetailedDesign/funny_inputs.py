@@ -204,6 +204,14 @@ structures_funny_inputs = {
     "tensile_strength_foam": 1.7 * 10**6, #Pa
     "tensile_strength_alu": 193 * 10**6, #Pa
     "tensile_strength_reduction_temp": 0.9, #- https://firesciencereviews.springeropen.com/articles/10.1186/s40038-015-0007-5#:~:text=This%20concern%20is%20exacerbated%20for,(Langhelle%20and%20Amdahl%202001).
+    "E_foam": 0.123*10**9, #Pa
+    "E_alu": 70.3 * 10**9, #Pa
+    "density_alu": 2.68 * 1000, #kg/m3
+    "boom_inner_diameter": 0.015, #m
+
+    "root_chord": 0.458, #m
+    "first_spar_position": 0.14, #ratio
+    "second_spar_position": 0.5, #ratio
 }
 
 funny_inputs.update(structures_funny_inputs)
@@ -220,7 +228,7 @@ thermal_funny_inputs = {
     "shell_thickness": 0.002, # m, structural material thickness
     "shell_k": 6.7, # W/(mK), structural material conductivity
     "include_insulation": True,
-    "insulation_thickness": 0.01, # m 
+    "insulation_thickness": 0.01, # m
     "insulation_k": 0.017, # W/(mK), insulation conductivity
     "heat_coeff_ext": 45.0, # W/(m^2 K), external convective coefficient
     "heat_int": 200.0, # W, internal dissipation
@@ -229,6 +237,15 @@ thermal_funny_inputs = {
     "power_thermal_required": -300.0,  # Negative = cooling ; Positive = heating
     
     # Maria's things
+    "wing_eff_area": 1., # m, effective surface area for conduction
+    "fuselage_eff_area": 1., # m, effective surface area for conduction
+    "T_amb_onsite": 140. + 273.15, # K, temperature in the onsite deployment zone
+    "T_amb_enroute": 40. + 273.15, # K, ambient temperature outside of deployment zone
+    "T_int": 40. + 273.15, # K, temperature inside the fuselage+wing structure
+    "thickness_foam_wing": 0.03, # m, thickness of the foam inbetween the aluminium shell
+    "thickness_alu_wing": 0.0008, # m, thickness of one layer of the aluminium shell structure
+    "thickness_foam_fuselage": 0.03, # m
+    "thickness_alu_fuselage": 0.0008, # m
     "n_battery": 4,
     "battery_capacity": 10., # Ah
     "battery_potential": 44.4, # V
@@ -371,10 +388,6 @@ final_outputs = {
     "volume_fueltank": 1.8296442000000004,
     "refills_for_mission": 0,
 }
-funny_inputs.update(final_outputs)
-
-
-funny_inputs.update()
 
 # ~~~ Hardware ~~~
 
