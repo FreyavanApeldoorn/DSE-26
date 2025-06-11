@@ -11,10 +11,10 @@ import numpy as np
 
 class Power:
 
-    def __init__(self, inputs: dict[str, float], hardware=None) -> None:
+    def __init__(self, inputs, hardware:dict[str, float]) -> None:
         self.inputs = inputs
-        self.outputs = self.inputs.copy()
         self.hardware = hardware
+        self.outputs = self.inputs.copy()
 
         self.M_to = inputs["M_to"]
         self.DOD_fraction = self.inputs["DOD_fraction"] 
@@ -49,7 +49,7 @@ class Power:
         #Calculate the total power 
         self.power_scan_total = self.power_scan + 4228
         self.power_deploy_total = self.power_deploy + 4228
-        self.power_cruise_total = self.power_cruise_hardware + 1082
+        self.power_cruise_total = self.power_cruise_hardware + 647
 
     # ~~~ Intermediate Functions ~~~
     # def power_consumptions_motors(self) -> float:
