@@ -119,15 +119,15 @@ other_components = {
         "GPS_z": None  # m, z-location w.r.t. front of fuselage
     },
     "Mesh_network_module": {   
-        "Mesh_network_module_name": "",
-        "Mesh_network_module_mass": 0.060,  # kg, mass of the mesh network module
+        "Mesh_network_module_name": "Mini Mesh Radio",
+        "Mesh_network_module_mass": 0.0365,  # kg, mass of the mesh network module
         "Mesh_network_module_power": 5,  # W, power consumption of the mesh network module
-        "Mesh_network_module_voltage": 4,  # V, voltage of the mesh network module
+        "Mesh_network_module_voltage": 5,  # V, voltage of the mesh network module
         "Mesh_network_module_cost": None,  # Cost of the mesh network module, if available
         
-        "Mesh_network_module_length": 0.123,  # m, length of the mesh network module
-        "Mesh_network_module_width": 0.077,  # m, width of the mesh network module
-        "Mesh_network_module_height": 0.03,  # m, height of the mesh network module
+        "Mesh_network_module_length": 0.046,  # m, length of the mesh network module
+        "Mesh_network_module_width": 0.051,  # m, width of the mesh network module
+        "Mesh_network_module_height": 0.0065,  # m, height of the mesh network module
         # Positioning:
         "Mesh_network_module_x": 0.4313,  # m, x-location w.r.t. front of fuselage
         "Mesh_network_module_y": None,  # m, y-location w.r.t. front of fuselage
@@ -148,12 +148,27 @@ other_components = {
         "SATCOM_module_y": None,  # m, y-location w.r.t. front of fuselage
         "SATCOM_module_z": None  # m, z-location w.r.t. front of fuselage
     },
+    "4G_LTE_module":{
+        "4G_LTE_module_name": "",
+        "4G_LTE_module_mass": 0.020,  # kg, mass of the 4G-LTE module
+        "4G_LTE_module_power": 5,  # W, power consumption of the 4G-LTE module, ESTIMATE not verified. 
+        "4G_LTE_module_voltage": 5,  # V, voltage of the 4G-LTE module
+        "4G_LTE_module_cost": None,  # Cost of the 4G-LTE module, if available
+        "4G_LTE_module_length": 0.0545,  # m, length of the 4G-LTE module
+        "4G_LTE_module_width": 0.0335,  # m, width of the 4G-LTE module
+        "4G_LTE_module_height": 0.0135,  # m, height of the 4G-LTE module
+        # Positioning:
+        "4G_LTE_module_x": 0.4313,  # m, x-location w.r.t. front of fuselage
+        "4G_LTE_module_y": None,  # m, y-location w.r.t. front of fuselage  
+        "4G_LTE_module_z": None  # m, z-location w.r.t. front of fuselage
+    },
+
+
     "PBD": {   # Power distribution board
         "PBD_name": "FLIGHTCORE MK2",
         "PDB_mass": 0.015,
         "PDB_power": None,  # W, does not consume power, but distributes it
         "PDB_cost": None,  # Cost of the PDB, if available
-
         "PDB_length": 0.116,
         "PDB_width": 0.11,
         "PDB_height": 0.025,

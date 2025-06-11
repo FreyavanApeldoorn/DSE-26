@@ -53,7 +53,8 @@ class Hardware:
         self.winch_motor_power_idle = self.hardware["winch_motor"]["Winch_motor_power_idle"]  # W, power consumption of the winch motor in idle state
         self.winch_motor_voltage = self.hardware["winch_motor"]["Winch_motor_voltage"]  # V, voltage of the winch motor
         self.battery_maximum_peak_current = self.hardware["battery_maximum_peak_current"]  # A, maximum peak current of the battery
-
+        self.LTE_module_power = self.hardware["4G_LTE_module"]["4G_LTE_module_power"] 
+        self.LTE_module_voltage = self.hardware["4G_LTE_module"]["4G_LTE_module_voltage"]
     # ~~~ Intermediate Functions ~~~
 
     # def select_components(self):
@@ -117,6 +118,7 @@ class Hardware:
     def calculate_power_hardware_during_scan(self) -> float:
         """
         Calculates the total power consumption of the hardware components during the scan phase.
+
         """
         power_hardware_scan = (
             self.wildfire_sensor_power + 
@@ -124,14 +126,17 @@ class Hardware:
             self.flight_controller_power + 
             self.Mesh_network_module_power + 
             self.SATCOM_module_power + 
+            self.LTE_module_power +
             self.OBC_power 
-        )
+        ) 
         total_amperage_scan = (
             self.wildfire_sensor_power / self.wildfire_sensor_voltage + 
             self.GPS_power / self.GPS_voltage+ 
             self.flight_controller_power / self.flight_controller_voltage + 
             self.Mesh_network_module_power / self.Mesh_network_module_voltage + 
             self.SATCOM_module_power / self.SATCOM_module_voltage + 
+            self.LTE_module_power / self.LTE_module_voltage +
+            self.winch_motor_power_idle / self.winch_motor_voltage +
             self.OBC_power / self.OBC_voltage
         )
         # Check if the battery can handle the total amperage during the scan phase
@@ -183,14 +188,18 @@ class Hardware:
         self.flight_controller_power + 
         self.Mesh_network_module_power + 
         self.SATCOM_module_power + 
-        self.OBC_power 
+        self.OBC_power +
+        self.LTE_module_power +
+        self.winch_motor_power_idle  # Assuming winch motor is idle during cruise
         )
         total_amperage_cruise = (
             self.GPS_power / self.GPS_voltage + 
             self.flight_controller_power / self.flight_controller_voltage + 
             self.Mesh_network_module_power / self.Mesh_network_module_voltage + 
             self.SATCOM_module_power / self.SATCOM_module_voltage + 
-            self.OBC_power / self.OBC_voltage
+            self.OBC_power / self.OBC_voltage + 
+            self.LTE_module_power / self.LTE_module_voltage +
+            self.winch_motor_power_idle / self.winch_motor_voltage
         )
         # Check if the battery can handle the total amperage during the cruise phase
         if total_amperage_cruise > self.battery_maximum_peak_current:
