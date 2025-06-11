@@ -48,11 +48,11 @@ class UAV:
 
             #stab_n_con = StabnCon()
             
-            aerodynamics = Aerodynamics(outputs, self.hardware)
-            outputs = aerodynamics.get_all()
+            # aerodynamics = Aerodynamics(outputs, self.hardware)
+            # outputs = aerodynamics.get_all()
 
-            structures = Structures(outputs, self.hardware)
-            outputs = structures.get_all()
+            # structures = Structures(outputs, self.hardware)
+            # outputs = structures.get_all()
 
             #thermal = Thermal(outputs)
             #outputs = thermal.get_all()

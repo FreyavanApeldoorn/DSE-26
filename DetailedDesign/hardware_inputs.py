@@ -214,12 +214,11 @@ component_inputs.update(deployment_components)
 
 propulsion = {
     "propeller_cruise": {
-        "propeller_cruise_name": "",
-        "propeller_cruise_mass": None,
+        "propeller_cruise_name": "G26*8.5 inch",
+        "propeller_cruise_mass": 68,
         "propeller_cruise_cost": None,  # Cost of the propeller, if available
-
+        "propeller_cruise_diameter": 0.66,  # m, diameter of the propeller
         "propeller_cruise_efficiency": None
-        
     },
     "motor_cruise": {
         "motor_cruise_name": "",
@@ -263,6 +262,7 @@ battery = {
     "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
     "battery_cost": None, 
     "battery_maximum_peak_current": 100,  # A, maximum current of the battery
+    "battery_capacity": 17*2,  # Ah, capacity of the battery
     
     "battery_mass": 2.8*4,  # kg, mass of the battery
     "battery_length": 0.2,  # m, length of the battery

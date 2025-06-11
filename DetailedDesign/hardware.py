@@ -209,6 +209,21 @@ class Hardware:
         
         return power_hardware_cruise
     
+    def calculate_power_hardware_cruise_return(self) -> float:
+        """
+        Calculates the total power consumption of the hardware components during the cruise phase for return to base."""
+        
+        power_hardware_cruise_return = (
+            self.GPS_power + 
+            self.flight_controller_power + 
+            self.Mesh_network_module_power + 
+            self.SATCOM_module_power + 
+            self.OBC_power +
+            self.LTE_module_power 
+            
+        )  # No winch motor on the return to base
+
+        return power_hardware_cruise_return
     
           
 
