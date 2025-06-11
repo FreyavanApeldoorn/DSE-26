@@ -8,7 +8,6 @@ import pprint
 - Structure
 - Deployment
 
-
 """
 
 component_inputs = {}
@@ -18,6 +17,7 @@ components_wildfires = {
         "wildfire_sensor_name": "DJI Zenmuse H30T",
         "wildfire_sensor_mass": 0.92,  # kg, mass of the wildfire sensor
         "wildfire_sensor_power": 28,  # W, power consumption of the wildfire sensor
+        "wildfire_sensor_voltage": 44.4,  # V, voltage of the wildfire sensor
         "wildfire_sensor_cost": 13_500,  # Cost of the wildfire sensor, if available
         
         "wildfire_sensor_length": 0.169,  # m, length of the wildfire sensor
@@ -38,6 +38,7 @@ components_oilspills = {
         "oil_sensor_name": "DJI Zenmuse L2",
         "oil_sensor_mass": 0.905,  # kg, mass of the oil sensor
         "oil_sensor_power": 28,  # W, power consumption of the oil sensor
+        "oil_sensor_voltage": 44.4,  # V, voltage of the oil sensor
         "oil_sensor_cost": 14_280,
         "oil_sensor_length": 0.155,  # m, length of the oil sensor
         "oil_sensor_width": 0.128,  # m, width of the oil sensor
@@ -48,11 +49,11 @@ components_oilspills = {
         "oil_sensor_z": None,  # m, z-location w.r.t. front of fuselage
     },
     "buoy": { 
-        "buoy_name": "",
-        "buoy_mass": 0.5,  # kg, mass of the buoy
+        "buoy_name": "Flyfiretech Drone Buoy",
+        "buoy_mass": 0.560,  # kg, mass of the buoy, 
 
         # Positioning:
-        "buoy_x": 0.5,  # m, x-location w.r.t. front of fuselage
+        "buoy_x": 0.5,  # m, x-location w.r.t. front of fuselage, #UPDATE based on position of LG
         "buoy_y": None,  # m, y-location w.r.t. front of fuselage
         "buoy_z": None  # m, z-location w.r.t. front of fuselage
     }
@@ -62,7 +63,7 @@ component_inputs.update(components_oilspills)
 
 other_components = {
     "gymbal_connection": {
-        "gymbal_connection_name": "",
+        "gymbal_connection_name": "SKYPORT",
         "gymbal_connection_mass": 0.07,  # kg, mass of the gimbal connection
         "gymbal_connection_cost": None,  # Cost of the gimbal connection, if available
         
@@ -77,6 +78,7 @@ other_components = {
         "flight_controller_name": "",
         "flight_controller_mass": 0.100,  # kg, mass of the flight controller
         "flight_controller_power": 7.5,  # W, power consumption of the flight controller
+        "Flight_controller_voltage": 5,  # V, voltage of the flight controller
         "flight_controller_cost": None,  # Cost of the flight controller, if available
         
         "flight_controller_length": 0.0923,  # m, length of the flight controller
@@ -89,13 +91,14 @@ other_components = {
     },
     "OBC": {
         "OBC_name": "",
-        "OBC_mass": 0.2270,  # kg, mass of the OBC
+        "OBC_mass": 0.700,  # kg, mass of the OBC
         "OBC_power": 60,  # W, power consumption of the OBC
+        "OBC_voltage": 12, # V, Voltage of the OBC
         "OBC_cost": None,  # Cost of the OBC, if available
 
-        "OBC_length": 0.1651,  # m, length of the OBC
-        "OBC_width": 0.13716,  # m, width of the OBC
-        "OBC_height": 0.06985,  # m, height of the OBC
+        "OBC_length": 0.110,  # m, length of the OBC
+        "OBC_width": 0.110,  # m, width of the OBC
+        "OBC_height": 0.07165,  # m, height of the OBC
         # Positioning:
         "OBC_x": 0.2185,  # m, x-location w.r.t. front of fuselage
         "OBC_y": None,  # m, y-location w.r.t. front of fuselage
@@ -105,6 +108,7 @@ other_components = {
         "GPS_name": "",
         "GPS_mass": 0.117,  # kg, mass of the GPS
         "GPS_power": 1.25,  # W, power consumption of the GPS
+        "GPS_voltage": 5,  # V, voltage of the GPS
         "GPS_cost": None,  # Cost of the GPS, if available
         
         "GPS_diameter": 0.078,  # m, diameter of the GPS
@@ -118,6 +122,7 @@ other_components = {
         "Mesh_network_module_name": "",
         "Mesh_network_module_mass": 0.060,  # kg, mass of the mesh network module
         "Mesh_network_module_power": 5,  # W, power consumption of the mesh network module
+        "Mesh_network_module_voltage": 4,  # V, voltage of the mesh network module
         "Mesh_network_module_cost": None,  # Cost of the mesh network module, if available
         
         "Mesh_network_module_length": 0.123,  # m, length of the mesh network module
@@ -132,6 +137,7 @@ other_components = {
         "SATCOM_module_name": "",
         "SATCOM_module_mass": 0.036,  # kg, mass of the SATCOM module
         "SATCOM_module_power": 2.25,  # W, power consumption of the SATCOM module
+        "SATCOM_module_voltage": 4,  # V, voltage of the SATCOM module
         "SATCOM_module_cost": None,  # Cost of the SATCOM module, if available
         
         "SATCOM_module_length": 0.045,  # m, length of the SATCOM module
@@ -145,7 +151,7 @@ other_components = {
     "PBD": {   # Power distribution board
         "PBD_name": "FLIGHTCORE MK2",
         "PDB_mass": 0.015,
-        "PDB_power": None,  # W, power consumption of the PDB
+        "PDB_power": None,  # W, does not consume power, but distributes it
         "PDB_cost": None,  # Cost of the PDB, if available
 
         "PDB_length": 0.116,
@@ -162,9 +168,11 @@ component_inputs.update(other_components)
 
 deployment_components = {
     "winch_motor": {
-        "Winch_motor_name": "",
-        "Winch_motor_mass": 1.117,
-        "Winch_motor_power": 60,  # W, power consumption of the winch motor
+        "Winch_motor_name": "XD-10",
+        "Winch_motor_mass": 1.117, # kg, mass of the winch motor
+        "Winch_motor_power_operation": 100,  # W, power consumption of the winch motor during operation
+        "wind_motor_power_idle": 10,  # W, power consumption of the winch motor when not in operation
+        "Winch_motor_voltage": 24,  # V, voltage of the winch motor
         "Winch_motor_cost": None,  # Cost of the winch motor, if available
         
         "Winch_motor_length": 0.17,

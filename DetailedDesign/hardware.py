@@ -109,7 +109,8 @@ class Hardware:
         Calculates the total power consumption of the hardware components during the scan phase.
         """
         power_hardware_scan = self.wildfire_sensor_power + self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power 
-        
+        total_amperage_scan = 
+
         return power_hardware_scan
     
     def calculate_power_hardware_during_deploy(self) -> float:

@@ -110,6 +110,11 @@ class Propulsion:
     def power_transition(self, vtol_power):
         
         self.transition_power = self.optimal_cruise_power + vtol_power # self.P_hov
+
+    def UAV_drag_cruise():
+        D = 0.5 * self.rho * V**2 * S * C_D
+
+        return 
         
 
     # ~~~ Output functions ~~~ 
