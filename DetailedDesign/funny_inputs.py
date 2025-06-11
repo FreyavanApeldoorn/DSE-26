@@ -16,6 +16,12 @@ constants_funny_inputs = {
     "rho_sea": 1.225,  # Density at sea level [kg/m^3]
     "mtow": 30 * 9.81,  # maximum takeoff weight [kg]
     "MTOW": 30 * 9.81,  # maximum takeoff weight [N]
+    "beta": 1 / (273.15 + 48),  # 1/K, thermal expansion coefficient at ~48°C
+    "nu": 15.89e-6,  # m^2/s, kinematic viscosity of air at ~300K
+    "alpha": 22.5e-6,  # m^2/s, thermal diffusivity of air at ~300K
+    "k_air": 0.0262,  # W/(mK), thermal conductivity of air at ~300K
+    "epsilon": 0.9,  # -, emissivity of the heat sink surface
+    "sigma": 5.67e-8,  # W/(mK^4), Stefan–Boltzmann constant
 }
 
 funny_inputs.update(constants_funny_inputs)
@@ -242,6 +248,10 @@ thermal_funny_inputs = {
     "T_amb_onsite": 140. + 273.15, # K, temperature in the onsite deployment zone
     "T_amb_enroute": 40. + 273.15, # K, ambient temperature outside of deployment zone
     "T_int": 40. + 273.15, # K, temperature inside the fuselage+wing structure
+    "T_equi_pcm": 48. + 273.15, # K, temperature at which the PCM starts changing phase 
+    "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
+    "sink_height": 0.01, # m, height of heat sink fins
+    "sink_thickness": 0.003, # m, thickness of heat sink fins
     "thickness_foam_wing": 0.03, # m, thickness of the foam inbetween the aluminium shell
     "thickness_alu_wing": 0.0008, # m, thickness of one layer of the aluminium shell structure
     "thickness_foam_fuselage": 0.03, # m
