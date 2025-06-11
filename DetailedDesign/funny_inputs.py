@@ -16,7 +16,6 @@ constants_funny_inputs = {
     "rho_sea": 1.225,  # Density at sea level [kg/m^3]
     "mtow": 30 * 9.81,  # maximum takeoff weight [kg]
     "MTOW": 30 * 9.81,  # maximum takeoff weight [N]
-    "beta": 1 / (273.15 + 48),  # 1/K, thermal expansion coefficient at ~48°C
     "nu": 15.89e-6,  # m^2/s, kinematic viscosity of air at ~300K
     "alpha": 22.5e-6,  # m^2/s, thermal diffusivity of air at ~300K
     "k_air": 0.0262,  # W/(mK), thermal conductivity of air at ~300K
@@ -252,10 +251,13 @@ thermal_funny_inputs = {
     "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
     "sink_height": 0.01, # m, height of heat sink fins
     "sink_thickness": 0.003, # m, thickness of heat sink fins
+    "sink_base": 0.003, # m, thickness of heat sink base
+    "sink_density": 10., # kg/m^3
     "thickness_foam_wing": 0.03, # m, thickness of the foam inbetween the aluminium shell
     "thickness_alu_wing": 0.0008, # m, thickness of one layer of the aluminium shell structure
     "thickness_foam_fuselage": 0.03, # m
     "thickness_alu_fuselage": 0.0008, # m
+    "insulation_density": 0.1, # kg/m^3
     "n_battery": 4,
     "battery_capacity": 10., # Ah
     "battery_potential": 44.4, # V
