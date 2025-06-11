@@ -38,7 +38,7 @@ class Hardware:
         self.wildfire_sensor_power = self.hardware["wildfire_camera"]["wildfire_sensor_power"]
         self.wildfire_sensor_voltage = self.hardware["wildfire_camera"]["wildfire_sensor_voltage"]
         self.oil_spill_sensor_power = self.hardware["oil_spill_camera"]["oil_sensor_power"]  # W, power consumption of the wildfire sensor
-        self.oil_spill_sensor_voltage = self.hardware["oil_spill_camera"]["oil_spill_sensor_voltage"]
+        self.oil_spill_sensor_voltage = self.hardware["oil_spill_camera"]["oil_sensor_voltage"]
         self.GPS_power = self.hardware["GPS"]["GPS_power"]
         self.GPS_voltage = self.hardware["GPS"]["GPS_voltage"]
         self.flight_controller_power = self.hardware["flight_controller"]["flight_controller_power"]
@@ -52,7 +52,7 @@ class Hardware:
         self.winch_motor_power_operation = self.hardware["winch_motor"]["Winch_motor_power_operation"]  # W, power consumption of the winch motor
         self.winch_motor_power_idle = self.hardware["winch_motor"]["Winch_motor_power_idle"]  # W, power consumption of the winch motor in idle state
         self.winch_motor_voltage = self.hardware["winch_motor"]["Winch_motor_voltage"]  # V, voltage of the winch motor
-        self.battery_maximum_peak_current = self.hardware["battery"]["maximum_peak_current"]  # A, maximum peak current of the battery
+        self.battery_maximum_peak_current = self.hardware["battery_maximum_peak_current"]  # A, maximum peak current of the battery
 
     # ~~~ Intermediate Functions ~~~
 

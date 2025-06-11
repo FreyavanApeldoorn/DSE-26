@@ -78,7 +78,7 @@ other_components = {
         "flight_controller_name": "",
         "flight_controller_mass": 0.100,  # kg, mass of the flight controller
         "flight_controller_power": 7.5,  # W, power consumption of the flight controller
-        "Flight_controller_voltage": 5,  # V, voltage of the flight controller
+        "flight_controller_voltage": 5,  # V, voltage of the flight controller
         "flight_controller_cost": None,  # Cost of the flight controller, if available
         
         "flight_controller_length": 0.0923,  # m, length of the flight controller
@@ -171,7 +171,7 @@ deployment_components = {
         "Winch_motor_name": "XD-10",
         "Winch_motor_mass": 1.117, # kg, mass of the winch motor
         "Winch_motor_power_operation": 100,  # W, power consumption of the winch motor during operation
-        "wind_motor_power_idle": 10,  # W, power consumption of the winch motor when not in operation
+        "Winch_motor_power_idle": 10,  # W, power consumption of the winch motor when not in operation
         "Winch_motor_voltage": 24,  # V, voltage of the winch motor
         "Winch_motor_cost": None,  # Cost of the winch motor, if available
         
@@ -341,9 +341,9 @@ if __name__ == '__main__':
     print("Wildfire components:")
     pprint.pprint(components_wildfires)
     print("\nOil spill components:")
-    pprint.pprint(components_oldspills)
+    pprint.pprint(components_oilspills)
     print("\nOther components:")
-    pprint.pprint(otoher_components)
+    pprint.pprint(other_components)
     print("\nDeployment components:")
     pprint.pprint(deployment_components)
     print("\nPropulsion:")
@@ -351,7 +351,7 @@ if __name__ == '__main__':
     print("\nBattery:")
     pprint.pprint(battery)
     print("\nWings:")
-    pprint.pprint(wings)
+    pprint.pprint(wing_group)
     print("\nStructure:")
     pprint.pprint(structure)
 
