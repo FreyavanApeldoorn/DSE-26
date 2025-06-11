@@ -247,6 +247,7 @@ battery = {
     "battery_name": "",
     "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
     "battery_cost": None, 
+    "battery_maximum_peak_current": 100,  # A, maximum current of the battery
     
     "battery_mass": 2.8*4,  # kg, mass of the battery
     "battery_length": 0.2,  # m, length of the battery
@@ -302,7 +303,7 @@ nest_components = {
         "container_length": None,  # m, length of the container
         "container_width": None,  # m, width of the container
         "container_height": None  # m, height of the container
-    }
+    },
     
     "generator": {
         "generator_name": "CAT DE65 GC",
@@ -317,6 +318,7 @@ nest_components = {
         "generator_y": None,  # m, y-location w.r.t. front of fuselage
         "generator_z": None  # m, z-location w.r.t. front of fuselage
     },
+
     "fuel_tank": {
         "fuel_tank_name": "",
         "fuel_tank_mass": None,
@@ -330,7 +332,7 @@ nest_components = {
         "fuel_tank_y": None,  # m, y-location w.r.t. front of fuselage
         "fuel_tank_z": None  # m, z-location w.r.t. front of fuselage
     },
-    ""
+    
 }
 
 
