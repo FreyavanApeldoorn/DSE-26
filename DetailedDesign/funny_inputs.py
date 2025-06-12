@@ -16,10 +16,10 @@ constants_funny_inputs = {
     "rho_sea": 1.225,  # Density at sea level [kg/m^3]
     "mtow": 30 * 9.81,  # maximum takeoff weight [kg]
     "MTOW": 30 * 9.81,  # maximum takeoff weight [N]
-    "nu": 15.89e-6,  # m^2/s, kinematic viscosity of air at ~300K
-    "alpha": 22.5e-6,  # m^2/s, thermal diffusivity of air at ~300K
-    "k_air": 0.0262,  # W/(mK), thermal conductivity of air at ~300K
-    "epsilon": 0.9,  # -, emissivity of the heat sink surface
+    "nu": 0.00001702,  # m^2/s, kinematic viscosity of air at ~300K
+    "alpha": 0.00002346,  # m^2/s, thermal diffusivity of air at ~300K
+    "k_air": 0.02662,  # W/(mK), thermal conductivity of air at ~300K
+    "epsilon": 0.85,  # -, emissivity of the heat sink surface
     "sigma": 5.67e-8,  # W/(mK^4), Stefan–Boltzmann constant
 }
 
@@ -84,6 +84,8 @@ deployment_funny_inputs = {
     "deployment_accuracy": 0.5,  # m, guesstimate
     "firebreak_width": 3,  # m
     "fuselage_size": 1.5,  # m, guesstimate
+    "mission_perimeter": 100, # m
+    "nr_aerogels": 30,
 }
 
 funny_inputs.update(deployment_funny_inputs)
@@ -106,7 +108,11 @@ funny_inputs.update(Constraints_funny_inputs)
 
 # ~~~ Operations ~~~
 
-operations_funny_inputs = {}
+operations_funny_inputs = {
+    "number_of_UAVs": 20,
+    "number_of_containers": 3,
+    "number_of_workers": 2,
+}
 
 funny_inputs.update(operations_funny_inputs)
 
@@ -248,16 +254,20 @@ thermal_funny_inputs = {
     "T_amb_enroute": 40. + 273.15, # K, ambient temperature outside of deployment zone
     "T_int": 40. + 273.15, # K, temperature inside the fuselage+wing structure
     "T_equi_pcm": 48. + 273.15, # K, temperature at which the PCM starts changing phase 
-    "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
+    # "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
     "sink_height": 0.01, # m, height of heat sink fins
     "sink_thickness": 0.003, # m, thickness of heat sink fins
     "sink_base": 0.003, # m, thickness of heat sink base
-    "sink_density": 10., # kg/m^3
+    "sink_density": 2710., # kg/m^3
     "thickness_foam_wing": 0.03, # m, thickness of the foam inbetween the aluminium shell
     "thickness_alu_wing": 0.0008, # m, thickness of one layer of the aluminium shell structure
     "thickness_foam_fuselage": 0.03, # m
     "thickness_alu_fuselage": 0.0008, # m
-    "insulation_density": 0.1, # kg/m^3
+    "conductivity_alu": 237., # W / (mK)
+    "conductivity_foam": 0.03, # W / (mK)
+    "conductivity_insulation": 0.03, # W / (mK)
+    "insulation_density": 80, # kg/m^3
+    "pcm_latent_heat": 197000., # J/kg
     "n_battery": 4,
     "battery_capacity": 10., # Ah
     "battery_potential": 44.4, # V
@@ -363,7 +373,7 @@ final_outputs = {
     "total_deployment_energy": 13120.0,
     "wire_mass": 0.2235,
     "deployment_system_mass": np.float64(12.904411288598778),
-    "nr_aerogels": np.float64(358.0),
+    "nr_aerogels": 358,
     "power_scan": 300,
     "power_idle": 100,
     "mass_hardware": 5.0,
@@ -465,3 +475,7 @@ hardware_funny_inputs = {
     "SATCOM_module_height": 0.017,  # m, height of the SATCOM module
     "SATCOM_module_x": None,  # m, x-location
 }
+
+
+actual_outputs = {key:final_outputs[key] for key in final_outputs if key not in funny_inputs}
+funny_inputs.update(actual_outputs)
