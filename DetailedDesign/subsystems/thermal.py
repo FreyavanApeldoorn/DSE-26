@@ -24,7 +24,6 @@ class Thermal:
         
         # Constants
         self.g = inputs["g"]
-        self.beta = inputs["beta"]
         self.nu = inputs["nu"]
         self.alpha = inputs["alpha"]
         self.k_air = inputs["k_air"]
@@ -66,12 +65,14 @@ class Thermal:
         self.thickness_alu_fuselage = inputs["thickness_alu_fuselage"]
         self.conductivity_foam = inputs["conductivity_foam"]
         self.conductivity_alu = inputs["conductivity_alu"]
+        self.insulation_density = inputs["insulation_density"]
 
         # Heat sink and PCM specs
         self.T_equi_pcm = inputs["T_equi_pcm"]
         self.sink_length = inputs["sink_length"]
         self.sink_height = inputs["sink_height"]
         self.sink_thickness = inputs["sink_thickness"]
+        self.sink_base = inputs["sink_base"]
 
         # Temperatures
         self.T_amb_onsite = inputs["T_amb_onsite"]
@@ -203,19 +204,21 @@ class Thermal:
         -> sink_area2: Inside surfaces between fins (see source)
             Source: https://www.heatsinkcalculator.com/blog/sizing-heat-sinks-with-a-few-simple-equations/
         '''
-        fin_spacing_opt = 2.714 * ((self.nu**2 * self.sink_length) / (self.g * self.beta * self.alpha)) ** 0.25 # m, optimal fin spacing
+        beta = 2 / (self.T_equi_pcm - self.T_amb_enroute)  # 1/K, thermal expansion coefficient
+        fin_spacing_opt = 2.71 * ((self.g * beta * (self.T_equi_pcm - self.T_amb_enroute))/(self.sink_length * self.alpha * self.nu)) ** (-0.25) # m, optimal fin spacing
 
         # Convection coefficient per area 
         convection_coeff1 = 1.42 * ((self.T_equi_pcm - self.T_amb_enroute) / self.sink_length)**0.25 # W/(m^2 K), for area1 
-        convection_coeff2 = self.k_air / fin_spacing_opt # W/(m^2 K), for area2
+        convection_coeff2 = 1.32 (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
 
         # Heat sink areas
         sink_area1 = self.sink_height * self.sink_length + self.sink_thickness * (2*self.sink_height + self.sink_length) # m^2
-        sink_area2 = 2 * self.sink_height * self.sink_length # m^2, area per fin channel (2 sides per channel) 
-
+        sink_area2 = self.sink_length * (2 * (self.sink_height - self.sink_base) + fin_spacing_opt) + 2 * (self.sink_thickness * self.sink_height + fin_spacing_opt * self.sink_base) + self.sink_thickness * self.sink_length
+        sink_area3 = self.sink_length * (self.sink_thickness * fin_spacing_opt) + 2 * (self.sink_thickness * self.sink_height + fin_spacing_opt * self.sink_base)
+        
         # Fixed heat loss from sink_area1
-        heat_dissipated_sink_c1 = convection_coeff1 * sink_area1 * (self.T_equi_pcm - self.T_amb_enroute)
-        heat_dissipated_sink_r1 = self.epsilon * self.sigma * sink_area1 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
+        heat_dissipated_sink_c1 = 2 * convection_coeff1 * sink_area1 * (self.T_equi_pcm - self.T_amb_enroute)
+        heat_dissipated_sink_r1 = 2 * self.epsilon * self.sigma * sink_area1 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
 
         heat_dissipated_sink_fixed = heat_dissipated_sink_c1 + heat_dissipated_sink_r1
 
@@ -224,19 +227,19 @@ class Thermal:
 
         # Heat loss per fin gap
         heat_dissipated_sink_c2_unit = convection_coeff2 * sink_area2 * (self.T_equi_pcm - self.T_amb_enroute)
-        heat_dissipated_sink_r2_unit = self.epsilon * self.sigma * sink_area2 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
+        heat_dissipated_sink_r2_unit = self.epsilon * self.sigma * sink_area3 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
         heat_dissipated_per_fin_gap = heat_dissipated_sink_c2_unit + heat_dissipated_sink_r2_unit
 
         # Outputs
         n_fin = np.ceil(heat_dissipated_sink_remain / heat_dissipated_per_fin_gap) # -, number of fins (rounded up)
-        sink_width = n_fin * fin_spacing_opt # m, total heat sink width
+        sink_width = (n_fin - 1) * fin_spacing_opt + n_fin * self.sink_thickness # m, total heat sink width
 
         return n_fin, sink_width
 
     
-    def simulate(self, x) -> float:
+    def simulate(self, x, opt=False) -> float:
         
-        pcm_mass, sink_area, insulation_thickness = x
+        pcm_mass, n_fin, insulation_thickness = x
         all_heat = self.create_heat_dissipated()
         
         # Times
@@ -257,10 +260,21 @@ class Thermal:
         Q_int_approach = sum([all_heat[ph]['phase_Q'] for ph in ['ascend', 'cruise_min']])
         Q_int_return = sum([all_heat[ph]['phase_Q'] for ph in ['cruise_min', 'descent']])
 
+        total_heat_return = heat_int_return + heat_env_return + (Q_env_onsite / time_return)
+
+        n_fin, sink_width = self.heat_sink_width(total_heat_return)
+
+        insulation_mass = insulation_thickness * (self.wing_eff_area + self.fuselage_eff_area) * self.insulation_density
+        sink_mass = 
+        total_mass = insulation_mass + pcm_mass + sink_mass
+        
+        return total_mass
+
+        # Total
     def optimize(self):
-        bounds = [(0.01, 3.0), (0.01, 0.5), (0., 0.05)]  # pcm_mass (kg), sink_area (m^2), insulation_thickness (m)
-        x0 = [1.0, 0.1, 0.] # initial: pcm_mass (kg), sink_area (m^2), insulation_thickness (m)
-        return minimize(self.simulate, x0=x0, bounds=bounds, method="SLSQP")
+        bounds = [(0.01, 3.0), (0.01, 0.5), (0., 0.05)]  # pcm_mass (kg), n_fin (-), insulation_thickness (m)
+        x0 = [1.0, 0.1, 0.] # initial: pcm_mass (kg), n_fin (-), insulation_thickness (m)
+        m = minimize(self.simulate(opt=True), x0=x0, bounds=bounds, method="SLSQP")
 
     # ~~~ Output functions ~~~ 
 
