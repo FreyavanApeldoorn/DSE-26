@@ -194,8 +194,8 @@ class Thermal:
 
         return all_heat
     
-    def heat_sink_width(self, heat_int: float, sink_length: float,) -> tuple[int, float]:
-        ''''
+    def heat_dissipated_sink(self, sink_length: float, n_fin: float) -> float: 
+        '''
         Input:
         -> heat_int: Internal heat that needs to be dissipated during the return (cruise+descend) phase
             Including:  - The heat dissipated by the components during the return phase (in W)
@@ -222,31 +222,27 @@ class Thermal:
         heat_dissipated_sink_r1 = 2 * self.epsilon * self.sigma * sink_area1 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
 
         heat_dissipated_sink_fixed = heat_dissipated_sink_c1 + heat_dissipated_sink_r1
-
-        # Remaining heat to be dissipated by fins
-        heat_dissipated_sink_remain = heat_int - heat_dissipated_sink_fixed
-
+        
         # Heat loss per fin gap
         heat_dissipated_sink_c2_unit = convection_coeff2 * sink_area2 * (self.T_equi_pcm - self.T_amb_enroute)
         heat_dissipated_sink_r2_unit = self.epsilon * self.sigma * sink_area3 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
         heat_dissipated_per_fin_gap = heat_dissipated_sink_c2_unit + heat_dissipated_sink_r2_unit
 
-        # Outputs
-        n_fin = np.ceil(heat_dissipated_sink_remain / heat_dissipated_per_fin_gap) # -, number of fins (rounded up)
-        sink_width = (n_fin - 1) * fin_spacing_opt + n_fin * self.sink_thickness # m, total heat sink width
+        heat_dissipated_sink_flex = heat_dissipated_per_fin_gap * n_fin
 
-        return fin_spacing_opt, n_fin, sink_width
+        # Total
+        total_heat_dissipated_sink = heat_dissipated_sink_fixed + heat_dissipated_sink_flex
 
+        return fin_spacing_opt, total_heat_dissipated_sink
     
     def simulate(self, x) -> float:
         
-        
-        sink_length, insulation_thickness = x
+        sink_length, n_fin, insulation_thickness = x
         all_heat = self.create_heat_dissipated()
         
         # Times
         time_onsite = self.time_scan + self.time_descent + self.time_deploy + self.time_ascent
-        time_approach = self.time_ascent + self.time_cruise_min
+        # time_approach = self.time_ascent + self.time_cruise_min
         time_return = self.time_cruise_min + self.time_descent
 
         # Heat and heat energy entering due to outside temperature
@@ -262,25 +258,37 @@ class Thermal:
         # Q_int_approach = sum([all_heat[ph]['phase_Q'] for ph in ['ascend', 'cruise_min']])
         # Q_int_return = sum([all_heat[ph]['phase_Q'] for ph in ['cruise_min', 'descent']])
 
-        total_heat_onsite = Q_int_onsite + Q_env_onsite
+        # Total heat and heat energy produced 
+        total_Q_onsite = Q_int_onsite + Q_env_onsite
         total_heat_return = heat_int_return + heat_env_return + (Q_env_onsite / time_return)
 
-        pcm_mass = total_heat_onsite / self.pcm_latent_heat
+        # Heat sink 
+        fin_spacing_opt, total_heat_dissipated_sink = self.heat_dissipated_sink(sink_length, n_fin)
+        sink_width = (n_fin - 1) * fin_spacing_opt + n_fin * self.sink_thickness # m, total heat sink width
 
-        fin_spacing_opt, n_fin, sink_width = self.heat_sink_width(total_heat_return, sink_length)
-
+        # Mass calculations
+        ''' If the heat sink does not dissipate the heat required to return to the T_int, a penalty is applied '''
+        pcm_mass = total_Q_onsite / self.pcm_latent_heat
         insulation_mass = insulation_thickness * (self.wing_eff_area + self.fuselage_eff_area) * self.insulation_density
-        sink_mass = (sink_width * sink_length * self.sink_height - (n_fin - 1)* (fin_spacing_opt * (self.sink_height - self.sink_base))) * self.sink_density
+        sink_mass = (sink_width * sink_length * self.sink_height - (n_fin - 1)* (fin_spacing_opt * sink_length * (self.sink_height - self.sink_base))) * self.sink_density
+
+        if total_heat_dissipated_sink < total_heat_return:
+            return 1e6
+
         total_mass = insulation_mass + pcm_mass + sink_mass
-        
+
+        # Test prints
+        # print('pcm_mass:', pcm_mass, '\n sink_mass:', sink_mass, '\n insulation_mass:', insulation_mass)
+        # print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
+
         return total_mass
 
     def optimize(self):
         '''
         Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
         '''
-        bounds = [(0.01, 0.5), (0., 0.05)]  # sink_length (m), insulation_thickness (m)
-        x0 = [0.1, 0.] # initial: sink_length (m), insulation_thickness (m)
+        bounds = [(0.01, 0.5), (1., 500.), (0., 0.05)]  # sink_length (m), n_fin (-), insulation_thickness (m)
+        x0 = [0.1, 5, 0.] # initial: sink_length (m), n_fin (-), insulation_thickness (m)
         total_mass_result =  minimize(self.simulate, x0=x0, bounds=bounds, method="SLSQP")
         return total_mass_result
 
@@ -372,3 +380,95 @@ if __name__ == '__main__':
     #     total_Q_return_min = all_heat['cruise_min']['phase_Q'] + all_heat['descend']['phase_Q']
 
     #     return total_heat_return_min, total_Q_return_min
+
+    # def heat_sink_width(self, heat_int: float, sink_length: float) -> tuple[int, float]:
+    #     '''
+    #     Input:
+    #     -> heat_int: Internal heat that needs to be dissipated during the return (cruise+descend) phase
+    #         Including:  - The heat dissipated by the components during the return phase (in W)
+    #                     - The heat energy stored in the PCM (in J), then divided over total return time (in W)
+    #     Intermediate:             
+    #     -> sink_area1: Outside surfaces of base and sides (see source)
+    #     -> sink_area2: Inside surfaces between fins (see source)
+    #         Source: https://www.heatsinkcalculator.com/blog/sizing-heat-sinks-with-a-few-simple-equations/
+    #     '''
+    #     beta = 2 / (self.T_equi_pcm - self.T_amb_enroute)  # 1/K, thermal expansion coefficient
+    #     fin_spacing_opt = 2.71 * ((self.g * beta * (self.T_equi_pcm - self.T_amb_enroute))/(sink_length * self.alpha * self.nu)) ** (-0.25) # m, optimal fin spacing
+
+    #     # Convection coefficient per area 
+    #     convection_coeff1 = 1.42 * ((self.T_equi_pcm - self.T_amb_enroute) / sink_length)**0.25 # W/(m^2 K), for area1 
+    #     convection_coeff2 = 1.32 * (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
+
+    #     # Heat sink areas
+    #     sink_area1 = self.sink_height * sink_length + self.sink_thickness * (2*self.sink_height + sink_length) # m^2
+    #     sink_area2 = sink_length * (2 * (self.sink_height - self.sink_base) + fin_spacing_opt) + 2 * (self.sink_thickness * self.sink_height + fin_spacing_opt * self.sink_base) + self.sink_thickness * sink_length
+    #     sink_area3 = sink_length * (self.sink_thickness * fin_spacing_opt) + 2 * (self.sink_thickness * self.sink_height + fin_spacing_opt * self.sink_base)
+        
+    #     # Fixed heat loss from sink_area1
+    #     heat_dissipated_sink_c1 = 2 * convection_coeff1 * sink_area1 * (self.T_equi_pcm - self.T_amb_enroute)
+    #     heat_dissipated_sink_r1 = 2 * self.epsilon * self.sigma * sink_area1 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
+
+    #     heat_dissipated_sink_fixed = heat_dissipated_sink_c1 + heat_dissipated_sink_r1
+
+    #     # Remaining heat to be dissipated by fins
+    #     heat_dissipated_sink_remain = heat_int - heat_dissipated_sink_fixed
+
+    #     # Heat loss per fin gap
+    #     heat_dissipated_sink_c2_unit = convection_coeff2 * sink_area2 * (self.T_equi_pcm - self.T_amb_enroute)
+    #     heat_dissipated_sink_r2_unit = self.epsilon * self.sigma * sink_area3 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
+    #     heat_dissipated_per_fin_gap = heat_dissipated_sink_c2_unit + heat_dissipated_sink_r2_unit
+
+    #     # Outputs
+    #     n_fin = np.ceil(heat_dissipated_sink_remain / heat_dissipated_per_fin_gap) # -, number of fins (rounded up)
+    #     sink_width = (n_fin - 1) * fin_spacing_opt + n_fin * self.sink_thickness # m, total heat sink width
+
+    #     return fin_spacing_opt, n_fin, sink_width
+
+    # def simulate(self, x) -> float:
+        
+    #     sink_length, insulation_thickness = x
+    #     all_heat = self.create_heat_dissipated()
+        
+    #     # Times
+    #     time_onsite = self.time_scan + self.time_descent + self.time_deploy + self.time_ascent
+    #     time_approach = self.time_ascent + self.time_cruise_min
+    #     time_return = self.time_cruise_min + self.time_descent
+
+    #     # Heat and heat energy entering due to outside temperature
+    #     _, Q_env_onsite = self.Q_env_leak(time_onsite, self.T_amb_onsite, insulation_thickness) # J
+    #     # heat_env_approach, Q_env_approach = self.Q_env_leak(time_approach, self.T_amb_enroute) # W, J, same as return if time_ascent = time_descent
+    #     heat_env_return, Q_env_return = self.Q_env_leak(time_return, self.T_amb_enroute, insulation_thickness=insulation_thickness) # W, J 
+
+    #     # Heat and heat energy entering due to internal components 
+    #     # heat_int_approach = sum([all_heat[ph]['phase_heat'] for ph in ['ascend', 'cruise_min']])
+    #     heat_int_return = sum([all_heat[ph]['phase_heat'] for ph in ['cruise_min', 'descend']])
+
+    #     Q_int_onsite = sum([all_heat[ph]['phase_Q'] for ph in ['scan', 'descend', 'deploy', 'ascend']])
+    #     # Q_int_approach = sum([all_heat[ph]['phase_Q'] for ph in ['ascend', 'cruise_min']])
+    #     # Q_int_return = sum([all_heat[ph]['phase_Q'] for ph in ['cruise_min', 'descent']])
+
+    #     total_heat_onsite = Q_int_onsite + Q_env_onsite
+    #     total_heat_return = heat_int_return + heat_env_return + (Q_env_onsite / time_return)
+
+    #     pcm_mass = total_heat_onsite / self.pcm_latent_heat
+
+    #     fin_spacing_opt, n_fin, sink_width = self.heat_sink_width(total_heat_return, sink_length)
+
+    #     insulation_mass = insulation_thickness * (self.wing_eff_area + self.fuselage_eff_area) * self.insulation_density
+    #     sink_mass = (sink_width * sink_length * self.sink_height - (n_fin - 1)* (fin_spacing_opt * sink_length * (self.sink_height - self.sink_base))) * self.sink_density
+    #     total_mass = insulation_mass + pcm_mass + sink_mass
+
+    #     # Test prints
+    #     print('pcm_mass:', pcm_mass, '\n sink_mass:', sink_mass, '\n insulation_mass:', insulation_mass)
+    #     # print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
+
+    #     return total_mass
+
+    # def optimize(self):
+    #     '''
+    #     Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
+    #     '''
+    #     bounds = [(0.01, 0.5), (0., 0.05)]  # sink_length (m), insulation_thickness (m)
+    #     x0 = [0.1, 0.] # initial: sink_length (m), insulation_thickness (m)
+    #     total_mass_result =  minimize(self.simulate, x0=x0, bounds=bounds, method="SLSQP")
+    #     return total_mass_result

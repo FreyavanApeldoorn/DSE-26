@@ -255,9 +255,9 @@ thermal_funny_inputs = {
     "T_int": 40. + 273.15, # K, temperature inside the fuselage+wing structure
     "T_equi_pcm": 48. + 273.15, # K, temperature at which the PCM starts changing phase 
     # "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
-    "sink_height": 0.01, # m, height of heat sink fins
+    "sink_height": 0.02, # m, height of heat sink fins
     "sink_thickness": 0.003, # m, thickness of heat sink fins
-    "sink_base": 0.003, # m, thickness of heat sink base
+    "sink_base": 0.004, # m, thickness of heat sink base
     "sink_density": 2710., # kg/m^3
     "thickness_foam_wing": 0.03, # m, thickness of the foam inbetween the aluminium shell
     "thickness_alu_wing": 0.0008, # m, thickness of one layer of the aluminium shell structure
