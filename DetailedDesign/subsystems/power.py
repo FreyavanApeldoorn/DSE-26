@@ -11,7 +11,7 @@ import numpy as np
 
 class Power:
 
-    def __init__(self, inputs, hardware:dict[str, float]) -> None:
+    def __init__(self, inputs, hardware) -> None:
         self.inputs = inputs
         self.hardware = hardware
         self.outputs = self.inputs.copy()

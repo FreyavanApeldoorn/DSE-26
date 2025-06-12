@@ -24,7 +24,8 @@ class UAV:
         self.hardware = hardware
         self.iterations = iterations
         self.verbose = verbose
-        
+    
+
         self.history = history
         if self.history:
             self.history_data = self.outputs.copy()

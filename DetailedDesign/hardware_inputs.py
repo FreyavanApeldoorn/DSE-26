@@ -258,11 +258,12 @@ component_inputs.update(propulsion)
 
 
 battery = {
-    "battery_name": "",
+    #"battery_name": "",
     "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
     "battery_cost": None, 
     "battery_maximum_peak_current": 100,  # A, maximum current of the battery
     "battery_capacity": 17*2,  # Ah, capacity of the battery
+    "battery_voltage": 22.2,  # V, voltage of the battery
     
     "battery_mass": 2.8*4,  # kg, mass of the battery
     "battery_length": 0.2,  # m, length of the battery
@@ -303,11 +304,6 @@ structure = {
 
 }
 component_inputs.update(structure)
-
-
-
-
-components = component_inputs.copy()
 
 
 nest_components = {
@@ -488,6 +484,9 @@ nest_components = {
 
     }
 }
+component_inputs.update(nest_components)
+
+components = component_inputs.copy()
 
 
 if __name__ == '__main__':

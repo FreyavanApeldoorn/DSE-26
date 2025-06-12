@@ -20,17 +20,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT))
 
 
-# from DetailedDesign.funny_inputs import structures_funny_inputs as fi
-from DetailedDesign.inputs import constants_inputs as constantsi
-from DetailedDesign.inputs import requirements_inputs as requirementsi
-from DetailedDesign.inputs import uav_inputs as auvi
-from DetailedDesign.inputs import hardware_inputs as hi
-from DetailedDesign.inputs import component_locations as pi
-from DetailedDesign.inputs import deployment_inputs as di
-from DetailedDesign.inputs import propulsion_inputs as propi
-from DetailedDesign.inputs import stab_n_con_inputs as sci
-
-
 class StabCon:
     """Stability & Control analysis helper for the AeroShield UAV.
 
@@ -543,6 +532,16 @@ class StabCon:
 # Basic sanity check                                                         #
 # ---------------------------------------------------------------------------#
 if __name__ == "__main__":  # pragma: no cover
+
+    # from DetailedDesign.funny_inputs import structures_funny_inputs as fi
+    from DetailedDesign.inputs import constants_inputs as constantsi
+    from DetailedDesign.inputs import requirements_inputs as requirementsi
+    from DetailedDesign.inputs import uav_inputs as auvi
+    from DetailedDesign.inputs import hardware_inputs as hi
+    from DetailedDesign.inputs import component_locations as pi
+    from DetailedDesign.inputs import deployment_inputs as di
+    from DetailedDesign.inputs import propulsion_inputs as propi
+    from DetailedDesign.inputs import stab_n_con_inputs as sci
 
     inputs = {}
     inputs.update(constantsi)
