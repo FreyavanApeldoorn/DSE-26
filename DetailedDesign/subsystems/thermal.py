@@ -29,8 +29,10 @@ class Thermal:
         self.nu = inputs["nu"]
         self.alpha = inputs["alpha"]
         self.k_air = inputs["k_air"]
+        self.h_air_forced = inputs["h_air_forced"]
         self.epsilon = inputs["epsilon"]
         self.sigma = inputs["sigma"]
+        self.Prandtl = inputs["Prandtl"]
 
         # Power required for each phase
         self.power_required_VTOL = inputs["power_required_VTOL"]
@@ -58,6 +60,9 @@ class Thermal:
         # Other
         self.winch_eff = inputs["winch_eff"] # fraction (i.e. "0.65" means that 1 - 0.65 = 0.35 of the winch power required will be heat)
         self.processor_heat_diss = inputs["processor_heat_diss"] # given from the specifications
+
+        self.V_cruise = inputs["V_cruise"]
+        self.wind_speed = inputs["wind_speed"]
         
         # Shell specifications
         self.wing_eff_area = inputs["wing_eff_area"]
@@ -89,17 +94,20 @@ class Thermal:
     # ~~~ Intermediate Functions ~~~
 
     def create_R_value(self, insulation_thickness: float) -> float:
-
+        R_convection = 1 / self.h_air_forced
         # Thermal resistance per unit effective surface area
-        R_total_wing = (2 * (self.thickness_alu_wing / self.conductivity_alu)) + (insulation_thickness / self.conductivity_insulation) # + (self.thickness_foam_wing / self.conductivity_foam) # K/W
-        R_total_fuselage = (2 * self.thickness_alu_fuselage / self.conductivity_alu) + (insulation_thickness / self.conductivity_insulation) # (self.thickness_foam_fuselage / self.conductivity_foam) # K/W
+        R_total_wing = (1 * (self.thickness_alu_wing / self.conductivity_alu)) + (insulation_thickness / self.conductivity_insulation) + R_convection # + (self.thickness_foam_wing / self.conductivity_foam) # K/W
+        R_total_fuselage = (1 * self.thickness_alu_fuselage / self.conductivity_alu) + (insulation_thickness / self.conductivity_insulation) + R_convection # (self.thickness_foam_fuselage / self.conductivity_foam) # K/W
         
+        print('R_total_wing:',R_total_wing,'\n R_total_fuselage:', R_total_fuselage)
         return R_total_fuselage, R_total_wing
 
     def Q_env_leak(self, time: float, T_amb: float, insulation_thickness: float) -> float:
         
         R_total_fuselage, R_total_wing = self.create_R_value(insulation_thickness)
 
+        #R_total_fuselage = 9
+        #R_total_wing = 9
         # Heat entering the wing due to outside temperature
         heat_env_leak_wing = (T_amb - self.T_int) * self.wing_eff_area * (1 / R_total_wing) # W
         Q_env_leak_wing = heat_env_leak_wing * time # J
@@ -197,7 +205,7 @@ class Thermal:
 
         all_heat['deploy'] = {}
 
-        all_heat['deploy']['batt_heat'], all_heat['deploy']['batt_Q'] = self.battery_heat_dissipated(self.power_required_hover, self.time_deploy)
+        all_heat['deploy']['batt_heat'], all_heat['deploy']['batt_Q'] = self.battery_heat_dissipated((self.power_required_hover + self.power_deployment), self.time_deploy)
         all_heat['deploy']['processor_heat'], all_heat['deploy']['processor_Q'] = self.processor_heat_dissipated(self.time_deploy)
         all_heat['deploy']['winch_heat'], all_heat['deploy']['winch_Q'] = self.winch_heat_dissipated()
         all_heat['deploy']['phase_heat'], all_heat['deploy']['phase_Q'] = self.phase_heat_dissipated(self.power_required_hover, self.time_deploy, phase='deploy')
@@ -219,11 +227,16 @@ class Thermal:
         fin_spacing_opt = 2.71 * ((self.g * beta * (self.T_equi_pcm - self.T_amb_enroute))/(sink_length * self.alpha * self.nu)) ** (-0.25) # m, optimal fin spacing
         n_fin = (sink_width + fin_spacing_opt) / (self.sink_thickness + fin_spacing_opt)
         
-        # nusselt_nr = 
+        # Nusselt number
+        V_air_over_sink = self.V_cruise - self.wind_speed
+        Re = (V_air_over_sink * sink_length) / self.nu # Reynold number
+        Nusselt = 0.0296 * Re**0.8 * self.Prandtl**(1/3) # Nusselt number for turbulent air over flat plate
 
         # Convection coefficient per area 
-        convection_coeff1 = 100 * ((self.T_equi_pcm - self.T_amb_enroute) / sink_length)**0.25 # W/(m^2 K), for area1 
-        convection_coeff2 = 100 * (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
+        # convection_coeff1 = 1.42 * ((self.T_equi_pcm - self.T_amb_enroute) / sink_length)**0.25 # W/(m^2 K), for area1 
+        # convection_coeff2 = 1.31 * (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
+        convection_coeff1 = (Nusselt * self.k_air) / sink_length
+        convection_coeff2 = convection_coeff1
 
         # Heat sink areas
         sink_area1 = self.sink_height * sink_length + self.sink_thickness * (2*self.sink_height + sink_length) # m^2
@@ -259,7 +272,7 @@ class Thermal:
         time_return = self.time_cruise_min + self.time_descent
 
         # Heat and heat energy entering due to outside temperature
-        _, Q_env_onsite = self.Q_env_leak(time_onsite, self.T_amb_onsite, insulation_thickness) # J
+        heat_env_onsite, Q_env_onsite = self.Q_env_leak(time_onsite, self.T_amb_onsite, insulation_thickness) # J
         # heat_env_approach, Q_env_approach = self.Q_env_leak(time_approach, self.T_amb_enroute) # W, J, same as return if time_ascent = time_descent
         heat_env_return, Q_env_return = self.Q_env_leak(time_return, self.T_amb_enroute, insulation_thickness=insulation_thickness) # W, J 
 
@@ -290,9 +303,9 @@ class Thermal:
         total_mass = insulation_mass + pcm_mass + sink_mass
 
         # Test prints
-        # print('pcm_mass:', pcm_mass, '\n sink_mass:', sink_mass, '\n insulation_mass:', insulation_mass)
+        print('pcm_mass:', pcm_mass, '\n sink_mass:', sink_mass, '\n insulation_mass:', insulation_mass)
         # print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
-        print('time_onsite:', time_onsite, '\ntime_return:', time_return, '\ntime_turnaround_min:', self.time_turnaround_min,'\nQ_int_onsite:' , Q_int_onsite, '\nQ_env_onsite:', Q_env_onsite, '\nQ_int_return:', Q_int_return, '\nQ_env_return:', Q_env_return, '\ntotal_heat_dissipated_sink:', total_heat_dissipated_sink )
+        # print('time_onsite:', time_onsite, '\ntime_return:', time_return, '\ntime_turnaround_min:', self.time_turnaround_min,'\nQ_int_onsite:' , Q_int_onsite, '\nQ_env_onsite:', Q_env_onsite, '\nQ_int_return:', Q_int_return, '\nQ_env_return:', Q_env_return, '\ntotal_heat_dissipated_sink:', total_heat_dissipated_sink, '\nheat_env_onsite:', heat_env_onsite )
 
         return total_mass, total_heat_dissipated_sink, heat_dissipated_req_sink
     
@@ -304,14 +317,15 @@ class Thermal:
     def constraint(self, x) -> float:
         _, total_heat_dissipated_sink, heat_dissipated_req_sink = self.simulate(x)
         
+        print('total_heat_dissipated_sink:', total_heat_dissipated_sink, '\nheat_dissipated_req_sink:', heat_dissipated_req_sink)
         return total_heat_dissipated_sink - heat_dissipated_req_sink
 
     def optimize(self):
         '''
         Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
         '''
-        x0 = [0.1, 5, 0.005] # initial: sink_length (m), sink_width (m), insulation_thickness (m)
-        bounds = [(0.01, 0.45), (0.01, 1.5), (0.002, 1.)]  # sink_length (m), sink_width (m)), insulation_thickness (m)
+        x0 = [0.1, 0.5, 0.005] # initial: sink_length (m), sink_width (m), insulation_thickness (m)
+        bounds = [(0.1, 0.45), (0.01, 1.5), (0.0001, 1.)]  # sink_length (m), sink_width (m)), insulation_thickness (m)
         constraints = {'type': 'ineq', 'fun': self.constraint}
         
         total_mass_result =  minimize(self.objective, x0=x0, bounds=bounds, constraints=constraints, method="SLSQP")

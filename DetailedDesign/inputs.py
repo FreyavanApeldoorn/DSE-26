@@ -15,8 +15,10 @@ constants_inputs = {
     "nu": 0.00001702,  # m^2/s, kinematic viscosity of air at ~300K
     "alpha": 0.00002346,  # m^2/s, thermal diffusivity of air at ~300K
     "k_air": 0.02662,  # W/(mK), thermal conductivity of air at ~300K
+    "h_air_forced": 100., # W/m^2, forced air convection coefficient
     "epsilon": 0.85,  # -, emissivity of the heat sink surface
     "sigma": 5.67e-8,  # W/(mK^4), Stefan–Boltzmann constant
+    "Prandtl": 0.7268 # Prandtl number for air at 35C 
 }
 inputs.update(constants_inputs)
 
@@ -193,28 +195,28 @@ inputs.update(structures_inputs)
 # ~~~ Thermal control ~~~ initial inputs for thermal control sizing
 
 thermal_inputs = {
-    "wing_eff_area": 1., # m, effective surface area for conduction
-    "fuselage_eff_area": 1., # m, effective surface area for conduction
+    "wing_eff_area": 8.21, # m, effective surface area for conduction
+    "fuselage_eff_area": 2.54, # m, effective surface area for conduction
     "T_amb_onsite": 140. + 273.15, # K, temperature in the onsite deployment zone
     "T_amb_enroute": 35. + 273.15, # K, ambient temperature outside of deployment zone
     "T_int": 40. + 273.15, # K, temperature inside the fuselage+wing structure
     "T_equi_pcm": 48. + 273.15, # K, temperature at which the PCM starts changing phase 
     # "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
     "sink_height": 0.02, # m, height of heat sink fins
-    "sink_thickness": 0.004, # m, thickness of heat sink fins
-    "sink_base": 0.004, # m, thickness of heat sink base
+    "sink_thickness": 0.0005, # m, thickness of heat sink fins
+    "sink_base": 0.001, # m, thickness of heat sink base
     "sink_density": 2710., # kg/m^3
     "sink_time_margin": 30, # s, this is extra downtime for the UAVs on ground to reduce heat sink size
     "thickness_foam_wing": 0., # 0.03, # m, thickness of the foam inbetween the aluminium shell
-    "thickness_alu_wing": 0.0008, # m, thickness of one layer of the aluminium shell structure
+    "thickness_alu_wing": 0.00078, # m, thickness of one layer of the aluminium shell structure
     "thickness_foam_fuselage": 0., # 0.03, # m
-    "thickness_alu_fuselage": 0.0008, # m
+    "thickness_alu_fuselage": 0.00026, # m
     "conductivity_alu": 0.36, # 237., # W / (mK)
     "conductivity_foam": 0., # 0.03, # W / (mK)
-    "conductivity_insulation": 0.03, # W / (mK)
+    "conductivity_insulation": 0.012, # W / (mK)
     "insulation_density": 30., # kg/m^3
     "pcm_latent_heat": 197000., # J/kg
-    "n_battery": 4,
+    "n_battery": 2,
     "battery_resistance": 0.015, # Ohm, based on guessing
     "processor_heat_diss": 40., # W, guesstimate which should eventually come from the chosen processor
     "winch_eff": 0.65, # Winch efficiency fraction (0.35=35% efficiency) used to compute the heat generated
