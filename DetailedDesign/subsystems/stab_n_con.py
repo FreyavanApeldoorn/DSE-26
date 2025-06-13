@@ -38,141 +38,16 @@ class StabCon:
     # ---------------------------------------------------------------------#
 
     def __init__(self, inputs: dict[str, float], hardware=None) -> None:
-        self.inputs = inputs.copy()  # Copy to avoid mutating caller's data
+        self.inputs = inputs.copy()
         self.hardware = hardware
+        self._outputs = inputs.copy()
 
-        self.wing_span = inputs["wing_span"]
-        self.wing_root_chord = inputs["wing_root_chord"]
-        self.wing_tip_chord = inputs["wing_tip_chord"]
-        self.wing_area = inputs["wing_area"]
-        self.cl_alpha = inputs["cl_alpha"]
-        self.cd_0 = inputs["cd_0"]
-
-        self.bi = inputs["bi"]
-        self.bo = inputs["bo"]
-
-        self.v_ref = inputs["v_ref"]
-
-        self.delta_a_max = inputs["delta_a_max"]
-        self.aileron_differential = inputs["aileron_differential"]
-
-        self.roll_rate_req = inputs["roll_rate_req"]
-
-        self.rho_sea = inputs["rho_0"]
-        self.wind_speed = inputs["wind_speed"]
-        # self.Propeller_diameter_VTOL = inputs["Propeller_diameter_VTOL"]
-        self.T_max = inputs["T_max"]
-        self.mtow = inputs["MTOW"]
-        self.n_prop_vtol = inputs["n_prop_vtol"]
-
-        self.l_fus = inputs["l_fus"]
-        self.mac = inputs["mac"]
-
-        self.x_ac_bar_wing = inputs["x_ac_bar_wing"]
-
-        self.CL_alpha_h = inputs["CL_alpha_h"]
-        self.CL_alpha_Ah = inputs["CL_alpha_Ah"]
-        self.d_epsilon_d_alpha = inputs["d_epsilon_d_alpha"]
-        self.lh = inputs["lh"]
-        self.Vh_V = inputs["Vh_V"]
-        # self.Cm_ac = inputs["Cm_ac"] # this should be deleted as input because it is calculated based on other parameters
-
-        self.ca_c = inputs["ca_c"]
-        self.AR_h = inputs["AR_h"]
-        self.Cm_ac_wing = inputs["Cm_ac_wing"]
-        self.CL_Aminush = inputs["CL_A-h"]
-        self.V_cruise = inputs["V_cruise"]
-        self.fuselage_diameter = inputs["fuselage_diameter"]
-
-        self.cr_cv_init = inputs["cr_cv_init"]
-        self.br_bv = inputs["br_bv"]
-        self.gust_speed = inputs["gust_speed"]
-        self.delta_r_max = inputs["delta_r_max"]
-        self.Vv = inputs["Vv"]
-        self.ARvt = inputs["ARvt"]
-        self.Vv = inputs["Vv"]
-        self.lvt = inputs["lvt"]
-
-        # Make a *copy* of the inputs dict so we do not mutate the caller’s data.
-        self._outputs: dict[str, Any] = inputs.copy()
-
-        # initialize all attributes from inputs for cg calculation
-        self.oil_sensor_mass = inputs["oil_sensor_mass"]
-        self.oil_sensor_x = inputs["oil_sensor_x"]
-        self.oil_sensor_y = inputs["oil_sensor_y"]
-        self.oil_sensor_z = inputs["oil_sensor_z"]
-        self.wildfire_sensor_mass = inputs["wildfire_sensor_mass"]
-        self.wildfire_sensor_x = inputs["wildfire_sensor_x"]
-        self.wildfire_sensor_y = inputs["wildfire_sensor_y"]
-        self.wildfire_sensor_z = inputs["wildfire_sensor_z"]
-        self.gymbal_connection_mass = inputs["gymbal_connection_mass"]
-        self.gymbal_connection_x = inputs["gymbal_connection_x"]
-        self.gymbal_connection_y = inputs["gymbal_connection_y"]
-        self.gymbal_connection_z = inputs["gymbal_connection_z"]
-        self.flight_controller_mass = inputs["flight_controller_mass"]
-        self.flight_controller_x = inputs["flight_controller_x"]
-        self.flight_controller_y = inputs["flight_controller_y"]
-        self.flight_controller_z = inputs["flight_controller_z"]
-        self.OBC_mass = inputs["OBC_mass"]
-        self.OBC_x = inputs["OBC_x"]
-        self.OBC_y = inputs["OBC_y"]
-        self.OBC_z = inputs["OBC_z"]
-        self.GPS_mass = inputs["GPS_mass"]
-        self.GPS_x = inputs["GPS_x"]
-        self.GPS_y = inputs["GPS_y"]
-        self.GPS_z = inputs["GPS_z"]
-        self.Mesh_network_module_mass = inputs["Mesh_network_module_mass"]
-        self.Mesh_network_module_x = inputs["Mesh_network_module_x"]
-        self.Mesh_network_module_y = inputs["Mesh_network_module_y"]
-        self.Mesh_network_module_z = inputs["Mesh_network_module_z"]
-        self.SATCOM_module_mass = inputs["SATCOM_module_mass"]
-        self.SATCOM_module_x = inputs["SATCOM_module_x"]
-        self.SATCOM_module_y = inputs["SATCOM_module_y"]
-        self.SATCOM_module_z = inputs["SATCOM_module_z"]
-        self.Winch_motor_mass = inputs["Winch_motor_mass"]
-        self.Winch_motor_x = inputs["Winch_motor_x"]
-        self.Winch_motor_y = inputs["Winch_motor_y"]
-        self.Winch_motor_z = inputs["Winch_motor_z"]
-        self.payload_mass = inputs["payload_mass"]
-        self.payload_x = inputs["payload_x"]
-        self.payload_y = inputs["payload_y"]
-        self.payload_z = inputs["payload_z"]
-        self.motor_mass_cruise = inputs["motor_mass_cruise"]
-        self.motor_cruise_x = inputs["motor_cruise_x"]
-        self.motor_cruise_y = inputs["motor_cruise_y"]
-        self.motor_cruise_z = inputs["motor_cruise_z"]
-        self.propeller_mass_cruise = inputs["propeller_mass_cruise"]
-        self.motor_mass_VTOL = inputs["motor_mass_VTOL"]
-        self.motor_front_VTOL_x = inputs["motor_front_VTOL_x"]
-        self.motor_rear_VTOL_x = inputs["motor_rear_VTOL_x"]
-        self.propeller_mass_VTOL = inputs["propeller_mass_VTOL"]
-        self.battery_mass = inputs["battery_mass"]
-        self.battery_x = inputs["battery_x"]
-        self.battery_y = inputs["battery_y"]
-        self.battery_z = inputs["battery_z"]
-        self.PDB_mass = inputs["PDB_mass"]
-        self.PDB_x = inputs["PDB_x"]
-        self.PDB_y = inputs["PDB_y"]
-        self.PDB_z = inputs["PDB_z"]
-        self.buoy_mass = inputs["buoy_mass"]
-        self.buoy_x = inputs["buoy_x"]
-        self.buoy_y = inputs["buoy_y"]
-        self.buoy_z = inputs["buoy_z"]
-        self.wildfire_fuselage_x_cg = inputs["wildfire_fuselage_x_cg"]
-        self.oil_spill_fuselage_x_cg = inputs["oil_spill_fuselage_x_cg"]
-        self.wildfire_wing_x_cg = inputs["wildfire_wing_x_cg"]
-        self.no_payload_fuselage_x_cg = inputs["no_payload_fuselage_x_cg"]
-        self.oil_spill_wing_x_cg = inputs["oil_spill_wing_x_cg"]
-        self.wildfire_fuselage_mass = inputs["wildfire_fuselage_mass"]
-        self.oil_spill_fuselage_mass = inputs["oil_spill_fuselage_mass"]
-        self.no_payload_fuselage_mass = inputs["no_payload_fuselage_mass"]
-        self.wildfire_wing_mass = inputs["wildfire_wing_mass"]
-        self.oil_spill_wing_mass = inputs["oil_spill_wing_mass"]
-        self.mac = inputs["mac"]
-        self.l_fus = inputs["l_fus"]
+        # Dynamically assign all inputs to instance attributes
+        for key, value in self.inputs.items():
+            setattr(self, key, value)
 
     # ---------------------------------------------------------------------#
-    # Main Functions                                                       #
+    # Main Functions                                                      #
     # ---------------------------------------------------------------------#
 
     # ~~~ Aileron sizing ~~~
@@ -596,8 +471,9 @@ if __name__ == "__main__":  # pragma: no cover
     from DetailedDesign.inputs import constants_inputs as constantsi
     from DetailedDesign.inputs import requirements_inputs as requirementsi
     from DetailedDesign.inputs import uav_inputs as auvi
-    from DetailedDesign.inputs import hardware_inputs as hi
-    from DetailedDesign.inputs import component_locations as pi
+
+    # from DetailedDesign.inputs import hardware_inputs as hi
+    # from DetailedDesign.inputs import component_locations as pi
     from DetailedDesign.inputs import deployment_inputs as di
     from DetailedDesign.inputs import propulsion_inputs as propi
     from DetailedDesign.inputs import stab_n_con_inputs as sci
@@ -606,8 +482,8 @@ if __name__ == "__main__":  # pragma: no cover
     inputs.update(constantsi)
     inputs.update(requirementsi)
     inputs.update(auvi)
-    inputs.update(hi)
-    inputs.update(pi)
+    # inputs.update(hi)
+    # inputs.update(pi)
     inputs.update(di)
     inputs.update(propi)
     inputs.update(sci)

@@ -240,11 +240,11 @@ stab_n_con_inputs = {
     "wing_span": 3.0,  # m, guesstimate
     "wing_root_chord": 0.458,  # m, guesstimate
     "wing_tip_chord": 0.39,  # m, guesstimate
-    "bi": 0.75,  # m, location to the innermost point of the aileron
-    "bo": 0.76,  # m, location to the outermost point of the aileron
+    "bi": 0.875,  # m, location to the innermost point of the aileron
+    "bo": 0.91,  # m, location to the outermost point of the aileron
     "delta_a_max": np.deg2rad(25),  # rad, maximum aileron deflection angle
     "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
-    "roll_rate_req": np.deg2rad(20),  # rad/s, guesstimate
+    "roll_rate_req": np.deg2rad(35),  # rad/s, guesstimate
     "v_ref": 72 * 0.8 / 3.6,  # m/s, reference velocity for roll rate requirement
     "wildfire_fuselage_x_cg": 0,  # m, initially set to 0 and updated later
     "oil_spill_fuselage_x_cg": 0,  # m, initially set to 0 and updated later
