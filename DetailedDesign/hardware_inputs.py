@@ -427,7 +427,7 @@ nest_components = {
     "4G_antenna": {
         "4G_antenna_name": "Panorama B4BE 5G/4G/3G/2G antenne",
         "4G_antenna_mass": 0.39,  # kg, mass of the 4G communication system
-        "4G_antenna_power": None,  # W, power consumption of the 4G communication system
+        "4G_antenna_power": 30,  # W, power consumption of the 4G communication system
         "4G_antenna_cost": None,  # Cost of the 4G communication system, if available
 
         "4G_antenna_length": 0.048,  # m, length of the 4G communication system
@@ -441,7 +441,7 @@ nest_components = {
     "Satellite_antenna": {
         "Satellite_antenna_name": "Selfsat H30D",
         "Satellite_antenna_mass": 1.1,  # kg, mass of the satellite communication system
-        "Satellite_antenna_power": 0,  # W, power consumption of the satellite communication system
+        "Satellite_antenna_power": 2.85,  # W, power consumption of the satellite communication system
         "Satellite_antenna_cost": 0,  # Cost of the satellite communication system, if available
 
         "Satellite_antenna_length": 0.547,  # m, length of the satellite communication system
@@ -468,9 +468,9 @@ nest_components = {
     },
     "lighting_system": {
         "lighting_system_name": "",
-        "lighting_system_mass": None,  # kg, mass of the lighting system
-        "lighting_system_power": None,  # W, power consumption of the lighting system
-        "lighting_system_cost": None,  # Cost of the lighting system, if available
+        "lighting_system_mass": 0,  # kg, mass of the lighting system
+        "lighting_system_power": 0,  # W, power consumption of the lighting system
+        "lighting_system_cost": 0,  # Cost of the lighting system, if available
 
         "lighting_system_length": None,  # m, length of the lighting system
         "lighting_system_width": None,  # m, width of the lighting system

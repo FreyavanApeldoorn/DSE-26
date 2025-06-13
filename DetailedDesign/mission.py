@@ -262,32 +262,11 @@ class Mission:
             pass # ADD MARGIN STUFF
 
 
-    def true_mission_deployment_rate(self) -> float:
-        """
-        Calculates and updates the UAV and overall deployment rates for the mission.
-        This method computes the UAV deployment rate and the overall deployment rate
-        based on the mission perimeter, UAV time, and total mission time. It updates
-        the corresponding instance attributes with the calculated values.
-        Returns
-        -------
-        float
-            The overall deployment rate for the mission.
-        Notes
-        -----
-        This method assumes that `calc_total_mission_time` properly updates
-        `self.time_uav` and `self.total_mission_time` before the rates are calculated.
-        """
-        
-        self.calc_total_mission_time()
-        self.uav_deployment_rate = self.mission_perimeter / self.time_uav
-        self.deployment_rate = self.mission_perimeter / self.total_mission_time
-
     # ~~~ Output functions ~~~ 
  
     def get_all(self) -> dict[str, float]:
 
         self.calc_total_mission_time()
-        self.true_mission_deployment_rate()
 
         self.outputs["trips_for_mission"] = self.num_trips
 
@@ -306,7 +285,6 @@ class Mission:
         self.outputs["time_operation"] = self.time_operation
         self.outputs["time_wrapup"] = self.time_wrapup
         self.outputs["total_mission_time"] = self.total_mission_time
-        self.outputs["true_deployment_rate"] = self.deployment_rate
 
         return self.outputs
     
