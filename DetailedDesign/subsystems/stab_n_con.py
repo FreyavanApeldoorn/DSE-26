@@ -90,6 +90,16 @@ class StabCon:
         self.Cm_ac = inputs["Cm_ac"]
 
         self.ca_c = inputs["ca_c"]
+
+        self.cr_cv_init = inputs["cr_cv_init"]
+        self.br_bv = inputs["br_bv"]
+        self.gust_speed = inputs["gust_speed"]
+        self.delta_r_max = inputs["delta_r_max"]
+        self.Vv = inputs["Vv"]
+        self.ARvt = inputs["ARvt"]
+        self.Vv = inputs["Vv"]
+        self.lvt = inputs["lvt"]
+
         # Make a *copy* of the inputs dict so we do not mutate the caller’s data.
         self._outputs: dict[str, Any] = inputs.copy()
 
@@ -205,15 +215,12 @@ class StabCon:
             raise ValueError(f"Invalid aileron stations: bi={self.bi}, bo={self.bo}")
 
         # Precompute arrays that stay constant
-        spanwise_stations = np.linspace(0.0, half_span, 100)
+        spanwise_stations = np.linspace(0.0, half_span, 1000)
         chord = (
             self.wing_root_chord
             - ((self.wing_root_chord - self.wing_tip_chord) / half_span)
             * spanwise_stations
         )
-        print("spanwise_stations =", spanwise_stations)
-        print("chord =", chord)
-        print("roll_rate_req =", self.roll_rate_req)
 
         # Compute Cl_p once (unchanging with bo)
         Cl_p = -(
@@ -235,7 +242,7 @@ class StabCon:
             Cl_delta_a = (
                 2.0
                 * self.cl_alpha
-                * self._tau_from_ca_over_c()
+                * self._tau_from_ca_over_c(self.ca_c)
                 / (self.wing_area * self.wing_span)
                 * simpson(
                     chord[aileron_idx] * spanwise_stations[aileron_idx],
@@ -270,7 +277,65 @@ class StabCon:
 
             self.bo = new_bo
 
-    # ~~~ Rudder sizing ~~~
+    # ~~~ Rudder sizing (static-trim gust criterion, τr varies with cr/cv) ~~~
+    def size_rudder_for_gust(self, step_frac: float = 0.02) -> tuple[float, float]:
+        """
+        Iterate the rudder-to-fin chord ratio (cr/cv) until the rudder can
+        *trim* the sideslip created by a design gust.
+
+        Returns
+        -------
+        cr_over_cv : float
+            Final chord ratio.
+        sr_over_sv : float
+            Rudder-area / fin-area ratio for bookkeeping.
+        """
+        # ── 1.  Gust-induced sideslip ────────────────────────────────────
+        beta_0 = self.gust_speed / self.v_ref  # [rad]
+
+        # ── 2.  Directional stability derivative (fin only) ─────────────
+        CL_alpha_v = (
+            np.pi * self.ARvt / (1 + np.sqrt(1 + (self.ARvt / 2) ** 2))
+        )  # [1/rad]
+        Cn_beta = -0.8 * CL_alpha_v * self.Vv  # < 0 (restoring)
+        print(f"Cl: {CL_alpha_v}")
+
+        # Required control power, per rad of deflection
+        Cn_req = abs(Cn_beta * beta_0) / self.delta_r_max
+
+        # ── 3.  Vertical-tail reference area & constants ────────────────
+        S_v = self.Vv * self.wing_area * self.wing_span / self.lvt
+        V_v = self.Vv  # alias for clarity
+        br_bv = self.br_bv
+
+        # ── 4.  Iterate on cr/cv ────────────────────────────────────────
+        cr_cv = self.cr_cv_init
+        max_cr_cv = 0.9
+        dcr = step_frac * max_cr_cv
+
+        while True:
+            # ♦ Effectiveness grows with chord ratio ♦
+            tau_r = self._tau_from_ca_over_c(cr_cv)
+
+            S_r = cr_cv * br_bv * S_v
+            Cn_dr = tau_r * CL_alpha_v * V_v * (S_r / S_v)
+
+            if Cn_dr >= Cn_req:  # ✅ requirement met
+                self.cr_over_cv = cr_cv
+                self.rudder_area = S_r
+                self.Cn_delta_r = Cn_dr
+                self._outputs.update(
+                    {"cr_over_cv": cr_cv, "rudder_area": S_r, "Cn_delta_r": Cn_dr}
+                )
+                return cr_cv, S_r / S_v
+
+            cr_cv += dcr  # ➜ try a larger chord
+
+            if cr_cv > max_cr_cv:
+                raise ValueError(
+                    f"Cannot meet gust-trim requirement: need Cnδr={Cn_req:.4f}, "
+                    f"achieved {Cn_dr:.4f} at cr/cv={max_cr_cv:.2f}."
+                )
 
     # ~~~ VTOL sizing ~~~
 
@@ -509,11 +574,11 @@ class StabCon:
     # Private helpers                                                      #
     # ---------------------------------------------------------------------#
 
-    def _tau_from_ca_over_c(self) -> float:
+    def _tau_from_ca_over_c(self, ratio) -> float:
         """Interpolate elevator effectiveness τ for the configured cₐ/c ratio."""
         data = np.loadtxt(self.EFFECTIVENESS_FILE, delimiter=",", skiprows=0)
         ca_c, tau = data.T
-        return float(np.interp(self.ca_c, ca_c, tau))
+        return float(np.interp(ratio, ca_c, tau))
 
 
 # ---------------------------------------------------------------------------#
@@ -536,6 +601,14 @@ if __name__ == "__main__":  # pragma: no cover
     p_achieved, bo = stabcon.size_ailerons()
     print(
         f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
+    )
+
+    stabcon.size_rudder_for_gust()
+    print("Rudder sized successfully.")
+    cr_over_cv, sr_over_sv = stabcon.size_rudder_for_gust()
+    print(
+        f"Rudder-to-fin chord ratio (cr/cv): {cr_over_cv:.2f}, "
+        f"Rudder-area / fin-area ratio (Sr/Sv): {sr_over_sv:.2f}"
     )
 
     """

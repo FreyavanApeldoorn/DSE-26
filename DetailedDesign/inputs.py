@@ -337,7 +337,7 @@ component_locations = {
 inputs.update(component_locations)
 
 stab_n_con_inputs = {
-    "ca_c": 0.4,  # Aileron chord to wing chord ratio
+    "ca_c": 0.3,  # Aileron chord to wing chord ratio
     "cl_alpha": 5.0 * 180 / np.pi,  # Wing airfoil (E1210) lift curve slope [1/rad]
     "cd_0": 0.02,  # Wing airfoil (E1210)Zero-lift drag coefficient
     "wing_area": 1.27,  # m^2, guesstimate
@@ -348,8 +348,8 @@ stab_n_con_inputs = {
     "bo": 0.76,  # m, location to the outermost point of the aileron
     "delta_a_max": np.deg2rad(25),  # rad, maximum aileron deflection angle
     "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
-    "roll_rate_req": np.deg2rad(10),  # rad/s, guesstimate
-    "v_ref": 20.0,  # m/s, reference velocity for roll rate requirement
+    "roll_rate_req": np.deg2rad(20),  # rad/s, guesstimate
+    "v_ref": 72 * 0.8 / 3.6,  # m/s, reference velocity for roll rate requirement
     "wildfire_fuselage_x_cg": 0,  # m, initially set to 0 and updated later
     "oil_spill_fuselage_x_cg": 0,  # m, initially set to 0 and updated later
     "wildfire_wing_x_cg": 0,  # m, initially set to 0 and updated later
@@ -373,6 +373,15 @@ stab_n_con_inputs = {
     "wind_speed": 30 / 3.6,  # m/s, wind speed from requirement
     "rpm_max": 4200,  # rpm
     "T_max": 17.6 * 9.81,  # N, maximum thrust per motor.
+    "gust_speed": 30 / 3.6,  # m/s, gust speed
+    "lvt": 6.0,  # m, distance from wing AC to AC of vertical tailplane
+    "Vv": 0.1,  # Tail volume coefficient [–]
+    "ARvt": 3.5,  # Aspect ratio of the vertical tailplane [–]
+    "taper_ratio_vt": 0.5,  # Taper ratio of the vertical tailplane [–]
+    "sweep_vt": np.deg2rad(5),  # Sweep angle of the vertical tailplane [rad]
+    "br_bv": 0.9,  # Ratio of the rudder span to the vertical tailplane span[–]
+    "delta_r_max": np.deg2rad(30),  # Maximum rudder deflection angle [rad]
+    "cr_cv_init": 0.3,  # Ratio of the rudder chord to the vertical tailplane chord [–]
 }
 inputs.update(stab_n_con_inputs)
 

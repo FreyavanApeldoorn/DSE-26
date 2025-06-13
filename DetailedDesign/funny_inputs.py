@@ -163,8 +163,8 @@ stab_n_con_funny_inputs = {
     "Propeller_diameter_VTOL": 0.30,  # m, diameter of each VTOL propeller
     "mtow": 25.0,  # kg, maximum take‐off mass of one UAV
     "n_prop_vtol": 4,  # number of VTOL propulsors per UAV
-    "lvt": 6.0,  # m, distance from wing AC to AC of vertical tailplane
-    "Vv": 0.6,  # Tail volume coefficient [–]
+    "lvt": 3,  # m, distance from wing AC to AC of vertical tailplane
+    "Vv": 0.06,  # Tail volume coefficient [–]
     "ARvt": 2,  # Aspect ratio of the vertical tailplane [–]
     "taper_ratio_vt": 0.5,  # Taper ratio of the vertical tailplane [–]
     "sweep_vt": np.deg2rad(5),  # Sweep angle of the vertical tailplane [rad]
