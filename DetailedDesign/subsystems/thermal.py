@@ -106,9 +106,11 @@ class Thermal:
         
         R_total_fuselage, R_total_wing = self.create_R_value(insulation_thickness)
 
-        #R_total_fuselage = 9
-        #R_total_wing = 9
+        # R_total_fuselage = 9
+        # R_total_wing = 9
+
         # Heat entering the wing due to outside temperature
+
         heat_env_leak_wing = (T_amb - self.T_int) * self.wing_eff_area * (1 / R_total_wing) # W
         Q_env_leak_wing = heat_env_leak_wing * time # J
 
@@ -324,8 +326,8 @@ class Thermal:
         '''
         Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
         '''
-        x0 = [0.1, 0.5, 0.005] # initial: sink_length (m), sink_width (m), insulation_thickness (m)
-        bounds = [(0.1, 0.45), (0.01, 1.5), (0.0001, 1.)]  # sink_length (m), sink_width (m)), insulation_thickness (m)
+        x0 = [0.100, 0.500, 0.0500] # initial: sink_length (m), sink_width (m), insulation_thickness (m)
+        bounds = [(0.1, 0.4), (0.001, 1.), (0.001, 0.03)]  # sink_length (m), sink_width (m)), insulation_thickness (m)
         constraints = {'type': 'ineq', 'fun': self.constraint}
         
         total_mass_result =  minimize(self.objective, x0=x0, bounds=bounds, constraints=constraints, method="SLSQP")

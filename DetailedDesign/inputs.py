@@ -28,7 +28,7 @@ requirements_inputs = {
     "M_to": 30,  # Maximum Takeoff Mass [kg]
     "MTOW": 30 * constants_inputs["g"],  # Maximum Takeoff Weight [N]
     "R_max": 20000,  # Maximum Range [m]
-    "R_min": 1000,
+    "R_min": 2000,
 }
 inputs.update(requirements_inputs)
 
@@ -195,8 +195,8 @@ inputs.update(structures_inputs)
 # ~~~ Thermal control ~~~ initial inputs for thermal control sizing
 
 thermal_inputs = {
-    "wing_eff_area": 8.21, # m, effective surface area for conduction
-    "fuselage_eff_area": 2.54, # m, effective surface area for conduction
+    "wing_eff_area": 0.75, # m, effective surface area for conduction
+    "fuselage_eff_area": 2.01, # 7.04, # m, effective surface area for conduction
     "T_amb_onsite": 140. + 273.15, # K, temperature in the onsite deployment zone
     "T_amb_enroute": 35. + 273.15, # K, ambient temperature outside of deployment zone
     "T_int": 40. + 273.15, # K, temperature inside the fuselage+wing structure
@@ -214,7 +214,7 @@ thermal_inputs = {
     "conductivity_alu": 0.36, # 237., # W / (mK)
     "conductivity_foam": 0., # 0.03, # W / (mK)
     "conductivity_insulation": 0.012, # W / (mK)
-    "insulation_density": 30., # kg/m^3
+    "insulation_density": 30, # kg/m^3
     "pcm_latent_heat": 197000., # J/kg
     "n_battery": 2,
     "battery_resistance": 0.015, # Ohm, based on guessing
