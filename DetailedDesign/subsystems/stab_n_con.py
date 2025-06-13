@@ -67,7 +67,7 @@ class StabCon:
 
         self.l_fus = inputs["l_fus"]
         self.mac = inputs["mac"]
-        
+
         self.x_ac_bar_wing = inputs["x_ac_bar_wing"]
 
         self.CL_alpha_h = inputs["CL_alpha_h"]
@@ -75,7 +75,7 @@ class StabCon:
         self.d_epsilon_d_alpha = inputs["d_epsilon_d_alpha"]
         self.lh = inputs["lh"]
         self.Vh_V = inputs["Vh_V"]
-        #self.Cm_ac = inputs["Cm_ac"] # this should be deleted as input because it is calculated based on other parameters
+        # self.Cm_ac = inputs["Cm_ac"] # this should be deleted as input because it is calculated based on other parameters
 
         self.ca_c = inputs["ca_c"]
         self.AR_h = inputs["AR_h"]
@@ -83,8 +83,16 @@ class StabCon:
         self.CL_Aminush = inputs["CL_A-h"]
         self.V_cruise = inputs["V_cruise"]
         self.fuselage_diameter = inputs["fuselage_diameter"]
-        
-        
+
+        self.cr_cv_init = inputs["cr_cv_init"]
+        self.br_bv = inputs["br_bv"]
+        self.gust_speed = inputs["gust_speed"]
+        self.delta_r_max = inputs["delta_r_max"]
+        self.Vv = inputs["Vv"]
+        self.ARvt = inputs["ARvt"]
+        self.Vv = inputs["Vv"]
+        self.lvt = inputs["lvt"]
+
         # Make a *copy* of the inputs dict so we do not mutate the caller’s data.
         self._outputs: dict[str, Any] = inputs.copy()
 
@@ -137,7 +145,7 @@ class StabCon:
         self.motor_mass_VTOL = inputs["motor_mass_VTOL"]
         self.motor_front_VTOL_x = inputs["motor_front_VTOL_x"]
         self.motor_rear_VTOL_x = inputs["motor_rear_VTOL_x"]
-        self.propeller_mass_VTOL = inputs["propeller_mass_VTOL"] 
+        self.propeller_mass_VTOL = inputs["propeller_mass_VTOL"]
         self.battery_mass = inputs["battery_mass"]
         self.battery_x = inputs["battery_x"]
         self.battery_y = inputs["battery_y"]
@@ -193,15 +201,12 @@ class StabCon:
             raise ValueError(f"Invalid aileron stations: bi={self.bi}, bo={self.bo}")
 
         # Precompute arrays that stay constant
-        spanwise_stations = np.linspace(0.0, half_span, 100)
+        spanwise_stations = np.linspace(0.0, half_span, 1000)
         chord = (
             self.wing_root_chord
             - ((self.wing_root_chord - self.wing_tip_chord) / half_span)
             * spanwise_stations
         )
-        print("spanwise_stations =", spanwise_stations)
-        print("chord =", chord)
-        print("roll_rate_req =", self.roll_rate_req)
 
         # Compute Cl_p once (unchanging with bo)
         Cl_p = -(
@@ -223,7 +228,7 @@ class StabCon:
             Cl_delta_a = (
                 2.0
                 * self.cl_alpha
-                * self._tau_from_ca_over_c()
+                * self._tau_from_ca_over_c(self.ca_c)
                 / (self.wing_area * self.wing_span)
                 * simpson(
                     chord[aileron_idx] * spanwise_stations[aileron_idx],
@@ -258,7 +263,65 @@ class StabCon:
 
             self.bo = new_bo
 
-    # ~~~ Rudder sizing ~~~
+    # ~~~ Rudder sizing (static-trim gust criterion, τr varies with cr/cv) ~~~
+    def size_rudder_for_gust(self, step_frac: float = 0.02) -> tuple[float, float]:
+        """
+        Iterate the rudder-to-fin chord ratio (cr/cv) until the rudder can
+        *trim* the sideslip created by a design gust.
+
+        Returns
+        -------
+        cr_over_cv : float
+            Final chord ratio.
+        sr_over_sv : float
+            Rudder-area / fin-area ratio for bookkeeping.
+        """
+        # ── 1.  Gust-induced sideslip ────────────────────────────────────
+        beta_0 = self.gust_speed / self.v_ref  # [rad]
+
+        # ── 2.  Directional stability derivative (fin only) ─────────────
+        CL_alpha_v = (
+            np.pi * self.ARvt / (1 + np.sqrt(1 + (self.ARvt / 2) ** 2))
+        )  # [1/rad]
+        Cn_beta = -0.8 * CL_alpha_v * self.Vv  # < 0 (restoring)
+        print(f"Cl: {CL_alpha_v}")
+
+        # Required control power, per rad of deflection
+        Cn_req = abs(Cn_beta * beta_0) / self.delta_r_max
+
+        # ── 3.  Vertical-tail reference area & constants ────────────────
+        S_v = self.Vv * self.wing_area * self.wing_span / self.lvt
+        V_v = self.Vv  # alias for clarity
+        br_bv = self.br_bv
+
+        # ── 4.  Iterate on cr/cv ────────────────────────────────────────
+        cr_cv = self.cr_cv_init
+        max_cr_cv = 0.9
+        dcr = step_frac * max_cr_cv
+
+        while True:
+            # ♦ Effectiveness grows with chord ratio ♦
+            tau_r = self._tau_from_ca_over_c(cr_cv)
+
+            S_r = cr_cv * br_bv * S_v
+            Cn_dr = tau_r * CL_alpha_v * V_v * (S_r / S_v)
+
+            if Cn_dr >= Cn_req:  # ✅ requirement met
+                self.cr_over_cv = cr_cv
+                self.rudder_area = S_r
+                self.Cn_delta_r = Cn_dr
+                self._outputs.update(
+                    {"cr_over_cv": cr_cv, "rudder_area": S_r, "Cn_delta_r": Cn_dr}
+                )
+                return cr_cv, S_r / S_v
+
+            cr_cv += dcr  # ➜ try a larger chord
+
+            if cr_cv > max_cr_cv:
+                raise ValueError(
+                    f"Cannot meet gust-trim requirement: need Cnδr={Cn_req:.4f}, "
+                    f"achieved {Cn_dr:.4f} at cr/cv={max_cr_cv:.2f}."
+                )
 
     # ~~~ VTOL sizing ~~~
 
@@ -289,7 +352,7 @@ class StabCon:
         """Calculate the center of gravity (c.g.) of the UAV for different configurations."""
 
         results = {}
-        for configuration in ["wildfire", "oil_spill","no_payload"]:
+        for configuration in ["wildfire", "oil_spill", "no_payload"]:
             if configuration == "wildfire":
                 sensor_mass = self.wildfire_sensor_mass
                 sensor_x = self.wildfire_sensor_x
@@ -430,7 +493,7 @@ class StabCon:
 
     # ~~~ Loading diagram ~~~
     def loading_diagram(self) -> tuple[np.ndarray, np.ndarray]:
-        '''Calculate the loading diagram for the UAV for different configurations.'''
+        """Calculate the loading diagram for the UAV for different configurations."""
         x_lemac = np.linspace(0.5, self.l_fus - 0.5, 10)
 
         results = {}
@@ -469,12 +532,12 @@ class StabCon:
     def scissor_plot(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return the control & stability curves and the non-dimensional CG track."""
         # Create an array with positions for lemac and the corresponding X_cg_bar values
-        
+
         x_cg_bar = np.linspace(-0.5, 1.5, 100)
-        
-        # some preliminary calculations needed 
-        x_ac_bar =  self.x_ac_bar_wing  
-                #((1.8 * self.fuselage_diameter **2 * x_lemac )/ (self.CL_alpha_Ah * self.wing_span * self.mac )) #This would be the fuselage contribution - igor
+
+        # some preliminary calculations needed
+        x_ac_bar = self.x_ac_bar_wing
+        # ((1.8 * self.fuselage_diameter **2 * x_lemac )/ (self.CL_alpha_Ah * self.wing_span * self.mac )) #This would be the fuselage contribution - igor
 
         # Calculate the stability curve
         sh_s_stability = (
@@ -483,30 +546,26 @@ class StabCon:
                 (self.CL_alpha_h / self.CL_alpha_Ah)
                 * (1.0 - self.d_epsilon_d_alpha)
                 * (self.lh / self.mac)
-                * self.Vh_V # this is already the sqaured value
+                * self.Vh_V  # this is already the sqaured value
             )
             * (x_cg_bar - x_ac_bar - 0.05)
         )
-        # Calculate the control curve 
-        CL_h = -0.35*self.AR_h**(1/3)
-        Cm_ac = self.Cm_ac_wing #+ -1.8*(1-(2.5*self.fuselage_diameter/self.l_fus))*(np.pi*self.fuselage_diameter**2*self.l_fus/(4*self.wing_span*self.mac))* 0.232/self.CL_alpha_Ah
+        # Calculate the control curve
+        CL_h = -0.35 * self.AR_h ** (1 / 3)
+        Cm_ac = (
+            self.Cm_ac_wing
+        )  # + -1.8*(1-(2.5*self.fuselage_diameter/self.l_fus))*(np.pi*self.fuselage_diameter**2*self.l_fus/(4*self.wing_span*self.mac))* 0.232/self.CL_alpha_Ah
 
         sh_s_control = (
-            (1.0
+            1.0
             / (
-                (CL_h / self.CL_Aminush)
-                * (self.lh / self.mac)
-                * self.Vh_V) # this is already the sqaured value
-            )
-            * (x_cg_bar + (Cm_ac / self.CL_Aminush - x_ac_bar))
-        )
-        control_slope = (1.0
-            / (
-                (CL_h / self.CL_Aminush)
-                * (self.lh / self.mac)
-                * self.Vh_V) # this is already the sqaured value
-            )
-        
+                (CL_h / self.CL_Aminush) * (self.lh / self.mac) * self.Vh_V
+            )  # this is already the sqaured value
+        ) * (x_cg_bar + (Cm_ac / self.CL_Aminush - x_ac_bar))
+        control_slope = 1.0 / (
+            (CL_h / self.CL_Aminush) * (self.lh / self.mac) * self.Vh_V
+        )  # this is already the sqaured value
+
         return sh_s_control, sh_s_stability, x_cg_bar
 
     # ---------------------------------------------------------------------#
@@ -521,11 +580,11 @@ class StabCon:
     # Private helpers                                                      #
     # ---------------------------------------------------------------------#
 
-    def _tau_from_ca_over_c(self) -> float:
+    def _tau_from_ca_over_c(self, ratio) -> float:
         """Interpolate elevator effectiveness τ for the configured cₐ/c ratio."""
         data = np.loadtxt(self.EFFECTIVENESS_FILE, delimiter=",", skiprows=0)
         ca_c, tau = data.T
-        return float(np.interp(self.ca_c, ca_c, tau))
+        return float(np.interp(ratio, ca_c, tau))
 
 
 # ---------------------------------------------------------------------------#
@@ -561,14 +620,22 @@ if __name__ == "__main__":  # pragma: no cover
         f"Achieved roll rate: {np.rad2deg(p_achieved):.3f} deg/s with bo = {bo:.3f} m"
     )
 
-    #Horizontal tailplane sizing tailplace sizing
-        # ~~~ Explanation ~~~
-        # The sizing starts with the calculation of the c.g. location in the longitudinal direction. 
-        # Then based on the c.g. of the fuselage and the wing, the loading diagram is generated.
-        # The loading diagram shows the variation of the c.g. for both configurations depending on the LEMAC
-        # The scissor plot shows the stability and control constraints to determine the tailplane size.
-        # Code produces the plots but they have to be overlaid manually to find the optimal position.
-        
+    stabcon.size_rudder_for_gust()
+    print("Rudder sized successfully.")
+    cr_over_cv, sr_over_sv = stabcon.size_rudder_for_gust()
+    print(
+        f"Rudder-to-fin chord ratio (cr/cv): {cr_over_cv:.2f}, "
+        f"Rudder-area / fin-area ratio (Sr/Sv): {sr_over_sv:.2f}"
+    )
+
+    # Horizontal tailplane sizing tailplace sizing
+    # ~~~ Explanation ~~~
+    # The sizing starts with the calculation of the c.g. location in the longitudinal direction.
+    # Then based on the c.g. of the fuselage and the wing, the loading diagram is generated.
+    # The loading diagram shows the variation of the c.g. for both configurations depending on the LEMAC
+    # The scissor plot shows the stability and control constraints to determine the tailplane size.
+    # Code produces the plots but they have to be overlaid manually to find the optimal position.
+
     cg_results = stabcon.calculate_UAV_cg()
     for config, result in cg_results.items():
         setattr(stabcon, f"{config}_fuselage_x_cg", result["fuselage_x_cg"])
@@ -582,7 +649,7 @@ if __name__ == "__main__":  # pragma: no cover
         print(f"  Wing mass: {result['wing_mass']:.3f} kg")
         print(f"  Wing CG (x): {result['wing_x_cg']:.3f} m")
 
-    #Generate the loading diagram
+    # Generate the loading diagram
     loading_results = stabcon.loading_diagram()
 
     for config in loading_results:
@@ -613,9 +680,11 @@ if __name__ == "__main__":  # pragma: no cover
     plt.legend()
     plt.grid()
     plt.xlim(-0.5, 1.5)
-    plt.ylim(0,1)
+    plt.ylim(0, 1)
     plt.show()
-    print("Scissor plot generated successfully. Now overlay the graphs to find the optimal tail size and determine LEMAC position")
+    print(
+        "Scissor plot generated successfully. Now overlay the graphs to find the optimal tail size and determine LEMAC position"
+    )
 
     user_input = float(input("Please enter the x_lemac/fuselage_length: "))
     user_input2 = float(input("Please enter the x_cg_bar: "))
@@ -628,12 +697,3 @@ if __name__ == "__main__":  # pragma: no cover
     # print("Vertical tailplane MAC: ", stabcon.size_vertical_tailplane()[2])
     # print("Vertical tailplane root chord: ", stabcon.size_vertical_tailplane()[3])
     # print("Vertical tailplane tip chord: ", stabcon.size_vertical_tailplane()[4])
-
-    
-
-    
-
-
-
-    
-    
