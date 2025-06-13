@@ -7,9 +7,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from scipy.optimize import minimize
 from DetailedDesign.funny_inputs import funny_inputs
+from DetailedDesign.inputs import inputs
 from DetailedDesign.hardware_inputs import components
 from power import Power
 from propulsion import Propulsion
+from constraints import Constraints
 from DetailedDesign.mission import Mission
 from DetailedDesign.deployment import Deployment 
 from DetailedDesign.hardware import Hardware
@@ -40,17 +42,17 @@ class Thermal:
         # Duration of each phase
         self.time_ascent = inputs["time_ascent"] 
         self.time_descent = inputs["time_descent"]
-        self.time_cruise_max = inputs["time_cruise"]
+        self.time_cruise_max = inputs["time_cruise_max"]
         self.time_cruise_min = inputs["time_cruise_min"]
         self.time_scan = inputs["time_scan"] # time during hover without having the winch activated
         self.time_deploy = inputs["time_deploy"] # time during hover with having the winch activated
-        self.time_uav = inputs["time_uav"] # total time for one uav trip from ascend to return to nest
+        self.time_uav = inputs["time_uav_max"] # total time for one uav trip from ascend to return to nest
         self.time_turnaround_min = inputs["time_turnaround"]
 
         # Battery parameters
         self.n_battery = inputs["n_battery"]
-        self.battery_capacity = inputs["battery_capacity"] # Ah
-        self.battery_potential = inputs["battery_potential"] # V
+        self.battery_capacity = hardware["battery_capacity"] # Ah
+        self.battery_potential = hardware["battery_voltage"] # V
         self.battery_resistance = inputs["battery_resistance"] # Ohm
 
         # Other
@@ -202,7 +204,7 @@ class Thermal:
 
         return all_heat
     
-    def heat_dissipated_sink(self, sink_length: float, n_fin: float) -> float: 
+    def heat_dissipated_sink(self, sink_length: float, sink_width: float) -> float: 
         '''
         Input:
         -> heat_int: Internal heat that needs to be dissipated during the return (cruise+descend) phase
@@ -215,10 +217,13 @@ class Thermal:
         '''
         beta = 2 / (self.T_equi_pcm - self.T_amb_enroute)  # 1/K, thermal expansion coefficient
         fin_spacing_opt = 2.71 * ((self.g * beta * (self.T_equi_pcm - self.T_amb_enroute))/(sink_length * self.alpha * self.nu)) ** (-0.25) # m, optimal fin spacing
+        n_fin = (sink_width + fin_spacing_opt) / (self.sink_thickness + fin_spacing_opt)
         
+        # nusselt_nr = 
+
         # Convection coefficient per area 
-        convection_coeff1 = 1.42 * ((self.T_equi_pcm - self.T_amb_enroute) / sink_length)**0.25 # W/(m^2 K), for area1 
-        convection_coeff2 = 1.32 * (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
+        convection_coeff1 = 100 * ((self.T_equi_pcm - self.T_amb_enroute) / sink_length)**0.25 # W/(m^2 K), for area1 
+        convection_coeff2 = 100 * (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
 
         # Heat sink areas
         sink_area1 = self.sink_height * sink_length + self.sink_thickness * (2*self.sink_height + sink_length) # m^2
@@ -241,11 +246,11 @@ class Thermal:
         # Total
         total_heat_dissipated_sink = heat_dissipated_sink_fixed + heat_dissipated_sink_flex
 
-        return fin_spacing_opt, total_heat_dissipated_sink
+        return fin_spacing_opt, n_fin, total_heat_dissipated_sink
     
     def simulate(self, x) -> float:
         
-        sink_length, n_fin, insulation_thickness = x
+        sink_length, sink_width, insulation_thickness = x
         all_heat = self.create_heat_dissipated()
         
         # Times
@@ -260,7 +265,7 @@ class Thermal:
 
         # Heat and heat energy entering due to internal components 
         # heat_int_approach = sum([all_heat[ph]['phase_heat'] for ph in ['ascend', 'cruise_min']])
-        heat_int_return = sum([all_heat[ph]['phase_heat'] for ph in ['cruise_min', 'descend']])
+        # heat_int_return = sum([all_heat[ph]['phase_heat'] for ph in ['cruise_min', 'descend']])
 
         Q_int_onsite = sum([all_heat[ph]['phase_Q'] for ph in ['scan', 'descend', 'deploy', 'ascend']])
         # Q_int_approach = sum([all_heat[ph]['phase_Q'] for ph in ['ascend', 'cruise_min']])
@@ -273,8 +278,8 @@ class Thermal:
         heat_dissipated_req_sink = total_Q_return / (time_return + self.time_turnaround_min + self.sink_time_margin)
 
         # Heat sink 
-        fin_spacing_opt, total_heat_dissipated_sink = self.heat_dissipated_sink(sink_length, n_fin)
-        sink_width = (n_fin - 1) * fin_spacing_opt + n_fin * self.sink_thickness # m, total heat sink width
+        fin_spacing_opt, n_fin, total_heat_dissipated_sink = self.heat_dissipated_sink(sink_length, sink_width)
+        # sink_width = (n_fin - 1) * fin_spacing_opt + n_fin * self.sink_thickness # m, total heat sink width
 
         # Mass calculations
         ''' If the heat sink does not dissipate the heat required to return to the T_int, a penalty is applied '''
@@ -286,7 +291,8 @@ class Thermal:
 
         # Test prints
         # print('pcm_mass:', pcm_mass, '\n sink_mass:', sink_mass, '\n insulation_mass:', insulation_mass)
-        print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
+        # print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
+        print('time_onsite:', time_onsite, '\ntime_return:', time_return, '\ntime_turnaround_min:', self.time_turnaround_min,'\nQ_int_onsite:' , Q_int_onsite, '\nQ_env_onsite:', Q_env_onsite, '\nQ_int_return:', Q_int_return, '\nQ_env_return:', Q_env_return, '\ntotal_heat_dissipated_sink:', total_heat_dissipated_sink )
 
         return total_mass, total_heat_dissipated_sink, heat_dissipated_req_sink
     
@@ -304,8 +310,8 @@ class Thermal:
         '''
         Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
         '''
-        x0 = [0.1, 5, 0.005] # initial: sink_length (m), n_fin (-), insulation_thickness (m)
-        bounds = [(0.01, 0.5), (1., 1000.), (0.002, 0.01)]  # sink_length (m), n_fin (-), insulation_thickness (m)
+        x0 = [0.1, 5, 0.005] # initial: sink_length (m), sink_width (m), insulation_thickness (m)
+        bounds = [(0.01, 0.45), (0.01, 1.5), (0.002, 1.)]  # sink_length (m), sink_width (m)), insulation_thickness (m)
         constraints = {'type': 'ineq', 'fun': self.constraint}
         
         total_mass_result =  minimize(self.objective, x0=x0, bounds=bounds, constraints=constraints, method="SLSQP")
@@ -324,13 +330,32 @@ class Thermal:
 
 if __name__ == '__main__':
 
-    ther = Thermal(funny_inputs)
+    hardware = Hardware(inputs, components)
+    hardware_outputs = hardware.get_all()
+
+    con = Constraints(inputs, hardware_outputs)
+    inputs = con.get_all()
+
+    prop = Propulsion(inputs)
+    inputs = prop.get_all()
+
+    deployment = Deployment(inputs, strategy='perimeter', amt=inputs['mission_perimeter'])
+    inputs = deployment.get_all()
+
+    mission = Mission(inputs)
+    inputs = mission.get_all()
+
+    power = Power(inputs, hardware_outputs)
+    inputs = power.get_all()
+
+    thermal = Thermal(inputs, hardware_outputs)
+    # inputs = thermal.get_all() 
 
     # Print statements
-    # print('Dict/ total:', ther.create_heat_dissipated()['deploy'])
-    # print('\n Winch', ther.winch_heat_dissipated())
-    # print(ther.total_heat_storage())
-    print(ther.optimize())
+    # print('Dict/ total:', thermal.create_heat_dissipated()['deploy'])
+    # print('\n Winch', thermal.winch_heat_dissipated())
+    # print(thermal.total_heat_storage())
+    print(thermal.optimize())
 
 
 
