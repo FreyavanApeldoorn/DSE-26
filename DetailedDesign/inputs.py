@@ -193,31 +193,32 @@ inputs.update(structures_inputs)
 # ~~~ Thermal control ~~~ initial inputs for thermal control sizing
 
 thermal_inputs = {
-    "wing_eff_area": 1., # m, effective surface area for conduction
-    "fuselage_eff_area": 1., # m, effective surface area for conduction
-    "T_amb_onsite": 140. + 273.15, # K, temperature in the onsite deployment zone
-    "T_amb_enroute": 35. + 273.15, # K, ambient temperature outside of deployment zone
-    "T_int": 40. + 273.15, # K, temperature inside the fuselage+wing structure
-    "T_equi_pcm": 48. + 273.15, # K, temperature at which the PCM starts changing phase 
+    "wing_eff_area": 1.0,  # m, effective surface area for conduction
+    "fuselage_eff_area": 1.0,  # m, effective surface area for conduction
+    "T_amb_onsite": 140.0 + 273.15,  # K, temperature in the onsite deployment zone
+    "T_amb_enroute": 35.0 + 273.15,  # K, ambient temperature outside of deployment zone
+    "T_int": 40.0 + 273.15,  # K, temperature inside the fuselage+wing structure
+    "T_equi_pcm": 48.0
+    + 273.15,  # K, temperature at which the PCM starts changing phase
     # "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
-    "sink_height": 0.02, # m, height of heat sink fins
-    "sink_thickness": 0.004, # m, thickness of heat sink fins
-    "sink_base": 0.004, # m, thickness of heat sink base
-    "sink_density": 2710., # kg/m^3
-    "sink_time_margin": 30, # s, this is extra downtime for the UAVs on ground to reduce heat sink size
-    "thickness_foam_wing": 0., # 0.03, # m, thickness of the foam inbetween the aluminium shell
-    "thickness_alu_wing": 0.0008, # m, thickness of one layer of the aluminium shell structure
-    "thickness_foam_fuselage": 0., # 0.03, # m
-    "thickness_alu_fuselage": 0.0008, # m
-    "conductivity_alu": 0.36, # 237., # W / (mK)
-    "conductivity_foam": 0., # 0.03, # W / (mK)
-    "conductivity_insulation": 0.03, # W / (mK)
-    "insulation_density": 30., # kg/m^3
-    "pcm_latent_heat": 197000., # J/kg
+    "sink_height": 0.02,  # m, height of heat sink fins
+    "sink_thickness": 0.004,  # m, thickness of heat sink fins
+    "sink_base": 0.004,  # m, thickness of heat sink base
+    "sink_density": 2710.0,  # kg/m^3
+    "sink_time_margin": 30,  # s, this is extra downtime for the UAVs on ground to reduce heat sink size
+    "thickness_foam_wing": 0.0,  # 0.03, # m, thickness of the foam inbetween the aluminium shell
+    "thickness_alu_wing": 0.0008,  # m, thickness of one layer of the aluminium shell structure
+    "thickness_foam_fuselage": 0.0,  # 0.03, # m
+    "thickness_alu_fuselage": 0.0008,  # m
+    "conductivity_alu": 0.36,  # 237., # W / (mK)
+    "conductivity_foam": 0.0,  # 0.03, # W / (mK)
+    "conductivity_insulation": 0.03,  # W / (mK)
+    "insulation_density": 30.0,  # kg/m^3
+    "pcm_latent_heat": 197000.0,  # J/kg
     "n_battery": 4,
-    "battery_resistance": 0.015, # Ohm, based on guessing
-    "processor_heat_diss": 40., # W, guesstimate which should eventually come from the chosen processor
-    "winch_eff": 0.65, # Winch efficiency fraction (0.35=35% efficiency) used to compute the heat generated
+    "battery_resistance": 0.015,  # Ohm, based on guessing
+    "processor_heat_diss": 40.0,  # W, guesstimate which should eventually come from the chosen processor
+    "winch_eff": 0.65,  # Winch efficiency fraction (0.35=35% efficiency) used to compute the heat generated
 }
 inputs.update(thermal_inputs)
 
@@ -246,56 +247,125 @@ inputs.update(nest_inputs)
 
 
 stab_n_con_inputs = {
-    "ca_c": 0.3,  # Aileron chord to wing chord ratio
-    "cl_alpha": 5.0 * 180 / np.pi,  # Wing airfoil (E1210) lift curve slope [1/rad]
-    "cd_0": 0.02,  # Wing airfoil (E1210)Zero-lift drag coefficient
-    "wing_area": 1.27,  # m^2, guesstimate
-    "wing_span": 3.0,  # m, guesstimate
-    "wing_root_chord": 0.458,  # m, guesstimate
-    "wing_tip_chord": 0.39,  # m, guesstimate
-    "bi": 0.875,  # m, location to the innermost point of the aileron
-    "bo": 0.91,  # m, location to the outermost point of the aileron
-    "delta_a_max": np.deg2rad(25),  # rad, maximum aileron deflection angle
-    "aileron_differential": 0.75,  # Aileron differential, ratio of down-going to up-going aileron deflection
-    "roll_rate_req": np.deg2rad(35),  # rad/s, guesstimate
-    "v_ref": 72 * 0.8 / 3.6,  # m/s, reference velocity for roll rate requirement
-    "wildfire_fuselage_x_cg": 0,  # m, initially set to 0 and updated later
-    "oil_spill_fuselage_x_cg": 0,  # m, initially set to 0 and updated later
-    "wildfire_wing_x_cg": 0,  # m, initially set to 0 and updated later
-    "oil_spill_wing_x_cg": 0,  # m, initially set to 0 and updated later
-    "wildfire_fuselage_mass": 0,  # kg, initially set to 0 and updated later
-    "oil_spill_fuselage_mass": 0,  # kg, initially set to 0 and updated later
-    "wildfire_wing_mass": 0,  # kg, initially set to 0 and updated later
-    "oil_spill_wing_mass": 0,  # kg, initially set to 0 and updated later
-    "no_payload_fuselage_x_cg": 0,  # m, x-location of the center of gravity without payload
-    "no_payload_fuselage_mass": 0,  # kg, mass of the fuselage without payload
-    # control and stability curve parameters
-    "l_fus": 2,  # m, length of the fuselage
-    "fuselage_diameter": 0.4,  # m, diameter of the fuselage
-    "lh": 1.2,  # m, horizontal distance from the wing ac to the horizontal tail ac
-    "mac": 0.333,  # m, mean aerodynamic chord of the wing
-    "x_ac_bar_wing": 0.24,  # m, x-coordinate of the aerodynamic center relative to the leading edge of the wing, based on ADSEE estimation lecture 8
-    "CL_alpha_Ah": 0.08,  # Finite wing lift curve slope [1/rad]
-    "CL_alpha_h": 0.06,  # Horizontal tail lift curve slope [-]
-    "d_epsilon_d_alpha": 0.3,  # Downwash gradient [rad/(rad*m)]
-    "Vh_V": 0.85,  # Horizontal tail velocity to wing velocity ratio [-]
-    "Cm_ac_wing": -0.11,  # Moment coefficient at the aerodynamic center of the wing at zero lift [-] based on XFLR5
-    "AR_h": 3.5,  # Aspect ratio of the horizontal tail [-]
-    "CL_A-h": 0.62,  # Lift coefficient of the aircraft - tail at cruise conditions [-]
-    # other parameters
-    "wind_speed": 30 / 3.6,  # m/s, wind speed from requirement
-    "rpm_max": 4200,  # rpm
-    "T_max": 17.6 * 9.81,  # N, maximum thrust per motor.
-    "gust_speed": 30 / 3.6,  # m/s, gust speed
-    "lvt": 6.0,  # m, distance from wing AC to AC of vertical tailplane
-    "Vv": 0.1,  # Tail volume coefficient [–]
-    "ARvt": 3.5,  # Aspect ratio of the vertical tailplane [–]
-    "taper_ratio_vt": 0.5,  # Taper ratio of the vertical tailplane [–]
-    "sweep_vt": np.deg2rad(5),  # Sweep angle of the vertical tailplane [rad]
-    "br_bv": 0.9,  # Ratio of the rudder span to the vertical tailplane span[–]
-    "delta_r_max": np.deg2rad(30),  # Maximum rudder deflection angle [rad]
-    "cr_cv_init": 0.3,  # Ratio of the rudder chord to the vertical tailplane chord [–]
+    # ───────────────────────────────────────────────────────────────────────
+    # Aerodynamic & control-surface parameters
+    # ───────────────────────────────────────────────────────────────────────
+    "cl_alpha": 0.1 * 180 / np.pi,  # [1/rad] Wing lift-curve slope (E1233)
+    "cd_0": 0.11,  # Zero-lift drag coefficient (E1233)
+    "ca_c": 0.3,  # Aileron chord / wing chord ratio
+    "delta_a_max": np.deg2rad(25),  # [rad] Max aileron deflection
+    "aileron_differential": 0.75,  # Down-/up-going deflection ratio
+    "roll_rate_req": np.deg2rad(35),  # [rad/s] Required roll rate
+    "v_ref": 72 * 0.8 / 3.6,  # [m/s] Reference velocity (80% of 72 km/h)
+    # ───────────────────────────────────────────────────────────────────────
+    # Wing geometry
+    # ───────────────────────────────────────────────────────────────────────
+    "wing_area": 1.27,  # [m²] planform area (estimate)
+    "wing_span": 3.0,  # [m] span (estimate)
+    "wing_root_chord": 0.458,  # [m] root chord (estimate)
+    "wing_tip_chord": 0.39,  # [m] tip chord (estimate)
+    "bi": 0.875,  # [m] inboard aileron start
+    "bo": 0.91,  # [m] outboard aileron end
+    # ───────────────────────────────────────────────────────────────────────
+    # Mass & CG placeholders
+    # ───────────────────────────────────────────────────────────────────────
+    # → wildfire
+    "wildfire_sensor_mass": 0.0,
+    "wildfire_sensor_x": 0.0,
+    "wildfire_fuselage_mass": 0.0,
+    "wildfire_fuselage_x": 0.0,
+    "wildfire_wing_mass": 0.0,
+    "wildfire_wing_x": 0.0,
+    # → oil spill
+    "oil_spill_sensor_mass": 0.0,
+    "oil_spill_sensor_x": 0.0,
+    "oil_spill_fuselage_mass": 0.0,
+    "oil_spill_fuselage_x": 0.0,
+    "oil_spill_wing_mass": 0.0,
+    "oil_spill_wing_x": 0.0,
+    # → no payload
+    "no_payload_fuselage_mass": 0.0,
+    "no_payload_fuselage_x_cg": 0.0,
+    # ───────────────────────────────────────────────────────────────────────
+    # Payload & sensor modules
+    # ───────────────────────────────────────────────────────────────────────
+    "payload_mass": 5.0,
+    "payload_x": 0.5,  # Blanket/payload bay
+    "buoy_mass": 0.5,
+    "buoy_x": 0.5,  # Oil-spill buoy
+    "wildfire_sensor_mass": 0.0,
+    "wildfire_sensor_x": 0.0,
+    "oil_spill_sensor_mass": 0.0,
+    "oil_spill_sensor_x": 0.0,
+    # ───────────────────────────────────────────────────────────────────────
+    # Fuselage-mounted avionics & structure
+    # ───────────────────────────────────────────────────────────────────────
+    "gymbal_connection_mass": 0.5,
+    "gymbal_connection_x": 0.5,
+    "flight_controller_mass": 0.5,
+    "flight_controller_x": 0.5,
+    "OBC_mass": 0.5,
+    "OBC_x": 0.5,
+    "GPS_mass": 0.5,
+    "GPS_x": 0.5,
+    "Mesh_network_module_mass": 0.5,
+    "Mesh_network_module_x": 0.5,
+    "SATCOM_module_mass": 0.5,
+    "SATCOM_module_x": 0.5,
+    "Winch_motor_mass": 0.5,
+    "Winch_motor_x": 0.5,
+    # ───────────────────────────────────────────────────────────────────────
+    # Propulsion & energy-storage
+    # ───────────────────────────────────────────────────────────────────────
+    # — Cruise motor + prop
+    "motor_mass_cruise": 0.5,
+    "propeller_mass_cruise": 0.25,
+    "motor_cruise_x": 1.30,
+    # — VTOL lift motors + props
+    "motor_mass_VTOL": 0.5,
+    "propeller_mass_VTOL": 0.20,
+    "motor_front_VTOL_x": 0.40,
+    "motor_rear_VTOL_x": -0.35,
+    # — Battery & power distribution
+    "battery_mass": 2.80,
+    "battery_x": 0.00,
+    "PDB_mass": 0.15,
+    "PDB_x": 0.05,
+    # ───────────────────────────────────────────────────────────────────────
+    # Longitudinal stability & tailplane
+    # ───────────────────────────────────────────────────────────────────────
+    "l_fus": 2.3,  # [m] fuselage length
+    "fuselage_diameter": 0.4,  # [m] fuselage diameter
+    "lh": 1.0,  # [m] wing AC → tail AC
+    "mac": 0.42,  # [m] mean aerodynamic chord
+    "x_ac_bar_wing": 0.25,  # [m] wing AC from LE (25% MAC)
+    "CL_alpha_Ah": 0.08 * 180 / np.pi,  # [1/rad] finite wing lift-curve slope
+    "CL_alpha_h": 0.06 * 180 / np.pi,  # [1/rad] tail lift-curve slope
+    "d_epsilon_d_alpha": 0.3,  # downwash gradient [rad/rad]
+    "Vh_V": 0.9**2,  # tail/wing velocity ratio
+    "Cm_ac_wing": -0.11,  # moment coeff. at wing AC
+    "AR_h": 3.5,  # tail aspect ratio
+    "CL_A_h": 0.62,  # C_L aircraft-tail at cruise
+    # ───────────────────────────────────────────────────────────────────────
+    # Lateral/directional & vertical tail
+    # ───────────────────────────────────────────────────────────────────────
+    "lvt": 6.0,  # [m] wing AC → vertical tail AC
+    "Vv": 0.1,  # volume coeff. vertical tail
+    "ARvt": 3.5,  # vertical tail aspect ratio
+    "taper_ratio_vt": 0.5,  # vertical tail taper
+    "sweep_vt": np.deg2rad(5),  # vertical tail sweep [rad]
+    "br_bv": 0.9,  # rudder span ratio
+    "delta_r_max": np.deg2rad(30),  # max rudder deflection [rad]
+    "cr_cv_init": 0.3,  # rudder chord ratio
+    # ───────────────────────────────────────────────────────────────────────
+    # Environmental & propulsion limits
+    # ───────────────────────────────────────────────────────────────────────
+    "wind_speed": 30 / 3.6,  # [m/s] requirement gust
+    "gust_speed": 30 / 3.6,  # [m/s] gust speed
+    "rpm_max": 4200,  # [rpm] motor limit
+    "T_max": 17.6 * 9.81,  # [N] thrust per motor
 }
+
 inputs.update(stab_n_con_inputs)
 
 
