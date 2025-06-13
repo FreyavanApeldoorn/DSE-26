@@ -106,8 +106,8 @@ class Thermal:
         
         R_total_fuselage, R_total_wing = self.create_R_value(insulation_thickness)
 
-        # R_total_fuselage = 9
-        # R_total_wing = 9
+        #R_total_fuselage = 5
+        #R_total_wing = 5
 
         # Heat entering the wing due to outside temperature
 
