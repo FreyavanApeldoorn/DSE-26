@@ -14,9 +14,10 @@ from DetailedDesign.subsystems.constraints import Constraints
 
 class Propulsion:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs: dict[str, float], hardware = None) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = hardware
 
 
         self.wing_loading = inputs['wing_loading']
@@ -109,6 +110,11 @@ class Propulsion:
     def power_transition(self, vtol_power):
         
         self.transition_power = self.optimal_cruise_power + vtol_power # self.P_hov
+
+    def UAV_drag_cruise():
+        D = 0.5 * self.rho * V**2 * S * C_D
+
+        return 
         
 
     # ~~~ Output functions ~~~ 
@@ -121,6 +127,8 @@ class Propulsion:
         propulsion_system_mass = self.motor_mass_cruise  + self.motor_mass_VTOL * 4 + self.propeller_mass_cruise + self.propeller_mass_VTOL * 4
 
         self.power_transition(vtol_power)
+
+        
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
         self.outputs["power_required_VTOL"] = vtol_power
@@ -154,4 +162,3 @@ if __name__ == '__main__': # pragma: no cover
     print(math.isclose(res['power_required_cruise'], 2000, rel_tol=1000))
     print(math.isclose(res['propeller_diameter_cruise'], 0.45, rel_tol=0.5))
     print(res)
-    

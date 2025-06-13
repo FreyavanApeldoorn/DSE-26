@@ -11,13 +11,14 @@ import numpy as np
 
 class Power:
 
-    def __init__(self, inputs: dict[str, float]) -> None:
+    def __init__(self, inputs, hardware) -> None:
         self.inputs = inputs
+        self.hardware = hardware
         self.outputs = self.inputs.copy()
 
         self.M_to = inputs["M_to"]
         self.DOD_fraction = self.inputs["DOD_fraction"] 
-        self.specific_energy = inputs["battery_specific_energy"] 
+        #self.specific_energy = inputs["battery_specific_energy"] 
         self.eta_battery = self.inputs["eta_battery"]  # battery efficiency
 
         self.time_cruise = inputs["time_cruise_max"]
@@ -28,18 +29,35 @@ class Power:
         self.time_scan = inputs["time_scan"]
         self.time_idle = inputs["time_turnaround"]
 
-        self.power_cruise = inputs["power_required_cruise"]
+        
         self.power_ascent = inputs["power_required_VTOL"]
         self.power_descent = inputs["power_required_hover"]  # assuming hover power is used for descent
         self.power_deploy = inputs["power_deploy"]
         self.power_transition = inputs["power_transition"]
         self.power_scan = inputs["power_scan"]
         self.power_idle = inputs["power_idle"]
+        self.power_cruise_hardware = inputs["power_cruise_hardware"]  # Power required for cruise operations from hardware
 
+        self.power_required_VTOL = inputs["power_required_VTOL"]  # Power required for VTOL operations
+        self.power_required_cruise = inputs["power_required_cruise"]  # Power required for cruise operations
+        self.power_required_hover = inputs["power_required_hover"]  # Power required for hover operations
+        
+        self.battery_capacity = self.hardware["battery_capacity"]  # Battery capacity in Ah
+        self.battery_voltage =self.hardware["battery_voltage"]  # Battery voltage in V
+        self.battery_maximum_peak_current = self.hardware["battery_maximum_peak_current"] 
+
+        #Calculate the total power 
+        self.power_scan_total = self.power_scan + 4228
+        self.power_deploy_total = self.power_deploy + 4228
+        self.power_cruise_total = self.power_cruise_hardware + 647
 
     # ~~~ Intermediate Functions ~~~
+    # def power_consumptions_motors(self) -> float:
+        
+    #     return
 
     def calculate_required_capacity(self) -> float:
+        
         
         times = np.array([
             self.time_cruise,
@@ -51,12 +69,12 @@ class Power:
             self.time_idle
         ])
         powers = np.array([
-            self.power_cruise,
+            self.power_cruise_total,
             self.power_ascent,
             self.power_descent,
-            self.power_deploy,
+            self.power_deploy_total,
             self.power_transition,
-            self.power_scan,
+            self.power_scan_total,
             self.power_idle
 
         ])
@@ -97,8 +115,11 @@ class Power:
         MF_battery = self.trip_capacity_wh / (self.specific_energy * self.eta_battery * self.DOD_fraction * self.M_to)
         self.battery_mass = MF_battery * self.M_to
 
+    def calculate_battery_capacity(self) -> float:
+        
+        battery_capacity = self.battery_capacity * self.battery_voltage  # Convert battery capacity from Ah to Wh
 
-
+        return battery_capacity 
 
     def calculate_max_power(self) -> float:
         pass
@@ -107,18 +128,22 @@ class Power:
 
     # ~~~ Output functions ~~~ 
 
+
     def get_all(self) -> dict[str, float]:
 
         # These are all the required outputs for this class. Plz consult the rest if removing any of them!
 
         self.calculate_required_capacity()
-        self.calculate_battery_mass()
+        battery_capacity = self.calculate_battery_capacity()  # Calculate battery capacity in Wh
+        #self.calculate_battery_mass()
 
-        self.outputs["mass_battery"] = (self.battery_mass if self.outputs.get("mass_battery") is None else self.outputs["mass_battery"])
+        #self.outputs["mass_battery"] = self.battery_mass # if self.hardware["battery_mass"] is None else self.hardware["battery_mass"]
         self.outputs["required_capacity_wh"] = self.trip_capacity_wh
-        self.outputs["battery_capacity"] = self.trip_capacity_wh   # updated true capacity (might increase after choosing a battery)
+        self.outputs["battery_capacity"] = battery_capacity   
+
 
         return self.outputs
+
     
 if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
@@ -144,6 +169,6 @@ if __name__ == '__main__': # pragma: no cover
     }
     power = Power(inputs)
     outputs = power.get_all()
-    print("Battery mass:", outputs["Battery_mass"], "kg")
+    #print("Battery mass:", outputs["Battery_mass"], "kg")
     print("Battery volume:", outputs["Battery_volume"], "m^3")
     print("Battery capacity:", outputs["Battery_capacity"], "Wh")

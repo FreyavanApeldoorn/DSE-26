@@ -1,295 +1,474 @@
-'''
-This is the file for the thermal subsystem. It contains a single class.
-'''
-
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-
 import numpy as np
-import math
-import matplotlib.pyplot as plt
-from funny_inputs import funny_inputs
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..', '..')))
 
+from scipy.optimize import minimize
+from DetailedDesign.funny_inputs import funny_inputs
+from DetailedDesign.hardware_inputs import components
+from power import Power
+from propulsion import Propulsion
+from DetailedDesign.mission import Mission
+from DetailedDesign.deployment import Deployment 
+from DetailedDesign.hardware import Hardware
 class Thermal:
-    
-    def __init__(self, inputs: dict[str, float]) -> None:
+    '''
+    The thermal class contains the thermal subsystem sizing. 
+    '''
+
+    def __init__(self, inputs: dict[str, float], hardware=None) -> None:
         self.inputs = inputs
-        self.outputs = self.inputs.copy()
+        self.hardware = hardware
+        
+        # Constants
+        self.g = inputs["g"]
+        self.nu = inputs["nu"]
+        self.alpha = inputs["alpha"]
+        self.k_air = inputs["k_air"]
+        self.epsilon = inputs["epsilon"]
+        self.sigma = inputs["sigma"]
 
-        # deploy-region ambient temperature (°C)
-        self.T_amb_deploy = inputs["T_amb_deploy"]
-        # Cruise-region ambient temperature (°C)
-        self.T_amb_cruise = inputs["T_amb_cruise"]
-        # Initial internal temperature before deploy region (°C)
-        self.T_int_init = inputs["T_int_init"]
-        # Cruise internal set-point after deploy region (°C)
-        self.T_int_cruise_set = inputs["T_int_cruise_set"]
+        # Power required for each phase
+        self.power_required_VTOL = inputs["power_required_VTOL"]
+        self.power_required_cruise = inputs["power_required_cruise"]
+        self.power_required_hover = inputs["power_required_hover"]
+        self.power_deployment = inputs["power_deploy"]
+        self.power_required_winch = inputs["power_required_winch"]
 
-        # Shell geometry and materials
-        self.A_heat_shell = inputs["A_heat_shell"]    # Effective heat-transfer area (m²)
-        self.t_shell = inputs["t_shell"]              # Titanium shell thickness (m)
-        self.k_Ti = inputs["k_Ti"]                    # Titanium conductivity (W/(m·K))
+        # Duration of each phase
+        self.time_ascent = inputs["time_ascent"] 
+        self.time_descent = inputs["time_descent"]
+        self.time_cruise_max = inputs["time_cruise"]
+        self.time_cruise_min = inputs["time_cruise_min"]
+        self.time_scan = inputs["time_scan"] # time during hover without having the winch activated
+        self.time_deploy = inputs["time_deploy"] # time during hover with having the winch activated
+        self.time_uav = inputs["time_uav"] # total time for one uav trip from ascend to return to nest
 
-        # Insulation (optional)
-        self.include_insulation = inputs.get("include_insulation", False)
-        self.t_insulation = inputs.get("t_insulation", 0.0)    # Insulation thickness (m)
-        self.k_insulation = inputs.get("k_insulation", 1.0)    # Insulation conductivity (W/(m·K))
+        # Battery parameters
+        self.n_battery = inputs["n_battery"]
+        self.battery_capacity = inputs["battery_capacity"] # Ah
+        self.battery_potential = inputs["battery_potential"] # V
+        self.battery_resistance = inputs["battery_resistance"] # Ohm
 
-        # Heat loads and coefficients
-        self.heat_int = inputs["heat_int"]                # Internal dissipation (W)
-        self.heat_coeff_ext = inputs["heat_coeff_ext"]    # External convective coeff. (W/(m²·K))
+        # Other
+        self.winch_eff = inputs["winch_eff"] # fraction (i.e. "0.65" means that 1 - 0.65 = 0.35 of the winch power required will be heat)
+        self.processor_heat_diss = inputs["processor_heat_diss"] # given from the specifications
+        
+        # Shell specifications
+        self.wing_eff_area = inputs["wing_eff_area"]
+        self.fuselage_eff_area = inputs["fuselage_eff_area"]
+        self.thickness_foam_wing = inputs["thickness_foam_wing"]
+        self.thickness_alu_wing = inputs["thickness_alu_wing"]
+        self.thickness_foam_fuselage = inputs["thickness_foam_fuselage"]
+        self.thickness_alu_fuselage = inputs["thickness_alu_fuselage"]
+        self.conductivity_foam = inputs["conductivity_foam"]
+        self.conductivity_alu = inputs["conductivity_alu"]
+        self.insulation_density = inputs["insulation_density"]
+        self.conductivity_insulation = inputs["conductivity_insulation"]
 
-        # Internal thermal mass
-        self.m_int = inputs["m_int"]      # Mass of components (kg)
-        self.c_p_int = inputs["c_p_int"]  # Specific heat capacity (J/(kg·K))
+        # Heat sink and PCM specs
+        self.T_equi_pcm = inputs["T_equi_pcm"]
+        self.pcm_latent_heat = inputs["pcm_latent_heat"]
+        # self.sink_length = inputs["sink_length"]
+        self.sink_height = inputs["sink_height"]
+        self.sink_thickness = inputs["sink_thickness"]
+        self.sink_base = inputs["sink_base"]
+        self.sink_density = inputs["sink_density"]
 
-        # Exposure time in deploy region (s)
-        self.t_exposure = inputs["time_deploy"] + inputs["time_ascent"] + inputs["time_descent"]  # assuming exposure includes ascent and descent phases
-        # Cruise leg duration (s) for both outbound and return
-        self.t_cruise_max = inputs["time_uav_max"] - self.t_exposure  
-        self.t_cruise_min = inputs["time_uav_min"] - self.t_exposure
-        # Maximum thermal power available (positive = heating, negative = cooling) (W)
-        self.Q_therm = - inputs["power_thermal_required"]     # Maximum heating/cooling capacity (W)
-
+        # Temperatures
+        self.T_amb_onsite = inputs["T_amb_onsite"]
+        self.T_amb_enroute = inputs["T_amb_enroute"]
+        self.T_int = inputs["T_int"]
 
     # ~~~ Intermediate Functions ~~~
 
-    def _compute_resistances(self) -> float:
-        '''Compute total thermal resistance (K/W).'''
-        R_Ti = self.t_shell / (self.k_Ti * self.A_heat_shell)
-        R_ins = (self.t_insulation / (self.k_insulation * self.A_heat_shell)) if self.include_insulation else 0.0
-        R_conv = 1.0 / (self.heat_coeff_ext * self.A_heat_shell)
-        return R_Ti + R_ins + R_conv
+    def Q_env_leak(self, time: float, T_amb: float, insulation_thickness: float,) -> float:
 
-    # ~~~ Output functions ~~~
+        # Thermal resistance per unit effective surface area
+        R_total_wing = (2 * (self.thickness_alu_wing / self.conductivity_alu)) + (self.thickness_foam_wing / self.conductivity_foam) + (insulation_thickness / self.conductivity_insulation) # K/W
+        R_total_fuselage = (2 * self.thickness_alu_fuselage / self.conductivity_alu) + (self.thickness_foam_fuselage / self.conductivity_foam) + (insulation_thickness / self.conductivity_insulation) # K/W
 
-    def get_cruise_thermal_power(self) -> float:
+        # Heat entering the wing due to outside temperature
+        heat_env_leak_wing = (T_amb - self.T_int) * self.wing_eff_area * (1 / R_total_wing) # W
+        Q_env_leak_wing = heat_env_leak_wing * time # J
+
+        # Heat entering the fuselage due to outside temperature
+        heat_env_leak_fuselage = (T_amb - self.T_int) * self.fuselage_eff_area * (1 / R_total_fuselage) # W
+        Q_env_leak_fuselage = heat_env_leak_fuselage * time # J
+
+        # Total heat entering the UAV due to outside temperature
+        heat_env_leak = heat_env_leak_wing + heat_env_leak_fuselage
+        Q_env_leak = Q_env_leak_wing + Q_env_leak_fuselage
+
+        return heat_env_leak, Q_env_leak 
+
+    def battery_heat_dissipated(self, power_required: float, time: float,) -> float:
         '''
-        Thermal power (W) to hold cruise set-point at cruise ambient.
-        Positive = heating, Negative = cooling.
+        Return the heat dissipated during a specific phase by all batteries and the total heat energy from all batteries based on the power required and duration
         '''
-        R_tot = self._compute_resistances()
-        # In steady-state, 0 = heat_int + (T_amb - T_set)/R_tot + Q_hold
-        # So Q_hold = - [heat_int + (T_amb - T_set)/R_tot]
-        return - (self.heat_int + (self.T_amb_cruise - self.T_int_cruise_set) / R_tot)
-
-    def simulate_deploy_phase(self, Q_therm: float) -> float:
-        '''
-        Simulate the 1-s iterative deploy phase and return the exit internal temperature.
-        Q_therm > 0 means heating, Q_therm < 0 means cooling.
-        '''
-        R_tot = self._compute_resistances()
-        # Compute the hold power (negative = cooling) at T_int_init in deploy ambient:
-        Q_hold_initial = - (self.heat_int + (self.T_amb_deploy - self.T_int_init) / R_tot)
-        # If maximum available thermal power is <= Q_hold_initial (i.e. strong enough cooling),
-        # clamp at Q_hold_initial so the bay stays at T_int_init
-        if Q_therm <= Q_hold_initial:
-            self.outputs["deploy_hold_power"] = Q_hold_initial
-            return self.T_int_init
-
-        # Otherwise run full-power iteration and clamp each second if over‐heating or over‐cooling
-        T_current = self.T_int_init
-        for _ in range(int(self.t_exposure)):
-            # recompute the instantaneous hold power at this T_current
-            Q_hold = - (self.heat_int + (self.T_amb_deploy - T_current) / R_tot)
-            # If Q_therm <= Q_hold, then cooling capacity is enough to hold temperature
-            if Q_therm <= Q_hold:
-                self.outputs.setdefault("deploy_hold_power_times", []).append(Q_hold)
-                return T_current
-            # Otherwise integrate one second with the available Q_therm
-            dTdt = (self.heat_int + (self.T_amb_deploy - T_current) / R_tot + Q_therm) / (
-                self.m_int * self.c_p_int
-            )
-            T_current += dTdt
-        return T_current
-
-    def simulate_cruise_phase(self, T_start: float, Q_therm: float, duration: float) -> float:
-        '''
-        Simulate cruise-phase (1-s steps) from T_start over given duration, return end temperature.
-        Q_therm > 0 means heating, Q_therm < 0 means cooling.
-        '''
-        R_tot = self._compute_resistances()
-        T_current = T_start
-        for _ in range(int(duration)):
-            dTdt = (self.heat_int + (self.T_amb_cruise - T_current) / R_tot + Q_therm) / (
-                self.m_int * self.c_p_int
-            )
-            T_current += dTdt
-        return T_current
-
-    def get_deploy_region_exit_temperature(self) -> float:
-        '''Compute exit temperature from deploy zone under fixed max thermal power.'''
-        return self.simulate_deploy_phase(self.Q_therm)
-
-    def get_time_to_cruise_set(self) -> float:
-        '''
-        Iteratively compute time (s) to reach cruise set-point from deploy-exit under max thermal power.
-        Returns infinity if never reachable.
-        '''
-        T_exit = self.get_deploy_region_exit_temperature()
-        R_tot = self._compute_resistances()
-        T_current = T_exit
-        time_elapsed = 0.0
-        # Determine sign target: if bay above set, we need negative Q_therm to cool; if below, positive to heat.
-        while True:
-            if abs(T_current - self.T_int_cruise_set) < 1e-6:
-                return time_elapsed
-            # Compute instantaneous hold power at this T_current in cruise ambient
-            Q_hold = - (self.heat_int + (self.T_amb_cruise - T_current) / R_tot)
-            # If T_current > set and Q_therm >= Q_hold (i.e. heating or insufficient cooling), cannot reach from above
-            if T_current > self.T_int_cruise_set and self.Q_therm >= Q_hold:
-                return math.inf
-            # If T_current < set and Q_therm <= Q_hold (i.e. cooling or insufficient heating), cannot reach from below
-            if T_current < self.T_int_cruise_set and self.Q_therm <= Q_hold:
-                return math.inf
-            # Otherwise integrate one second
-            dTdt = (self.heat_int + (self.T_amb_cruise - T_current) / R_tot + self.Q_therm) / (
-                self.m_int * self.c_p_int
-            )
-            T_current += dTdt
-            time_elapsed += 1.0
-
-            # If we cross the set-point exactly, stop
-            if (dTdt < 0 and T_current <= self.T_int_cruise_set) or (dTdt > 0 and T_current >= self.T_int_cruise_set):
-                return time_elapsed
-
-    def get_required_thermal_for_zero_gain(self, tol: float = 0.1) -> float:
-        '''
-        Find minimum thermal power (W) such that, over the mission:
-          • Outbound cruise holds at T_int_init
-          • deploy zone and return cruise both run at this constant power
-        the final internal temperature equals the initial temperature.
-        Positive output = heating rating; negative = cooling rating.
-        '''
-        def mission_end_temp(Q_trial: float) -> float:
-            # 1) Outbound cruise: hold initial temp at cruise using just enough power
-            Q_cruise_hold = self.get_cruise_thermal_power()
-            T_mid = self.simulate_cruise_phase(self.T_int_init, Q_cruise_hold, self.t_cruise_min)
-            # 2) deploy zone: run at Q_trial
-            T_mid = self.simulate_deploy_phase(Q_trial)
-            # 3) Return cruise: run at Q_trial
-            T_end = self.simulate_cruise_phase(T_mid, Q_trial, self.t_cruise_min)
-            return T_end
-
-        # We search Q_trial between Q_low=0 (no active heating/cooling) and Q_high negative (strong cooling)
-        R_tot = self._compute_resistances()
-        Q_low = 0.0
-        T_low = mission_end_temp(Q_low) - self.T_int_init  # positive means bay ends above initial
-        # Large negative bound for strong cooling
-        Q_high = - (abs(self.heat_int + (self.T_amb_deploy - self.T_int_init) / R_tot) + 1000.0)
-        T_high = mission_end_temp(Q_high) - self.T_int_init  # negative means bay ends below initial
-
-        # If no-power case already ends at or below initial, zero active power needed
-        if T_low <= 0:
-            return 0.0
-        # If even strongest cooling cannot bring below initial, impossible
-        if T_high > 0:
-            return math.inf
-
-        # Bisection between Q_low (>=0) and Q_high (<0)
-        while abs(Q_high - Q_low) > tol:
-            Q_mid = 0.5 * (Q_low + Q_high)
-            T_mid = mission_end_temp(Q_mid) - self.T_int_init
-            if T_mid > 0:
-                Q_low = Q_mid
-            else:
-                Q_high = Q_mid
-        return 0.5 * (Q_low + Q_high)
-
-    def get_all(self) -> dict[str, float]:
-        '''Compute and return all thermal outputs (including required thermal rating for zero net gain).'''
-        self.outputs["Thermal_mass"] = self.m_int * self.c_p_int
-        self.outputs["Thermal_power_cruise"] = self.get_cruise_thermal_power()
-        self.outputs["Thermal_power_deploy"] = self.Q_therm
-        self.outputs["T_exit_deploy"] = self.get_deploy_region_exit_temperature()
-        self.outputs["Time_to_cruise_set"] = self.get_time_to_cruise_set()
-        self.outputs["Required_thermal_zero_gain"] = self.get_required_thermal_for_zero_gain()
+        battery_current = power_required / (self.battery_potential * self.n_battery) # A, current per battery
+        battery_heat = battery_current**2 * self.battery_resistance # W, heat dissipated per battery
+        phase_battery_heat = battery_heat * self.n_battery # W, heat dissipated for all batteries combined
+        phase_battery_Q = phase_battery_heat * time # J, heat energy generated by all batteries combined
         
-        # self.outputs["thickness_insulation"] = None
+        return phase_battery_heat, phase_battery_Q
+    
+    def winch_heat_dissipated(self) -> float:
+        '''
+        Return the heat dissipated and heat energy generated by the winch
+        '''
+        winch_heat = self.power_required_winch * (1 - self.winch_eff) # W
+        winch_Q = winch_heat * self.time_deploy # J
 
+        return winch_heat, winch_Q
+    
+    def processor_heat_dissipated(self, time: float,) -> float:
+        '''
+        Return the heat dissipated and heat energy generated by the processor
+        '''
+        return self.processor_heat_diss, (self.processor_heat_diss * time)
+    
+    def phase_heat_dissipated(self, power_required: float, time: float, phase: str,) -> float:
+        '''
+        Return the total heat dissipated and total heat energy generated per phase
+        '''
+        # Battery and processor heat and Q per phase
+        phase_batt_heat, phase_batt_Q = self.battery_heat_dissipated(power_required, time)
+        phase_processor_heat, phase_processor_Q = self.processor_heat_dissipated(time)
+        
+        # Total heat and Q per phase
+        phase_heat_dissipated, phase_Q = (phase_batt_heat + phase_processor_heat), (phase_batt_Q + phase_processor_Q)
 
+        # Add winch heat only in the deployment phase
+        if phase == "deploy":
+            winch_heat, winch_Q = self.winch_heat_dissipated()
+            phase_heat_dissipated += winch_heat
+            phase_Q += winch_Q
 
-        self.outputs["power_thermal_required"] = - self.get_required_thermal_for_zero_gain()  # Maximum thermal power rating (W)
-        self.outputs["max_required_energy_thermal"] = None  # max required energy for thermal at max range (Wh)
+        return phase_heat_dissipated, phase_Q
+    
+    def create_heat_dissipated(self):
+        '''
+        Create a dictionary containing all the significant heat contributions per phase from both within the fuselage as well as due to external conditions
+        '''
+        all_heat = {}
 
-        return self.outputs
+        all_heat['ascend'] = {}
+
+        all_heat['ascend']['batt_heat'], all_heat['ascend']['batt_Q'] = self.battery_heat_dissipated(self.power_required_VTOL, self.time_ascent)
+        all_heat['ascend']['processor_heat'], all_heat['ascend']['processor_Q'] = self.processor_heat_dissipated(self.time_ascent)
+        all_heat['ascend']['phase_heat'], all_heat['ascend']['phase_Q'] = self.phase_heat_dissipated(self.power_required_VTOL, self.time_ascent, phase='ascend')
+
+        all_heat['descend'] = {}
+
+        all_heat['descend']['batt_heat'], all_heat['descend']['batt_Q'] = self.battery_heat_dissipated(self.power_required_VTOL, self.time_descent)
+        all_heat['descend']['processor_heat'], all_heat['descend']['processor_Q'] = self.processor_heat_dissipated(self.time_descent)
+        all_heat['descend']['phase_heat'], all_heat['descend']['phase_Q'] = self.phase_heat_dissipated(self.power_required_VTOL, self.time_descent, phase='descend')
+
+        all_heat['cruise_max'] = {}
+
+        all_heat['cruise_max']['batt_heat'], all_heat['cruise_max']['batt_Q'] = self.battery_heat_dissipated(self.power_required_cruise, self.time_cruise_max)
+        all_heat['cruise_max']['processor_heat'], all_heat['cruise_max']['processor_Q'] = self.processor_heat_dissipated(self.time_cruise_max)
+        all_heat['cruise_max']['phase_heat'], all_heat['cruise_max']['phase_Q'] = self.phase_heat_dissipated(self.power_required_cruise, self.time_cruise_max, phase='cruise_max')
+
+        all_heat['cruise_min'] = {}
+
+        all_heat['cruise_min']['batt_heat'], all_heat['cruise_min']['batt_Q'] = self.battery_heat_dissipated(self.power_required_cruise, self.time_cruise_min)
+        all_heat['cruise_min']['processor_heat'], all_heat['cruise_min']['processor_Q'] = self.processor_heat_dissipated(self.time_cruise_min)
+        all_heat['cruise_min']['phase_heat'], all_heat['cruise_min']['phase_Q'] = self.phase_heat_dissipated(self.power_required_cruise, self.time_cruise_min, phase='cruise_min')
+
+        all_heat['scan'] = {}
+
+        all_heat['scan']['batt_heat'], all_heat['scan']['batt_Q'] = self.battery_heat_dissipated(self.power_required_hover, self.time_scan)
+        all_heat['scan']['processor_heat'], all_heat['scan']['processor_Q'] = self.processor_heat_dissipated(self.time_scan)
+        all_heat['scan']['phase_heat'], all_heat['scan']['phase_Q'] = self.phase_heat_dissipated(self.power_required_hover, self.time_scan, phase='scan')
+
+        all_heat['deploy'] = {}
+
+        all_heat['deploy']['batt_heat'], all_heat['deploy']['batt_Q'] = self.battery_heat_dissipated(self.power_required_hover, self.time_deploy)
+        all_heat['deploy']['processor_heat'], all_heat['deploy']['processor_Q'] = self.processor_heat_dissipated(self.time_deploy)
+        all_heat['deploy']['winch_heat'], all_heat['deploy']['winch_Q'] = self.winch_heat_dissipated()
+        all_heat['deploy']['phase_heat'], all_heat['deploy']['phase_Q'] = self.phase_heat_dissipated(self.power_required_hover, self.time_deploy, phase='deploy')
+
+        return all_heat
+    
+    def heat_dissipated_sink(self, sink_length: float, n_fin: float) -> float: 
+        '''
+        Input:
+        -> heat_int: Internal heat that needs to be dissipated during the return (cruise+descend) phase
+            Including:  - The heat dissipated by the components during the return phase (in W)
+                        - The heat energy stored in the PCM (in J), then divided over total return time (in W)
+        Intermediate:             
+        -> sink_area1: Outside surfaces of base and sides (see source)
+        -> sink_area2: Inside surfaces between fins (see source)
+            Source: https://www.heatsinkcalculator.com/blog/sizing-heat-sinks-with-a-few-simple-equations/
+        '''
+        beta = 2 / (self.T_equi_pcm - self.T_amb_enroute)  # 1/K, thermal expansion coefficient
+        fin_spacing_opt = 2.71 * ((self.g * beta * (self.T_equi_pcm - self.T_amb_enroute))/(sink_length * self.alpha * self.nu)) ** (-0.25) # m, optimal fin spacing
+
+        # Convection coefficient per area 
+        convection_coeff1 = 1.42 * ((self.T_equi_pcm - self.T_amb_enroute) / sink_length)**0.25 # W/(m^2 K), for area1 
+        convection_coeff2 = 1.32 * (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
+
+        # Heat sink areas
+        sink_area1 = self.sink_height * sink_length + self.sink_thickness * (2*self.sink_height + sink_length) # m^2
+        sink_area2 = sink_length * (2 * (self.sink_height - self.sink_base) + fin_spacing_opt) + 2 * (self.sink_thickness * self.sink_height + fin_spacing_opt * self.sink_base) + self.sink_thickness * sink_length
+        sink_area3 = sink_length * (self.sink_thickness * fin_spacing_opt) + 2 * (self.sink_thickness * self.sink_height + fin_spacing_opt * self.sink_base)
+        
+        # Fixed heat loss from sink_area1
+        heat_dissipated_sink_c1 = 2 * convection_coeff1 * sink_area1 * (self.T_equi_pcm - self.T_amb_enroute)
+        heat_dissipated_sink_r1 = 2 * self.epsilon * self.sigma * sink_area1 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
+
+        heat_dissipated_sink_fixed = heat_dissipated_sink_c1 + heat_dissipated_sink_r1
+        
+        # Heat loss per fin gap
+        heat_dissipated_sink_c2_unit = convection_coeff2 * sink_area2 * (self.T_equi_pcm - self.T_amb_enroute)
+        heat_dissipated_sink_r2_unit = self.epsilon * self.sigma * sink_area3 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
+        heat_dissipated_per_fin_gap = heat_dissipated_sink_c2_unit + heat_dissipated_sink_r2_unit
+
+        heat_dissipated_sink_flex = heat_dissipated_per_fin_gap * n_fin
+
+        # Total
+        total_heat_dissipated_sink = heat_dissipated_sink_fixed + heat_dissipated_sink_flex
+
+        return fin_spacing_opt, total_heat_dissipated_sink
+    
+    def simulate(self, x) -> float:
+        
+        sink_length, n_fin, insulation_thickness = x
+        all_heat = self.create_heat_dissipated()
+        
+        # Times
+        time_onsite = self.time_scan + self.time_descent + self.time_deploy + self.time_ascent
+        # time_approach = self.time_ascent + self.time_cruise_min
+        time_return = self.time_cruise_min + self.time_descent
+
+        # Heat and heat energy entering due to outside temperature
+        _, Q_env_onsite = self.Q_env_leak(time_onsite, self.T_amb_onsite, insulation_thickness) # J
+        # heat_env_approach, Q_env_approach = self.Q_env_leak(time_approach, self.T_amb_enroute) # W, J, same as return if time_ascent = time_descent
+        heat_env_return, Q_env_return = self.Q_env_leak(time_return, self.T_amb_enroute, insulation_thickness=insulation_thickness) # W, J 
+
+        # Heat and heat energy entering due to internal components 
+        # heat_int_approach = sum([all_heat[ph]['phase_heat'] for ph in ['ascend', 'cruise_min']])
+        heat_int_return = sum([all_heat[ph]['phase_heat'] for ph in ['cruise_min', 'descend']])
+
+        Q_int_onsite = sum([all_heat[ph]['phase_Q'] for ph in ['scan', 'descend', 'deploy', 'ascend']])
+        # Q_int_approach = sum([all_heat[ph]['phase_Q'] for ph in ['ascend', 'cruise_min']])
+        # Q_int_return = sum([all_heat[ph]['phase_Q'] for ph in ['cruise_min', 'descent']])
+
+        # Total heat and heat energy produced 
+        total_Q_onsite = Q_int_onsite + Q_env_onsite
+        total_heat_return = heat_int_return + heat_env_return + (Q_env_onsite / time_return)
+
+        # Heat sink 
+        fin_spacing_opt, total_heat_dissipated_sink = self.heat_dissipated_sink(sink_length, n_fin)
+        sink_width = (n_fin - 1) * fin_spacing_opt + n_fin * self.sink_thickness # m, total heat sink width
+
+        # Mass calculations
+        ''' If the heat sink does not dissipate the heat required to return to the T_int, a penalty is applied '''
+        pcm_mass = total_Q_onsite / self.pcm_latent_heat
+        insulation_mass = insulation_thickness * (self.wing_eff_area + self.fuselage_eff_area) * self.insulation_density
+        sink_mass = (sink_width * sink_length * self.sink_height - (n_fin - 1)* (fin_spacing_opt * sink_length * (self.sink_height - self.sink_base))) * self.sink_density
+
+        if total_heat_dissipated_sink < total_heat_return:
+            return 1e6
+
+        total_mass = insulation_mass + pcm_mass + sink_mass
+
+        # Test prints
+        # print('pcm_mass:', pcm_mass, '\n sink_mass:', sink_mass, '\n insulation_mass:', insulation_mass)
+        # print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
+
+        return total_mass
+
+    def optimize(self):
+        '''
+        Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
+        '''
+        bounds = [(0.01, 0.5), (1., 500.), (0., 0.05)]  # sink_length (m), n_fin (-), insulation_thickness (m)
+        x0 = [0.1, 5, 0.] # initial: sink_length (m), n_fin (-), insulation_thickness (m)
+        total_mass_result =  minimize(self.simulate, x0=x0, bounds=bounds, method="SLSQP")
+        return total_mass_result
+
+    # ~~~ Output functions ~~~ 
+
+    # def get_all(self) -> dict[str, float]:
+    #     '''
+    #     Outputs:
+        
+    #     '''
+    #     return outputs
 
 
 if __name__ == '__main__':
-    # Sanity check with example inputs:
 
-    thermal = Thermal(funny_inputs)
-    outputs = thermal.get_all()
-    # Print each output on its own line
-    for key, value in outputs.items():
-        print(f"{key}: {value}")
+    ther = Thermal(funny_inputs)
 
-    # --- Simulation and plotting ---
-    dt = 1.0  # s interval
-    phases = [
-        ("cruise", funny_inputs["t_cruise"]),
-        ("deploy", funny_inputs["t_exposure"]),
-        ("cruise", funny_inputs["t_cruise"])
-    ]
-    times, temps, power_req = [], [], []
-    T = funny_inputs["T_int_init"]
-    R_tot = thermal._compute_resistances()
-    Q_cruise_hold = outputs["Thermal_power_cruise"]
+    # Print statements
+    # print('Dict/ total:', ther.create_heat_dissipated()['deploy'])
+    # print('\n Winch', ther.winch_heat_dissipated())
+    # print(ther.total_heat_storage())
+    print(ther.optimize())
 
-    for phase, duration in phases:
-        if phase == "cruise":
-            for _ in range(int(duration / dt)):
-                current_time = len(times) * dt
-                times.append(current_time)
-                if current_time < funny_inputs["t_cruise"]:
-                    T_amb = funny_inputs["T_amb_cruise"]
-                    Q_command = Q_cruise_hold
-                else:
-                    T_amb = funny_inputs["T_amb_cruise"]
-                    if T > funny_inputs["T_int_init"]:
-                        Q_command = funny_inputs["Q_therm"]
-                    else:
-                        Q_command = Q_cruise_hold
-                dTdt = (funny_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
-                    funny_inputs["m_int"] * funny_inputs["c_p_int"]
-                )
-                T += dTdt * dt
-                temps.append(T)
-                power_req.append(Q_command)
 
-        elif phase == "deploy":
-            for _ in range(int(duration / dt)):
-                current_time = len(times) * dt
-                times.append(current_time)
-                T_amb = funny_inputs["T_amb_deploy"]
-                Q_hold = - (funny_inputs["heat_int"] + (T_amb - T) / R_tot)
-                if funny_inputs["Q_therm"] <= Q_hold:
-                    Q_command = Q_hold
-                    temps.append(T)
-                    power_req.append(Q_command)
-                    continue
-                Q_command = funny_inputs["Q_therm"]
-                dTdt = (funny_inputs["heat_int"] + (T_amb - T) / R_tot + Q_command) / (
-                    funny_inputs["m_int"] * funny_inputs["c_p_int"]
-                )
-                T += dTdt * dt
-                temps.append(T)
-                power_req.append(Q_command)
 
-    # Plot internal temperature
-    plt.figure()
-    plt.plot(times, temps)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Internal Temperature (°C)')
-    plt.title('Internal Temperature Over Mission')
-    plt.savefig('DetailedDesign/subsystems/Plots/internal_temperature.png')
+    # ~~~ OLD snippets ~~~
 
-    # Plot commanded thermal power over mission
-    plt.figure()
-    plt.plot(times, power_req)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Commanded Thermal Power (W)')
-    plt.title('Thermal Power Demand Over Mission')
-    plt.savefig('DetailedDesign/subsystems/Plots/thermal_power_demand.png')
+    # from DetailedDesign.inputs import initial_inputs
+
+    # initial_inputs.update(funny_inputs)
+
+    # prop = Propulsion(funny_inputs)
+    # funny_inputs = prop.get_all()
+
+    # print(funny_inputs['power_required_VTOL'])
+
+    # inputs = {}
+    # power = Power(funny_inputs, Hardware(inputs, hardware_funny_inputs))
+    # funny_inputs = power.get_all()
+
+    # deployment = Deployment(funny_inputs, strategy='perimeter', amt=funny_inputs['mission_perimeter'])
+    # funny_inputs = deployment.get_all()
+
+    # mission = Mission(initial_inputs)
+    # funny_inputs = mission.get_all()
+
+    # thermal = Thermal(funny_inputs)
+    # outputs = thermal.get_all() 
+
+    # def total_heat_storage(self):
+    #     '''
+    #     Compute the heat dissipated and heat energy generated during the hover + deployment phase in the "hot" zone.
+    #     In the "hot" zone, it is not possible to dissipate heat using the heat sink, hence all this heat needs to be stored in the PCM.
+
+    #     hover + deployment phase consists out of: scan > descend > deploy > ascend
+    #     '''
+    #     all_heat = self.create_heat_dissipated()
+        
+    #     total_heat_store = all_heat['scan']['phase_heat'] + all_heat['descend']['phase_heat'] + all_heat['deploy']['phase_heat'] + all_heat['ascend']['phase_heat']
+    #     total_Q_store = all_heat['scan']['phase_Q'] + all_heat['descend']['phase_Q'] + all_heat['deploy']['phase_Q'] + all_heat['ascend']['phase_Q']
+
+    #     return total_heat_store, total_Q_store
+    
+    # def total_heat_approach_min(self):
+    #     '''
+    #     Compute the heat dissipated and heat energy generated during the shortest approach.
+    #     All this heat has to be dissipated through the heat sink in this phase.
+        
+    #     Min. approach phase consists out of: ascend > cruise
+    #     '''
+    #     all_heat = self.create_heat_dissipated()
+ 
+    #     total_heat_approach_min = all_heat['ascend']['phase_heat'] + all_heat['cruise_min']['phase_heat']
+    #     total_Q_approach_min = all_heat['ascend']['phase_Q'] + all_heat['cruise_min']['phase_Q']
+
+    #     return total_heat_approach_min, total_Q_approach_min
+    
+    # def total_heat_return_min(self):
+    #     '''
+    #     Compute the heat dissipated and heat energy generated during the shortest return.
+    #     All this heat + the excess from the "hot" has to be dissipated through the heat sink in this phase.
+        
+    #     Min. return phase consists out of: cruise > descend
+    #     '''
+
+    #     all_heat = self.create_heat_dissipated()
+ 
+    #     total_heat_return_min = all_heat['cruise_min']['phase_heat'] + all_heat['descend']['phase_heat']
+    #     total_Q_return_min = all_heat['cruise_min']['phase_Q'] + all_heat['descend']['phase_Q']
+
+    #     return total_heat_return_min, total_Q_return_min
+
+    # def heat_sink_width(self, heat_int: float, sink_length: float) -> tuple[int, float]:
+    #     '''
+    #     Input:
+    #     -> heat_int: Internal heat that needs to be dissipated during the return (cruise+descend) phase
+    #         Including:  - The heat dissipated by the components during the return phase (in W)
+    #                     - The heat energy stored in the PCM (in J), then divided over total return time (in W)
+    #     Intermediate:             
+    #     -> sink_area1: Outside surfaces of base and sides (see source)
+    #     -> sink_area2: Inside surfaces between fins (see source)
+    #         Source: https://www.heatsinkcalculator.com/blog/sizing-heat-sinks-with-a-few-simple-equations/
+    #     '''
+    #     beta = 2 / (self.T_equi_pcm - self.T_amb_enroute)  # 1/K, thermal expansion coefficient
+    #     fin_spacing_opt = 2.71 * ((self.g * beta * (self.T_equi_pcm - self.T_amb_enroute))/(sink_length * self.alpha * self.nu)) ** (-0.25) # m, optimal fin spacing
+
+    #     # Convection coefficient per area 
+    #     convection_coeff1 = 1.42 * ((self.T_equi_pcm - self.T_amb_enroute) / sink_length)**0.25 # W/(m^2 K), for area1 
+    #     convection_coeff2 = 1.32 * (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
+
+    #     # Heat sink areas
+    #     sink_area1 = self.sink_height * sink_length + self.sink_thickness * (2*self.sink_height + sink_length) # m^2
+    #     sink_area2 = sink_length * (2 * (self.sink_height - self.sink_base) + fin_spacing_opt) + 2 * (self.sink_thickness * self.sink_height + fin_spacing_opt * self.sink_base) + self.sink_thickness * sink_length
+    #     sink_area3 = sink_length * (self.sink_thickness * fin_spacing_opt) + 2 * (self.sink_thickness * self.sink_height + fin_spacing_opt * self.sink_base)
+        
+    #     # Fixed heat loss from sink_area1
+    #     heat_dissipated_sink_c1 = 2 * convection_coeff1 * sink_area1 * (self.T_equi_pcm - self.T_amb_enroute)
+    #     heat_dissipated_sink_r1 = 2 * self.epsilon * self.sigma * sink_area1 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
+
+    #     heat_dissipated_sink_fixed = heat_dissipated_sink_c1 + heat_dissipated_sink_r1
+
+    #     # Remaining heat to be dissipated by fins
+    #     heat_dissipated_sink_remain = heat_int - heat_dissipated_sink_fixed
+
+    #     # Heat loss per fin gap
+    #     heat_dissipated_sink_c2_unit = convection_coeff2 * sink_area2 * (self.T_equi_pcm - self.T_amb_enroute)
+    #     heat_dissipated_sink_r2_unit = self.epsilon * self.sigma * sink_area3 * (self.T_equi_pcm**4 - self.T_amb_enroute**4)
+    #     heat_dissipated_per_fin_gap = heat_dissipated_sink_c2_unit + heat_dissipated_sink_r2_unit
+
+    #     # Outputs
+    #     n_fin = np.ceil(heat_dissipated_sink_remain / heat_dissipated_per_fin_gap) # -, number of fins (rounded up)
+    #     sink_width = (n_fin - 1) * fin_spacing_opt + n_fin * self.sink_thickness # m, total heat sink width
+
+    #     return fin_spacing_opt, n_fin, sink_width
+
+    # def simulate(self, x) -> float:
+        
+    #     sink_length, insulation_thickness = x
+    #     all_heat = self.create_heat_dissipated()
+        
+    #     # Times
+    #     time_onsite = self.time_scan + self.time_descent + self.time_deploy + self.time_ascent
+    #     time_approach = self.time_ascent + self.time_cruise_min
+    #     time_return = self.time_cruise_min + self.time_descent
+
+    #     # Heat and heat energy entering due to outside temperature
+    #     _, Q_env_onsite = self.Q_env_leak(time_onsite, self.T_amb_onsite, insulation_thickness) # J
+    #     # heat_env_approach, Q_env_approach = self.Q_env_leak(time_approach, self.T_amb_enroute) # W, J, same as return if time_ascent = time_descent
+    #     heat_env_return, Q_env_return = self.Q_env_leak(time_return, self.T_amb_enroute, insulation_thickness=insulation_thickness) # W, J 
+
+    #     # Heat and heat energy entering due to internal components 
+    #     # heat_int_approach = sum([all_heat[ph]['phase_heat'] for ph in ['ascend', 'cruise_min']])
+    #     heat_int_return = sum([all_heat[ph]['phase_heat'] for ph in ['cruise_min', 'descend']])
+
+    #     Q_int_onsite = sum([all_heat[ph]['phase_Q'] for ph in ['scan', 'descend', 'deploy', 'ascend']])
+    #     # Q_int_approach = sum([all_heat[ph]['phase_Q'] for ph in ['ascend', 'cruise_min']])
+    #     # Q_int_return = sum([all_heat[ph]['phase_Q'] for ph in ['cruise_min', 'descent']])
+
+    #     total_heat_onsite = Q_int_onsite + Q_env_onsite
+    #     total_heat_return = heat_int_return + heat_env_return + (Q_env_onsite / time_return)
+
+    #     pcm_mass = total_heat_onsite / self.pcm_latent_heat
+
+    #     fin_spacing_opt, n_fin, sink_width = self.heat_sink_width(total_heat_return, sink_length)
+
+    #     insulation_mass = insulation_thickness * (self.wing_eff_area + self.fuselage_eff_area) * self.insulation_density
+    #     sink_mass = (sink_width * sink_length * self.sink_height - (n_fin - 1)* (fin_spacing_opt * sink_length * (self.sink_height - self.sink_base))) * self.sink_density
+    #     total_mass = insulation_mass + pcm_mass + sink_mass
+
+    #     # Test prints
+    #     print('pcm_mass:', pcm_mass, '\n sink_mass:', sink_mass, '\n insulation_mass:', insulation_mass)
+    #     # print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
+
+    #     return total_mass
+
+    # def optimize(self):
+    #     '''
+    #     Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
+    #     '''
+    #     bounds = [(0.01, 0.5), (0., 0.05)]  # sink_length (m), insulation_thickness (m)
+    #     x0 = [0.1, 0.] # initial: sink_length (m), insulation_thickness (m)
+    #     total_mass_result =  minimize(self.simulate, x0=x0, bounds=bounds, method="SLSQP")
+    #     return total_mass_result

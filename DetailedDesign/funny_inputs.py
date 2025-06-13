@@ -16,6 +16,11 @@ constants_funny_inputs = {
     "rho_sea": 1.225,  # Density at sea level [kg/m^3]
     "mtow": 30 * 9.81,  # maximum takeoff weight [kg]
     "MTOW": 30 * 9.81,  # maximum takeoff weight [N]
+    "nu": 0.00001702,  # m^2/s, kinematic viscosity of air at ~300K
+    "alpha": 0.00002346,  # m^2/s, thermal diffusivity of air at ~300K
+    "k_air": 0.02662,  # W/(mK), thermal conductivity of air at ~300K
+    "epsilon": 0.85,  # -, emissivity of the heat sink surface
+    "sigma": 5.67e-8,  # W/(mK^4), Stefan–Boltzmann constant
 }
 
 funny_inputs.update(constants_funny_inputs)
@@ -79,6 +84,8 @@ deployment_funny_inputs = {
     "deployment_accuracy": 0.5,  # m, guesstimate
     "firebreak_width": 3,  # m
     "fuselage_size": 1.5,  # m, guesstimate
+    "mission_perimeter": 100, # m
+    "nr_aerogels": 30,
 }
 
 funny_inputs.update(deployment_funny_inputs)
@@ -101,7 +108,11 @@ funny_inputs.update(Constraints_funny_inputs)
 
 # ~~~ Operations ~~~
 
-operations_funny_inputs = {}
+operations_funny_inputs = {
+    "number_of_UAVs": 20,
+    "number_of_containers": 3,
+    "number_of_workers": 2,
+}
 
 funny_inputs.update(operations_funny_inputs)
 
@@ -179,10 +190,39 @@ funny_inputs.update(stab_n_con_funny_inputs)
 
 structures_funny_inputs = {
     "wing_span": 3.0,  # m, guesstimate
-    "mass_battery": 2.800,  # kg
-    "battery_length": 0.182,  # m
-    "mass_wing": 3,  # kg
-    "taper_ratio": 0.83,  # -
+    "mass_battery": 2.800 , # kg
+    "battery_length": 0.182, # m 
+    "mass_wing": 3, #kg
+    "taper_ratio": 0.83, #-
+    "propeller_diameter_VTOL": 0.66, #m
+    "mass_propulsion": 5, #kg
+    "propeller_mass_VTOL": 0.073, #kg
+    "y_prop": 0.66 / 2, #m, how far out from the root chord the propeller beam is placed. 
+    "VTOL_boom_thickness": 0.05, #m
+    "VTOL_boom_length": 0.66 * 2, #m, based on 1 propeller diameter between propellers
+    "titanium_density": 4.43 * 1000, #kg/m3
+    "titanium_E": 110 * 10**9, #kg/m3
+    "max_deflection_VTOL_boom": 0.02, #m, guesstimate
+    "load_factor": 3.5, #due to gusts
+    "fuselage_diameter": 0.4, # m
+    "max_shear_titanium": 760*10**6, #Pa
+    "max_stress_titanium": 1.1*10**9, #Pa
+
+    "conductivity_alu": 138, # W/(m*K)
+    "conductivity_foam": 0.04, # W/(m*K)
+    "shear_strength_foam": 1 * 10**6, #Pa
+    "shear_strength_alu": 138 * 10**6, #Pa 
+    "tensile_strength_foam": 1.7 * 10**6, #Pa
+    "tensile_strength_alu": 193 * 10**6, #Pa
+    "tensile_strength_reduction_temp": 0.9, #- https://firesciencereviews.springeropen.com/articles/10.1186/s40038-015-0007-5#:~:text=This%20concern%20is%20exacerbated%20for,(Langhelle%20and%20Amdahl%202001).
+    "E_foam": 0.123*10**9, #Pa
+    "E_alu": 70.3 * 10**9, #Pa
+    "density_alu": 2.68 * 1000, #kg/m3
+    "boom_inner_diameter": 0.015, #m
+
+    "root_chord": 0.458, #m
+    "first_spar_position": 0.14, #ratio
+    "second_spar_position": 0.5, #ratio
 }
 
 funny_inputs.update(structures_funny_inputs)
@@ -190,21 +230,51 @@ funny_inputs.update(structures_funny_inputs)
 # ~~~ Thermal control ~~~
 
 thermal_funny_inputs = {
-    "T_amb_deploy": 140.0,
-    "T_amb_cruise": 45.0,
-    "T_int_init": 30.0,
-    "T_int_cruise_set": 30.0,
-    "A_heat_shell": 0.5,
-    "t_shell": 0.002,
-    "k_Ti": 6.7,
+    # Theo's things
+    "T_amb_deploy": 140.0, # C
+    "T_amb_cruise": 45.0, # C
+    "T_int_init": 30.0, # C
+    "T_int_cruise_set": 30.0, # C
+    "shell_eff_area": 0.5, # m^2, effective heat transfer area
+    "shell_thickness": 0.002, # m, structural material thickness
+    "shell_k": 6.7, # W/(mK), structural material conductivity
     "include_insulation": True,
-    "t_insulation": 0.01,
-    "k_insulation": 0.017,
-    "heat_coeff_ext": 45.0,
-    "heat_int": 200.0,
-    "m_int": 10.0,
-    "c_p_int": 500.0,
+    "insulation_thickness": 0.01, # m
+    "insulation_k": 0.017, # W/(mK), insulation conductivity
+    "heat_coeff_ext": 45.0, # W/(m^2 K), external convective coefficient
+    "heat_int": 200.0, # W, internal dissipation
+    "m_int": 10.0,  # kg, mass of components
+    "c_p_int": 500.0, # J/(kgK), specific heat capacity
     "power_thermal_required": -300.0,  # Negative = cooling ; Positive = heating
+    
+    # Maria's things
+    "wing_eff_area": 1., # m, effective surface area for conduction
+    "fuselage_eff_area": 1., # m, effective surface area for conduction
+    "T_amb_onsite": 140. + 273.15, # K, temperature in the onsite deployment zone
+    "T_amb_enroute": 40. + 273.15, # K, ambient temperature outside of deployment zone
+    "T_int": 40. + 273.15, # K, temperature inside the fuselage+wing structure
+    "T_equi_pcm": 48. + 273.15, # K, temperature at which the PCM starts changing phase 
+    # "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
+    "sink_height": 0.02, # m, height of heat sink fins
+    "sink_thickness": 0.003, # m, thickness of heat sink fins
+    "sink_base": 0.004, # m, thickness of heat sink base
+    "sink_density": 2710., # kg/m^3
+    "thickness_foam_wing": 0.03, # m, thickness of the foam inbetween the aluminium shell
+    "thickness_alu_wing": 0.0008, # m, thickness of one layer of the aluminium shell structure
+    "thickness_foam_fuselage": 0.03, # m
+    "thickness_alu_fuselage": 0.0008, # m
+    "conductivity_alu": 237., # W / (mK)
+    "conductivity_foam": 0.03, # W / (mK)
+    "conductivity_insulation": 0.03, # W / (mK)
+    "insulation_density": 80, # kg/m^3
+    "pcm_latent_heat": 197000., # J/kg
+    "n_battery": 4,
+    "battery_capacity": 10., # Ah
+    "battery_potential": 44.4, # V
+    "battery_resistance": 0.015, # Ohm, based on guessing
+    "processor_heat_diss": 40., # W, guesstimate which should eventually come from the chosen processor
+    "winch_eff": 0.65, # Winch efficiency fraction (0.35=35% efficiency) used to compute the heat generated
+
 }
 
 funny_inputs.update(thermal_funny_inputs)
@@ -215,6 +285,7 @@ final_outputs = {
     "M_to": 30,
     "MTOW": 294.3,
     "R_max": 20000,
+    "R_min": 2000, #just a trial run
     "mission_type": "wildfire",
     "mission_perimeter": 1000,
     "number_of_UAVs": 20,
@@ -302,7 +373,7 @@ final_outputs = {
     "total_deployment_energy": 13120.0,
     "wire_mass": 0.2235,
     "deployment_system_mass": np.float64(12.904411288598778),
-    "nr_aerogels": np.float64(358.0),
+    "nr_aerogels": 358,
     "power_scan": 300,
     "power_idle": 100,
     "mass_hardware": 5.0,
@@ -339,10 +410,6 @@ final_outputs = {
     "volume_fueltank": 1.8296442000000004,
     "refills_for_mission": 0,
 }
-funny_inputs.update(final_outputs)
-
-
-funny_inputs.update()
 
 # ~~~ Hardware ~~~
 
@@ -408,3 +475,7 @@ hardware_funny_inputs = {
     "SATCOM_module_height": 0.017,  # m, height of the SATCOM module
     "SATCOM_module_x": None,  # m, x-location
 }
+
+
+actual_outputs = {key:final_outputs[key] for key in final_outputs if key not in funny_inputs}
+funny_inputs.update(actual_outputs)
