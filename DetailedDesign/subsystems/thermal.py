@@ -45,6 +45,7 @@ class Thermal:
         self.time_scan = inputs["time_scan"] # time during hover without having the winch activated
         self.time_deploy = inputs["time_deploy"] # time during hover with having the winch activated
         self.time_uav = inputs["time_uav"] # total time for one uav trip from ascend to return to nest
+        self.time_turnaround_min = inputs["time_turnaround"]
 
         # Battery parameters
         self.n_battery = inputs["n_battery"]
@@ -76,6 +77,7 @@ class Thermal:
         self.sink_thickness = inputs["sink_thickness"]
         self.sink_base = inputs["sink_base"]
         self.sink_density = inputs["sink_density"]
+        self.sink_time_margin = inputs["sink_time_margin"]
 
         # Temperatures
         self.T_amb_onsite = inputs["T_amb_onsite"]
@@ -84,11 +86,17 @@ class Thermal:
 
     # ~~~ Intermediate Functions ~~~
 
-    def Q_env_leak(self, time: float, T_amb: float, insulation_thickness: float,) -> float:
+    def create_R_value(self, insulation_thickness: float) -> float:
 
         # Thermal resistance per unit effective surface area
-        R_total_wing = (2 * (self.thickness_alu_wing / self.conductivity_alu)) + (self.thickness_foam_wing / self.conductivity_foam) + (insulation_thickness / self.conductivity_insulation) # K/W
-        R_total_fuselage = (2 * self.thickness_alu_fuselage / self.conductivity_alu) + (self.thickness_foam_fuselage / self.conductivity_foam) + (insulation_thickness / self.conductivity_insulation) # K/W
+        R_total_wing = (2 * (self.thickness_alu_wing / self.conductivity_alu)) + (insulation_thickness / self.conductivity_insulation) # + (self.thickness_foam_wing / self.conductivity_foam) # K/W
+        R_total_fuselage = (2 * self.thickness_alu_fuselage / self.conductivity_alu) + (insulation_thickness / self.conductivity_insulation) # (self.thickness_foam_fuselage / self.conductivity_foam) # K/W
+        
+        return R_total_fuselage, R_total_wing
+
+    def Q_env_leak(self, time: float, T_amb: float, insulation_thickness: float) -> float:
+        
+        R_total_fuselage, R_total_wing = self.create_R_value(insulation_thickness)
 
         # Heat entering the wing due to outside temperature
         heat_env_leak_wing = (T_amb - self.T_int) * self.wing_eff_area * (1 / R_total_wing) # W
@@ -207,7 +215,7 @@ class Thermal:
         '''
         beta = 2 / (self.T_equi_pcm - self.T_amb_enroute)  # 1/K, thermal expansion coefficient
         fin_spacing_opt = 2.71 * ((self.g * beta * (self.T_equi_pcm - self.T_amb_enroute))/(sink_length * self.alpha * self.nu)) ** (-0.25) # m, optimal fin spacing
-
+        
         # Convection coefficient per area 
         convection_coeff1 = 1.42 * ((self.T_equi_pcm - self.T_amb_enroute) / sink_length)**0.25 # W/(m^2 K), for area1 
         convection_coeff2 = 1.32 * (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
@@ -256,11 +264,13 @@ class Thermal:
 
         Q_int_onsite = sum([all_heat[ph]['phase_Q'] for ph in ['scan', 'descend', 'deploy', 'ascend']])
         # Q_int_approach = sum([all_heat[ph]['phase_Q'] for ph in ['ascend', 'cruise_min']])
-        # Q_int_return = sum([all_heat[ph]['phase_Q'] for ph in ['cruise_min', 'descent']])
+        Q_int_return = sum([all_heat[ph]['phase_Q'] for ph in ['cruise_min', 'descend']])
 
         # Total heat and heat energy produced 
         total_Q_onsite = Q_int_onsite + Q_env_onsite
-        total_heat_return = heat_int_return + heat_env_return + (Q_env_onsite / time_return)
+        total_Q_return = Q_int_return + Q_env_return + total_Q_onsite # Total heat produced on the return 
+        # total_heat_return = heat_int_return + heat_env_return + (total_Q_onsite / time_return)
+        heat_dissipated_req_sink = total_Q_return / (time_return + self.time_turnaround_min + self.sink_time_margin)
 
         # Heat sink 
         fin_spacing_opt, total_heat_dissipated_sink = self.heat_dissipated_sink(sink_length, n_fin)
@@ -272,24 +282,34 @@ class Thermal:
         insulation_mass = insulation_thickness * (self.wing_eff_area + self.fuselage_eff_area) * self.insulation_density
         sink_mass = (sink_width * sink_length * self.sink_height - (n_fin - 1)* (fin_spacing_opt * sink_length * (self.sink_height - self.sink_base))) * self.sink_density
 
-        if total_heat_dissipated_sink < total_heat_return:
-            return 1e6
-
         total_mass = insulation_mass + pcm_mass + sink_mass
 
         # Test prints
         # print('pcm_mass:', pcm_mass, '\n sink_mass:', sink_mass, '\n insulation_mass:', insulation_mass)
-        # print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
+        print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
 
+        return total_mass, total_heat_dissipated_sink, heat_dissipated_req_sink
+    
+    def objective(self, x) -> float:
+        total_mass, _, _ = self.simulate(x)
+        
         return total_mass
+
+    def constraint(self, x) -> float:
+        _, total_heat_dissipated_sink, heat_dissipated_req_sink = self.simulate(x)
+        
+        return total_heat_dissipated_sink - heat_dissipated_req_sink
 
     def optimize(self):
         '''
         Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
         '''
-        bounds = [(0.01, 0.5), (1., 500.), (0., 0.05)]  # sink_length (m), n_fin (-), insulation_thickness (m)
-        x0 = [0.1, 5, 0.] # initial: sink_length (m), n_fin (-), insulation_thickness (m)
-        total_mass_result =  minimize(self.simulate, x0=x0, bounds=bounds, method="SLSQP")
+        x0 = [0.1, 5, 0.005] # initial: sink_length (m), n_fin (-), insulation_thickness (m)
+        bounds = [(0.01, 0.5), (1., 1000.), (0.002, 0.01)]  # sink_length (m), n_fin (-), insulation_thickness (m)
+        constraints = {'type': 'ineq', 'fun': self.constraint}
+        
+        total_mass_result =  minimize(self.objective, x0=x0, bounds=bounds, constraints=constraints, method="SLSQP")
+        
         return total_mass_result
 
     # ~~~ Output functions ~~~ 
