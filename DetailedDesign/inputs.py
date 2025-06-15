@@ -204,8 +204,8 @@ thermal_inputs = {
     + 273.15,  # K, temperature at which the PCM starts changing phase
     # "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
     "sink_height": 0.02,  # m, height of heat sink fins
-    "sink_thickness": 0.0005,  # m, thickness of heat sink fins
-    "sink_base": 0.001,  # m, thickness of heat sink base
+    "sink_thickness": 0.001,  # m, thickness of heat sink fins
+    "sink_base": 0.0005,  # m, thickness of heat sink base
     "sink_density": 2710.0,  # kg/m^3
     "sink_time_margin": 30,  # s, this is extra downtime for the UAVs on ground to reduce heat sink size
     "thickness_foam_wing": 0.0,  # 0.03, # m, thickness of the foam inbetween the aluminium shell
