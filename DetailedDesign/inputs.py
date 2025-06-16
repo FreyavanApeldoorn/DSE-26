@@ -195,23 +195,23 @@ inputs.update(structures_inputs)
 # ~~~ Thermal control ~~~ initial inputs for thermal control sizing
 
 thermal_inputs = {
-    "wing_eff_area": 0.75,  # m, effective surface area for conduction
-    "fuselage_eff_area": 2.01,  # 7.04, # m, effective surface area for conduction
+    "wing_eff_area": 1.24,  # m, effective surface area for conduction
+    "fuselage_eff_area": 0.65,  # 7.04, # m, effective surface area for conduction
     "T_amb_onsite": 140.0 + 273.15,  # K, temperature in the onsite deployment zone
     "T_amb_enroute": 35.0 + 273.15,  # K, ambient temperature outside of deployment zone
-    "T_int": 40.0 + 273.15,  # K, temperature inside the fuselage+wing structure
+    "T_int": 45.0 + 273.15,  # K, temperature inside the fuselage+wing structure
     "T_equi_pcm": 48.0
     + 273.15,  # K, temperature at which the PCM starts changing phase
     # "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
-    "sink_height": 0.02,  # m, height of heat sink fins
-    "sink_thickness": 0.001,  # m, thickness of heat sink fins
+    "sink_height": 0.04,  # m, height of heat sink fins
+    "sink_thickness": 0.0005,  # m, thickness of heat sink fins
     "sink_base": 0.0005,  # m, thickness of heat sink base
-    "sink_density": 2710.0,  # kg/m^3
+    "sink_density": 2700.0,  # kg/m^3
     "sink_time_margin": 30,  # s, this is extra downtime for the UAVs on ground to reduce heat sink size
     "thickness_foam_wing": 0.0,  # 0.03, # m, thickness of the foam inbetween the aluminium shell
     "thickness_alu_wing": 0.00078,  # m, thickness of one layer of the aluminium shell structure
     "thickness_foam_fuselage": 0.0,  # 0.03, # m
-    "thickness_alu_fuselage": 0.00026,  # m
+    "thickness_alu_fuselage": 0.00078,  # m
     "conductivity_alu": 0.36,  # 237., # W / (mK)
     "conductivity_foam": 0.0,  # 0.03, # W / (mK)
     "conductivity_insulation": 0.012,  # W / (mK)
