@@ -24,7 +24,8 @@ class UAV:
         self.hardware = hardware
         self.iterations = iterations
         self.verbose = verbose
-        
+    
+
         self.history = history
         if self.history:
             self.history_data = self.outputs.copy()
@@ -48,11 +49,11 @@ class UAV:
 
             #stab_n_con = StabnCon()
             
-            aerodynamics = Aerodynamics(outputs, self.hardware)
-            outputs = aerodynamics.get_all()
+            # aerodynamics = Aerodynamics(outputs, self.hardware)
+            # outputs = aerodynamics.get_all()
 
-            structures = Structures(outputs, self.hardware)
-            outputs = structures.get_all()
+            # structures = Structures(outputs, self.hardware)
+            # outputs = structures.get_all()
 
             #thermal = Thermal(outputs)
             #outputs = thermal.get_all()

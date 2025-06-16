@@ -29,7 +29,7 @@ history = False
 outputs = inputs.copy()  # Initialize outputs with inputs
 
 hardware = Hardware(inputs, components)
-outputs = hardware.get_all()
+component = hardware.get_all()
 
 
 for _ in range(total_iterations):
@@ -43,10 +43,10 @@ for _ in range(total_iterations):
     mission = Mission(outputs, verbose=False)
     outputs = mission.get_all()
 
-    uav = UAV(outputs, hardware, iterations=10, history=False, verbose=False)
+    uav = UAV(outputs, component, iterations=10, history=False, verbose=False)
     outputs = uav.get_all()
 
-    # nest = Nest(outputs)
+    # nest = Nest(outputs, component)
     # outputs = nest.get_all()
 
     print(f"Iteration percentage: {(_ + 1) / total_iterations * 100:.2f}%")
