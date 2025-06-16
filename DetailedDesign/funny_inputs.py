@@ -207,7 +207,7 @@ structures_funny_inputs = {
     "E_foam": 0.123*10**9, #Pa
     "E_alu": 70.3 * 10**9, #Pa
     "density_alu": 2.68 * 1000, #kg/m3
-    "boom_inner_diameter": 0.015 #m
+    "boom_inner_diameter": 0.03 #m
 }
 
 funny_inputs.update(structures_funny_inputs)

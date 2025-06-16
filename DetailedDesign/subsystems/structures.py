@@ -76,9 +76,14 @@ class Structures:
         self.density_alu = inputs['density_alu']
         self.boom_inner_diameter = inputs['boom_inner_diameter']
 
+        self.E_glass_fibre = 21.9*10**9 #Pa
+        self.density_glass_fibre = 1840 #kg/m3
+        self.max_shear_glass_fibre = 85*10**9
+        self.max_stress_glass_fibre = 304*10**6 # best orientation
+
 
         self.VTOL_boom_thickness = self.determine_VTOL_boom_thickness()
-        self.VTOL_boom_mass = (np.pi*(self.boom_inner_diameter + self.VTOL_boom_thickness)**2 - np.pi*self.boom_inner_diameter**2)*self.VTOL_boom_length*self.density_alu
+        self.VTOL_boom_mass = (np.pi*(self.boom_inner_diameter + self.VTOL_boom_thickness)**2 - np.pi*self.boom_inner_diameter**2)*self.VTOL_boom_length*self.density_glass_fibre
 
 
                 
@@ -313,7 +318,7 @@ class Structures:
         # Distributed load from the boom weight
 
         I_circle = (np.pi / 4)* ((self.boom_inner_diameter/2+self.VTOL_boom_thickness)**4 - (self.boom_inner_diameter/2)**4)
-        boom_weight = (0.5*self.VTOL_boom_thickness)**2 * np.pi * self.VTOL_boom_length * self.density_alu *9.81
+        boom_weight = (0.5*self.VTOL_boom_thickness)**2 * np.pi * self.VTOL_boom_length * self.density_glass_fibre *9.81
         #print('boom_mass', boom_weight / 9.81)
         W_boom = np.array([boom_weight / self.VTOL_boom_length for _ in y])
 
@@ -338,13 +343,14 @@ class Structures:
 
         M = np.concatenate((-M_left[:len(y)//2], -M_rev[::-1][len(y)//2:]))
 
-        deflection_left = -(1/(self.E_alu*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_left, x=y[:-2]), x=y[:-3])
-        deflection_rev = -(1/(self.E_alu*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_rev, x=y[:-2]), x=y[:-3])
+        deflection_left = -(1/(self.E_glass_fibre*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_left, x=y[:-2]), x=y[:-3])
+        deflection_rev = -(1/(self.E_glass_fibre*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_rev, x=y[:-2]), x=y[:-3])
 
         deflection = np.concatenate((deflection_rev[::-1][len(y)//2:], deflection_left[:len(y)//2]))
 
         if size_thickness:
             return max(deflection)
+    
 
         fig, axs = plt.subplots(4, 1, figsize=(10, 10), sharex=True)
 
@@ -379,12 +385,12 @@ class Structures:
         return None
     
     def determine_VTOL_boom_thickness(self) -> float:
-        t_range = np.linspace(0.001, 0.05, 100)
+        t_range = np.linspace(0.0001, 0.05, 1000)
         for t in t_range:
             self.VTOL_boom_thickness = t
             deflection = self.NVM_propeller_boom(size_thickness=True)
             if deflection <= self.max_deflection_VTOL_boom:
-                return round(t, 4) #rounded to half a mm
+                return round(t, 5)*1.5 #rounded to half a mm, 1.5 safety factor
         return None
     
     def determine_fuselage_thickness(self) -> float:
@@ -402,14 +408,14 @@ class Structures:
         V = 2 * max(abs(V_cruise), abs(V_VTOL))
         M = 2 * max(abs(M_cruise), abs(M_VTOL))
 
-        t_V = V / (self.max_shear_titanium*np.pi*self.fuselage_diameter)
-        t_M = (8*M) / (np.pi*self.fuselage_diameter**3*self.max_stress_titanium)
+        t_V = V / (self.max_shear_glass_fibre*np.pi*self.fuselage_diameter)
+        t_M = (8*M) / (np.pi*self.fuselage_diameter**3*self.max_stress_glass_fibre)
 
         # Because of manufacturing
-        if max(t_V, t_M) >= 0.001:
+        if max(t_V, t_M) >= 0.00026:
             return max(t_V, t_M)
         else:
-            return 0.001
+            return 0.00026
         
     def sandwich(self):
 
@@ -455,8 +461,9 @@ class Structures:
 if __name__ == "__main__":  # pragma: no cover
     a = Structures(fi)
     #print(a.determine_VTOL_boom_thickness())
-    a.NVM_VTOL()
-    a.NVM_cruise()
-    a.NVM_propeller_boom()
+    # a.NVM_VTOL()
+    # a.NVM_cruise()
+    # a.NVM_propeller_boom()
     # a.sandwich()
-    print(a.mass_battery)
+    print(a.VTOL_boom_thickness)
+    print(a.determine_fuselage_thickness())
