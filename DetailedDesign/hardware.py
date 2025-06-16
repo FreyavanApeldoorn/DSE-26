@@ -36,14 +36,25 @@ class Hardware:
         ]
 
         self.wildfire_sensor_power = self.hardware["wildfire_camera"]["wildfire_sensor_power"]
-        self.GPS_power = self.hardware["GPS"]["GPS_power"]
-        self.flight_controller_power = self.hardware["flight_controller"]["flight_controller_power"]
-        self.Mesh_network_module_power = self.hardware["Mesh_network_module"]["Mesh_network_module_power"]
-        self.SATCOM_module_power = self.hardware["SATCOM_module"]["SATCOM_module_power"]
-        self.OBC_power = self.hardware["OBC"]["OBC_power"]
-        self.winch_motor_power = self.hardware["winch_motor"]["Winch_motor_power"]  # W, power consumption of the winch motor
+        self.wildfire_sensor_voltage = self.hardware["wildfire_camera"]["wildfire_sensor_voltage"]
         self.oil_spill_sensor_power = self.hardware["oil_spill_camera"]["oil_sensor_power"]  # W, power consumption of the wildfire sensor
-
+        self.oil_spill_sensor_voltage = self.hardware["oil_spill_camera"]["oil_sensor_voltage"]
+        self.GPS_power = self.hardware["GPS"]["GPS_power"]
+        self.GPS_voltage = self.hardware["GPS"]["GPS_voltage"]
+        self.flight_controller_power = self.hardware["flight_controller"]["flight_controller_power"]
+        self.flight_controller_voltage = self.hardware["flight_controller"]["flight_controller_voltage"]
+        self.Mesh_network_module_power = self.hardware["Mesh_network_module"]["Mesh_network_module_power"]
+        self.Mesh_network_module_voltage = self.hardware["Mesh_network_module"]["Mesh_network_module_voltage"]
+        self.SATCOM_module_power = self.hardware["SATCOM_module"]["SATCOM_module_power"]
+        self.SATCOM_module_voltage = self.hardware["SATCOM_module"]["SATCOM_module_voltage"]
+        self.OBC_power = self.hardware["OBC"]["OBC_power"]
+        self.OBC_voltage = self.hardware["OBC"]["OBC_voltage"]
+        self.winch_motor_power_operation = self.hardware["winch_motor"]["Winch_motor_power_operation"]  # W, power consumption of the winch motor
+        self.winch_motor_power_idle = self.hardware["winch_motor"]["Winch_motor_power_idle"]  # W, power consumption of the winch motor in idle state
+        self.winch_motor_voltage = self.hardware["winch_motor"]["Winch_motor_voltage"]  # V, voltage of the winch motor
+        self.battery_maximum_peak_current = self.hardware["battery_maximum_peak_current"]  # A, maximum peak current of the battery
+        self.LTE_module_power = self.hardware["4G_LTE_module"]["4G_LTE_module_power"] 
+        self.LTE_module_voltage = self.hardware["4G_LTE_module"]["4G_LTE_module_voltage"]
     # ~~~ Intermediate Functions ~~~
 
     # def select_components(self):
@@ -107,9 +118,34 @@ class Hardware:
     def calculate_power_hardware_during_scan(self) -> float:
         """
         Calculates the total power consumption of the hardware components during the scan phase.
+
         """
-        power_hardware_scan = self.wildfire_sensor_power + self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power 
-        
+        power_hardware_scan = (
+            self.wildfire_sensor_power + 
+            self.GPS_power + 
+            self.flight_controller_power + 
+            self.Mesh_network_module_power + 
+            self.SATCOM_module_power + 
+            self.LTE_module_power +
+            self.OBC_power 
+        ) 
+        total_amperage_scan = (
+            self.wildfire_sensor_power / self.wildfire_sensor_voltage + 
+            self.GPS_power / self.GPS_voltage+ 
+            self.flight_controller_power / self.flight_controller_voltage + 
+            self.Mesh_network_module_power / self.Mesh_network_module_voltage + 
+            self.SATCOM_module_power / self.SATCOM_module_voltage + 
+            self.LTE_module_power / self.LTE_module_voltage +
+            self.winch_motor_power_idle / self.winch_motor_voltage +
+            self.OBC_power / self.OBC_voltage
+        )
+        # Check if the battery can handle the total amperage during the scan phase
+        if total_amperage_scan > self.battery_maximum_peak_current:
+            print(f"Total amperage during scan phase exceeds battery limit A")
+
+        else:
+            print(f"Total amperage during scan phase is within battery limit: {total_amperage_scan} A")
+
         return power_hardware_scan
     
     def calculate_power_hardware_during_deploy(self) -> float:
@@ -117,7 +153,29 @@ class Hardware:
         Calculates the total power consumption of the hardware components during the deploy phase.
         """
 
-        power_hardware_deploy = self.wildfire_sensor_power + self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power + self.winch_motor_power
+        power_hardware_deploy = ( 
+            self.wildfire_sensor_power + 
+            self.GPS_power + 
+            self.flight_controller_power + 
+            self.Mesh_network_module_power + 
+            self.SATCOM_module_power + 
+            self.OBC_power + 
+            self.winch_motor_power_operation
+        )
+        total_amperage_deploy = (
+            self.wildfire_sensor_power / self.wildfire_sensor_voltage + 
+            self.GPS_power / self.GPS_voltage + 
+            self.flight_controller_power / self.flight_controller_voltage + 
+            self.Mesh_network_module_power / self.Mesh_network_module_voltage + 
+            self.SATCOM_module_power / self.SATCOM_module_voltage + 
+            self.OBC_power / self.OBC_voltage + 
+            self.winch_motor_power_operation / self.winch_motor_voltage
+        )
+        # Check if the battery can handle the total amperage during the deploy phase
+        if total_amperage_deploy > self.battery_maximum_peak_current:
+            print(f"Total amperage during deploy phase exceeds battery limit A")
+        else:
+            print(f"Total amperage during deploy phase is within battery limit: {total_amperage_deploy} A")
         
         return power_hardware_deploy
     
@@ -125,10 +183,47 @@ class Hardware:
         """
         Calculates the total power consumption of the hardware components during the cruise phase.
         """
-        power_hardware_cruise =  self.GPS_power + self.flight_controller_power + self.Mesh_network_module_power + self.SATCOM_module_power + self.OBC_power 
+        power_hardware_cruise = (
+        self.GPS_power + 
+        self.flight_controller_power + 
+        self.Mesh_network_module_power + 
+        self.SATCOM_module_power + 
+        self.OBC_power +
+        self.LTE_module_power +
+        self.winch_motor_power_idle  # Assuming winch motor is idle during cruise
+        )
+        total_amperage_cruise = (
+            self.GPS_power / self.GPS_voltage + 
+            self.flight_controller_power / self.flight_controller_voltage + 
+            self.Mesh_network_module_power / self.Mesh_network_module_voltage + 
+            self.SATCOM_module_power / self.SATCOM_module_voltage + 
+            self.OBC_power / self.OBC_voltage + 
+            self.LTE_module_power / self.LTE_module_voltage +
+            self.winch_motor_power_idle / self.winch_motor_voltage
+        )
+        # Check if the battery can handle the total amperage during the cruise phase
+        if total_amperage_cruise > self.battery_maximum_peak_current:
+            print(f"Total amperage during cruise phase exceeds battery limit A")
+        else:
+            print(f"Total amperage during cruise phase is within battery limit: {total_amperage_cruise} A")
         
         return power_hardware_cruise
     
+    def calculate_power_hardware_cruise_return(self) -> float:
+        """
+        Calculates the total power consumption of the hardware components during the cruise phase for return to base."""
+        
+        power_hardware_cruise_return = (
+            self.GPS_power + 
+            self.flight_controller_power + 
+            self.Mesh_network_module_power + 
+            self.SATCOM_module_power + 
+            self.OBC_power +
+            self.LTE_module_power 
+            
+        )  # No winch motor on the return to base
+
+        return power_hardware_cruise_return
     
           
 

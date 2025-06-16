@@ -20,14 +20,11 @@ class Thermal:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
 
-        # deploy-region ambient temperature (°C)
-        self.T_amb_deploy = inputs["T_amb_deploy"]
-        # Cruise-region ambient temperature (°C)
-        self.T_amb_cruise = inputs["T_amb_cruise"]
-        # Initial internal temperature before deploy region (°C)
-        self.T_int_init = inputs["T_int_init"]
-        # Cruise internal set-point after deploy region (°C)
-        self.T_int_cruise_set = inputs["T_int_cruise_set"]
+        
+        self.T_amb_deploy = inputs["T_amb_deploy"] # deploy-region ambient temperature (°C)
+        self.T_amb_cruise = inputs["T_amb_cruise"]  # Cruise-region ambient temperature (°C)
+        self.T_int_init = inputs["T_int_init"]  # Initial internal temperature before deploy region (°C)
+        self.T_int_cruise_set = inputs["T_int_cruise_set"] # Cruise internal set-point after deploy region (°C)
 
         # Shell geometry and materials
         self.A_heat_shell = inputs["A_heat_shell"]    # Effective heat-transfer area (m²)
@@ -383,3 +380,25 @@ if __name__ == '__main__':
     plt.savefig('DetailedDesign/subsystems/Plots/thermal_power_demand.png')
 
     """
+#  ~~~ OLD THERMAL INPUTS ~~~
+# thermal_inputs = {
+#     "power_thermal_required": 10,  # W, power required for thermal control (initialized to a small value)
+#     "mass_thermal": 0.5,
+#     # inputs to be added to structures:
+#     "T_amb_deploy": 140.0,
+#     "T_amb_cruise": 45.0,
+#     "T_int_init": 30.0,
+#     "T_int_cruise_set": 30.0,
+#     "A_heat_shell": 0.5,
+#     "t_shell": 0.002,
+#     "k_Ti": 6.7,
+#     "include_insulation": True,
+#     "t_insulation": 0.01,  # THIS SHOULD BE MOVED TO SIZING IN THERMAL
+#     "k_insulation": 0.017,
+#     "heat_coeff_ext": 45.0,
+#     "heat_int": 200.0,
+#     "m_int": 10.0,  # COMES FROM HARDWARE
+#     "c_p_int": 500.0,
+# }
+
+# inputs.update(thermal_inputs)
