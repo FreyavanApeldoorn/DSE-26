@@ -329,11 +329,14 @@ stab_n_con_inputs = {
     # ───────────────────────────────────────────────────────────────────────
     # — Cruise motor + prop
     "motor_mass_cruise": 0.280,  # [kg] mass of the cruise motor
+    "motor_esc_cruise_mass": 0.110,  # [kg] mass of the cruise motor ESC
+    "motor_esc_cruise_x": 2.150,  # [m] x-location of the cruise motor
     "propeller_mass_cruise": 0.097,  # [kg] mass of the cruise propeller
     "motor_cruise_x": 2.150,  # [m] x-location of the cruise motor
     # — VTOL lift motors + props
     "motor_mass_VTOL": 0.280,  # [kg] mass of each VTOL motor
     "propeller_mass_VTOL": 0.097,  # [kg] mass of each VTOL propeller
+    "motor_esc_VTOL_mass": 0.110,  # [kg] mass of the cruise motor ESC
     "motor_front_VTOL_x": -0.551,  # [m] x-location of the front VTOL motor
     "motor_rear_VTOL_x": 0.974,  # [m] x-location of the rear VTOL motor
     # — Battery & power distribution

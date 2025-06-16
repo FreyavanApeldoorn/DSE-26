@@ -409,13 +409,14 @@ class StabCon:
             (self.CUAV_airlink_mass, self.CUAV_airlink_x),
             (self.fuselage_structural_mass, self.fuselage_structural_x_cg),
             (self.tailplane_structural_mass, self.tailplane_structural_x_cg),
+            (self.motor_esc_cruise_mass, self.motor_esc_cruise_x),
             
         ]
 
         # ---------------------------------------------------------------------
         # 3. Wing group (identical for all variants)
         # ---------------------------------------------------------------------
-        lift_motor_mass = self.motor_mass_VTOL + self.propeller_mass_VTOL
+        lift_motor_mass = self.motor_mass_VTOL + self.propeller_mass_VTOL + self.motor_esc_VTOL_mass
         wing_items = [
             (2 * lift_motor_mass, self.motor_front_VTOL_x),
             (2 * lift_motor_mass, self.motor_rear_VTOL_x),
@@ -757,6 +758,11 @@ if __name__ == "__main__":  # pragma: no cover
     plt.grid(True)
     plt.legend()
     plt.show()
+
+    user_input = float(input("Please enter the x_lemac/fuselage_length: "))
+    user_input2 = float(input("Please enter the x_cg_bar: "))
+    x_cg_location = user_input * stabcon.l_fus + user_input2 * stabcon.mac
+    print(f"The x_cg location is: {x_cg_location:.3f} m")
 
     """
 
