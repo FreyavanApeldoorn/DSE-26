@@ -2,7 +2,7 @@
 This is the inputs file, these should not be changed without communicating with the entire group.
 Only do this when your code is finished and verified, while working, use funny_inputs
 """
-
+ 
 import numpy as np
 
 inputs = {}
@@ -338,9 +338,11 @@ stab_n_con_inputs = {
     "motor_rear_VTOL_x": 0.974,  # [m] x-location of the rear VTOL motor
     # — Battery & power distribution
     "battery_mass": 3.619 * 2,  # [kg] mass of the battery (2 batteries)
-    "battery_x": 0.173,  # [m] x-location of the battery
+    "battery_x": 0.173,  # [m] x-location of the battery w.r.t leading edge wing
     "PDB_mass": 0.156,  # [kg] mass of the power distribution board
-    "PDB_x": 0.173,  # [m] x-location of the power distribution board
+    "PDB_x": 0.173,  # [m] x-location of the power distribution board w.r.t leading edge wing
+    "thermal_control_mass": 2.5,  # [kg] mass of the thermal control system
+    "thermal_control_x": 0.173,  # [m] x-location of the thermal control system w.r.t leading edge wing
     # ───────────────────────────────────────────────────────────────────────
     # Longitudinal stability & tailplane
     # ───────────────────────────────────────────────────────────────────────
