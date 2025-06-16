@@ -348,14 +348,14 @@ stab_n_con_inputs = {
     "fuselage_diameter": 0.4,  # [m] fuselage diameter
     "lh": 1.0,  # [m] wing AC → tail AC
     "mac": 0.42,  # [m] mean aerodynamic chord
-    "x_ac_bar_wing": 0.25,  # [m] wing AC from LE (25% MAC)
+    "x_ac_bar_wing": 0.105,  # [m] wing AC from LE (25% MAC)
     "CL_alpha_Ah": 0.08 * 180 / np.pi,  # [1/rad] finite wing lift-curve slope
     "CL_alpha_h": 0.06 * 180 / np.pi,  # [1/rad] tail lift-curve slope
     "d_epsilon_d_alpha": 0.3,  # downwash gradient [rad/rad]
     "Vh_V": 0.9**2,  # tail/wing velocity ratio
-    "Cm_ac_wing": -0.11,  # moment coeff. at wing AC
+    "Cm_ac_wing": -0.13,  # moment coeff. at wing AC
     "AR_h": 3.5,  # tail aspect ratio
-    "CL_A_h": 0.62,  # C_L aircraft-tail at cruise
+    "CL_A_h": 0.55,  # C_L aircraft-tail at cruise
     # ───────────────────────────────────────────────────────────────────────
     # Lateral/directional & vertical tail
     # ───────────────────────────────────────────────────────────────────────
