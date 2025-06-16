@@ -453,20 +453,24 @@ class StabCon:
             (self.Winch_motor_mass, self.Winch_motor_x),
             (self.motor_mass_cruise + self.propeller_mass_cruise, self.motor_cruise_x),
             (self.CUAV_airlink_mass, self.CUAV_airlink_x),
-            # (self.fuselage_structural_mass, self.fuselage_structural_x_cg),
-            # (self.tailplane_structural_mass, self.tailplane_structural_x_cg),
+            (self.fuselage_structural_mass, self.fuselage_structural_x_cg),
+            (self.tailplane_structural_mass, self.tailplane_structural_x_cg),
+            (self.motor_esc_cruise_mass, self.motor_esc_cruise_x),
         ]
 
         # ---------------------------------------------------------------------
         # 3. Wing group (identical for all variants)
         # ---------------------------------------------------------------------
-        lift_motor_mass = self.motor_mass_VTOL + self.propeller_mass_VTOL
+        lift_motor_mass = (
+            self.motor_mass_VTOL + self.propeller_mass_VTOL + self.motor_esc_VTOL_mass
+        )
         wing_items = [
             (2 * lift_motor_mass, self.motor_front_VTOL_x),
             (2 * lift_motor_mass, self.motor_rear_VTOL_x),
             (self.battery_mass, self.battery_x),
             (self.PDB_mass, self.PDB_x),
-            # (self.wing_structural_mass, self.wing_structural_x_cg),
+            (self.wing_structural_mass, self.wing_structural_x_cg),
+            (self.thermal_control_mass, self.thermal_control_x),
         ]
 
         # ---------------------------------------------------------------------
@@ -663,7 +667,9 @@ class StabCon:
         # Tail CL in a pull-up is approximated as −0.35 AR_h^(1/3)
         CL_h = -0.35 * self.AR_h ** (1.0 / 3.0)
         CL_Ah = self.CL_A_h  # aircraft lift coeff. (wing + body – tail)
-        Cm_ac = self.Cm_ac_wing  # aerodynamic-centre moment coefficient
+        Cm_ac = (
+            self.Cm_ac_wing
+        )  # aerodynamic-centre moment coefficient STILL ADD FUSELAGE contribution based on XFLR5
 
         ctrl_den = (CL_h / CL_Ah) * (self.lh / self.mac) * self.Vh_V
         sh_s_control = (x_cg_bar + (Cm_ac / CL_Ah - self.x_ac_bar_wing)) / ctrl_den
@@ -771,6 +777,7 @@ if __name__ == "__main__":  # pragma: no cover
     plt.grid(True)
     plt.legend()
     plt.show()
+    plt.close()
 
     sc_data = stabcon.scissor_plot_chat()
 
@@ -790,10 +797,10 @@ if __name__ == "__main__":  # pragma: no cover
     plt.plot(sc_data["x_cg_bar"], sc_data["sh_s_control"], "k-", label="Control")
 
     # Overlay the CG tracks for each payload case
-    for cfg, track in sc_data["cg_tracks"].items():
-        plt.plot(
-            track, sc_data["x_cg_bar"], label=f"{cfg} CG track"
-        )  # y-axis is same x_cg_bar
+    # for cfg, track in sc_data["cg_tracks"].items():
+    #     plt.plot(
+    #         track, sc_data["x_cg_bar"], label=f"{cfg} CG track"
+    #     )  # y-axis is same x_cg_bar
 
     plt.xlabel("Non-dimensional CG position, $(x_{cg}-x_{LE})/\\bar c$")
     plt.ylabel("$S_h/S$ or CG track")
@@ -803,6 +810,11 @@ if __name__ == "__main__":  # pragma: no cover
     plt.grid(True)
     plt.legend()
     plt.show()
+
+    user_input = float(input("Please enter the x_lemac/fuselage_length: "))
+    user_input2 = float(input("Please enter the x_cg_bar: "))
+    x_cg_location = user_input * stabcon.l_fus + user_input2 * stabcon.mac
+    print(f"The x_cg location is: {x_cg_location:.3f} m")
 
     """
 

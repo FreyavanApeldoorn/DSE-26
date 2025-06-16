@@ -329,33 +329,38 @@ stab_n_con_inputs = {
     # ───────────────────────────────────────────────────────────────────────
     # — Cruise motor + prop
     "motor_mass_cruise": 0.280,  # [kg] mass of the cruise motor
+    "motor_esc_cruise_mass": 0.110,  # [kg] mass of the cruise motor ESC
+    "motor_esc_cruise_x": 2.150,  # [m] x-location of the cruise motor
     "propeller_mass_cruise": 0.097,  # [kg] mass of the cruise propeller
     "motor_cruise_x": 2.150,  # [m] x-location of the cruise motor
     # — VTOL lift motors + props
     "motor_mass_VTOL": 0.280,  # [kg] mass of each VTOL motor
     "propeller_mass_VTOL": 0.097,  # [kg] mass of each VTOL propeller
+    "motor_esc_VTOL_mass": 0.110,  # [kg] mass of the cruise motor ESC
     "motor_front_VTOL_x": -0.551,  # [m] x-location of the front VTOL motor
     "motor_rear_VTOL_x": 0.974,  # [m] x-location of the rear VTOL motor
     # — Battery & power distribution
     "battery_mass": 3.619 * 2,  # [kg] mass of the battery (2 batteries)
-    "battery_x": 0.173,  # [m] x-location of the battery
+    "battery_x": 0.173,  # [m] x-location of the battery w.r.t leading edge wing
     "PDB_mass": 0.156,  # [kg] mass of the power distribution board
-    "PDB_x": 0.173,  # [m] x-location of the power distribution board
+    "PDB_x": 0.173,  # [m] x-location of the power distribution board w.r.t leading edge wing
+    "thermal_control_mass": 2.5,  # [kg] mass of the thermal control system
+    "thermal_control_x": 0.173,  # [m] x-location of the thermal control system w.r.t leading edge wing
     # ───────────────────────────────────────────────────────────────────────
     # Longitudinal stability & tailplane
     # ───────────────────────────────────────────────────────────────────────
     "l_fus": 2.15,  # [m] fuselage length
     "fuselage_diameter": 0.4,  # [m] fuselage diameter
-    "lh": 1.0,  # [m] wing AC → tail AC
+    "lh": 0.65,  # [m] wing AC → tail AC
     "mac": 0.42,  # [m] mean aerodynamic chord
     "x_ac_bar_wing": 0.25,  # [-] wing AC from LE (25% MAC)
     "CL_alpha_Ah": 0.08 * 180 / np.pi,  # [1/rad] finite wing lift-curve slope
     "CL_alpha_h": 0.06 * 180 / np.pi,  # [1/rad] tail lift-curve slope
     "d_epsilon_d_alpha": 0.3,  # downwash gradient [rad/rad]
     "Vh_V": 0.9**2,  # tail/wing velocity ratio
-    "Cm_ac_wing": -0.11,  # moment coeff. at wing AC
+    "Cm_ac_wing": -0.13,  # moment coeff. at wing AC
     "AR_h": 3.5,  # tail aspect ratio
-    "CL_A_h": 0.62,  # C_L aircraft-tail at cruise
+    "CL_A_h": 0.55,  # C_L aircraft-tail at cruise
     # ───────────────────────────────────────────────────────────────────────
     # Lateral/directional & vertical tail
     # ───────────────────────────────────────────────────────────────────────
