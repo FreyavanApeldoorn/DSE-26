@@ -379,13 +379,18 @@ class StabCon:
             ),
             "oil_spill": dict(
                 sensor=(self.oil_spill_sensor_mass, self.oil_spill_sensor_x),
-                payload=(0.0, 0.0),
+                payload=(self.payload_mass, self.payload_x),
                 buoy=(self.buoy_mass, self.buoy_x),
             ),
-            "no_payload": dict(
+            "no_payload_wildfire": dict(
                 sensor=(self.wildfire_sensor_mass, self.wildfire_sensor_x),
                 payload=(0.0, 0.0),
                 buoy=(0.0, 0.0),
+            ),
+            "no_payload_oil_spill": dict(
+                sensor=(self.oil_spill_sensor_mass, self.oil_spill_sensor_x),
+                payload=(0.0, 0.0),
+                buoy=(self.buoy_mass, self.buoy_x),
             ),
         }
 
@@ -401,6 +406,9 @@ class StabCon:
             (self.SATCOM_module_mass, self.SATCOM_module_x),
             (self.Winch_motor_mass, self.Winch_motor_x),
             (self.motor_mass_cruise + self.propeller_mass_cruise, self.motor_cruise_x),
+            (self.CUAV_airlink_mass, self.CUAV_airlink_x),
+            (self.fuselage_structural_mass, self.fuselage_structural_x_cg),
+            (self.tailplane_structural_mass, self.tailplane_structural_x_cg),
         ]
 
         # ---------------------------------------------------------------------
@@ -412,6 +420,7 @@ class StabCon:
             (2 * lift_motor_mass, self.motor_rear_VTOL_x),
             (self.battery_mass, self.battery_x),
             (self.PDB_mass, self.PDB_x),
+            (self.wing_structural_mass, self.wing_structural_x_cg),
         ]
 
         # ---------------------------------------------------------------------
@@ -601,7 +610,8 @@ class StabCon:
             * (self.lh / self.mac)
             * self.Vh_V  # already the squared velocity ratio
         )
-        sh_s_stability = (x_cg_bar - self.x_ac_bar_wing - static_margin) / stab_den
+        sh_s_stability = (x_cg_bar - self.x_ac_bar_wing + static_margin) / stab_den
+        sh_s_stability_no_margin = (x_cg_bar - self.x_ac_bar_wing) / stab_den
 
         # 3.   ——— Control requirement ———
         # Tail CL in a pull-up is approximated as −0.35 AR_h^(1/3)
@@ -622,6 +632,7 @@ class StabCon:
         return {
             "x_cg_bar": x_cg_bar,
             "sh_s_stability": sh_s_stability,
+            "sh_s_stability_no_margin": sh_s_stability_no_margin,
             "sh_s_control": sh_s_control,
             "cg_tracks": cg_tracks,
         }
@@ -715,7 +726,18 @@ if __name__ == "__main__":  # pragma: no cover
     sc_data = stabcon.scissor_plot_chat()
 
     # Plot the two sizing curves
-    plt.plot(sc_data["x_cg_bar"], sc_data["sh_s_stability"], "k--", label="Stability")
+    plt.plot(
+        sc_data["x_cg_bar"],
+        sc_data["sh_s_stability"],
+        "k--",
+        label="Stability + 5% Static Margin",
+    )
+    plt.plot(
+        sc_data["x_cg_bar"],
+        sc_data["sh_s_stability_no_margin"],
+        "k:",
+        label="Stability",
+    )
     plt.plot(sc_data["x_cg_bar"], sc_data["sh_s_control"], "k-", label="Control")
 
     # Overlay the CG tracks for each payload case
@@ -727,6 +749,8 @@ if __name__ == "__main__":  # pragma: no cover
     plt.xlabel("Non-dimensional CG position, $(x_{cg}-x_{LE})/\\bar c$")
     plt.ylabel("$S_h/S$ or CG track")
     plt.title("Scissor Plot with CG Tracks")
+    plt.xlim(-0.5, 1.5)
+    plt.ylim(0, 1.5)
     plt.grid(True)
     plt.legend()
     plt.show()

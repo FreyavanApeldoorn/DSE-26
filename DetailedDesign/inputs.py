@@ -271,72 +271,80 @@ stab_n_con_inputs = {
     # ───────────────────────────────────────────────────────────────────────
     # Mass & CG placeholders
     # ───────────────────────────────────────────────────────────────────────
+    "fuselage_structural_mass": 3,  # [kg] fuselage structure mass
+    "fuselage_structural_x_cg": 2.15 / 2,  # [m] fuselage CG location
+    "wing_structural_mass": 2.4 * 2,  # [kg] wing structure mass
+    "wing_structural_x_cg": 0.42 * 0.25,  # [m] wing CG location (25% MAC)
+    "tailplane_structural_mass": 1.67,  # [kg] tailplane structure mass
+    "tailplane_structural_x_cg": 2.15 - 0.35 * 0.75,  # [m] tailplane CG location,
     # → wildfire
-    "wildfire_sensor_mass": 0.0,
-    "wildfire_sensor_x": 0.0,
-    "wildfire_fuselage_mass": 0.0,
-    "wildfire_fuselage_x": 0.0,
-    "wildfire_wing_mass": 0.0,
-    "wildfire_wing_x": 0.0,
+    "wildfire_sensor_mass": 0.92,  # [kg] wildfire sensor mass
+    "wildfire_sensor_x": 0.172,  # [m] wildfire sensor CG location
+    "wildfire_fuselage_mass": 0.0,  # [kg] wildfire fuselage mass
+    "wildfire_fuselage_x": 0.0,  # [m] wildfire fuselage CG location
+    "wildfire_wing_mass": 0.0,  # [kg] wildfire wing mass
+    "wildfire_wing_x": 0.0,  # [m] wildfire wing CG location
     # → oil spill
-    "oil_spill_sensor_mass": 0.0,
-    "oil_spill_sensor_x": 0.0,
-    "oil_spill_fuselage_mass": 0.0,
-    "oil_spill_fuselage_x": 0.0,
-    "oil_spill_wing_mass": 0.0,
-    "oil_spill_wing_x": 0.0,
+    "oil_spill_sensor_mass": 0.905,  # [kg] oil spill sensor mass
+    "oil_spill_sensor_x": 0.172,  # [m] oil spill sensor CG location
+    "oil_spill_fuselage_mass": 0.0,  # [kg] oil spill fuselage mass
+    "oil_spill_fuselage_x": 0.0,  # [m] oil spill fuselage CG location
+    "oil_spill_wing_mass": 0.0,  # [kg] oil spill wing mass
+    "oil_spill_wing_x": 0.0,  # [m] oil spill wing CG location
     # → no payload
-    "no_payload_fuselage_mass": 0.0,
-    "no_payload_fuselage_x_cg": 0.0,
+    "no_payload_fuselage_mass": 0.0,  # [kg] no payload fuselage mass
+    "no_payload_fuselage_x_cg": 0.0,  # [m] no payload fuselage CG location
     # ───────────────────────────────────────────────────────────────────────
     # Payload & sensor modules
     # ───────────────────────────────────────────────────────────────────────
-    "payload_mass": 5.0,
-    "payload_x": 0.5,  # Blanket/payload bay
-    "buoy_mass": 0.5,
-    "buoy_x": 0.5,  # Oil-spill buoy
-    "wildfire_sensor_mass": 0.0,
-    "wildfire_sensor_x": 0.0,
-    "oil_spill_sensor_mass": 0.0,
-    "oil_spill_sensor_x": 0.0,
+    "payload_mass": 5.0,  # [kg] payload mass (aerogel blanket)
+    "payload_x": 1.08,  # [m] payload CG location (initially set to oil-spill buoy location)
+    "buoy_mass": 0.140 * 4,  # [kg] Oil-spill buoy mass (4 buoys)
+    "buoy_x": 1.08,  # [m] Buoy CG location (initially set to oil-spill buoy location)
+    "wildfire_sensor_mass": 0.92,  # [kg] Wildfire sensor mass
+    "wildfire_sensor_x": 0.172,  # [m] Wildfire sensor CG location
+    "oil_spill_sensor_mass": 0.905,  # [kg] Oil spill sensor mass
+    "oil_spill_sensor_x": 0.172,  # [m] Oil spill sensor CG location
     # ───────────────────────────────────────────────────────────────────────
     # Fuselage-mounted avionics & structure
     # ───────────────────────────────────────────────────────────────────────
-    "gymbal_connection_mass": 0.5,
-    "gymbal_connection_x": 0.5,
-    "flight_controller_mass": 0.5,
-    "flight_controller_x": 0.5,
-    "OBC_mass": 0.5,
-    "OBC_x": 0.5,
-    "GPS_mass": 0.5,
-    "GPS_x": 0.5,
-    "Mesh_network_module_mass": 0.5,
-    "Mesh_network_module_x": 0.5,
-    "SATCOM_module_mass": 0.5,
-    "SATCOM_module_x": 0.5,
-    "Winch_motor_mass": 0.5,
-    "Winch_motor_x": 0.5,
+    "gymbal_connection_mass": 0.070,  # [kg] mass of the gymbal connection
+    "gymbal_connection_x": 0.172,  # [m] CG location of the gymbal connection
+    "flight_controller_mass": 0.032,  # [kg] mass of the flight controller
+    "flight_controller_x": 0.567,  # [m] CG location of the flight controller
+    "OBC_mass": 0.7,  # [kg] mass of the on-board computer
+    "OBC_x": 0.659,  # [m] CG location of the on-board computer
+    "GPS_mass": 0.012,  # [kg] mass of the GPS module
+    "GPS_x": 0.113,  # [m] CG location of the GPS module
+    "Mesh_network_module_mass": 0.0365,  # [kg] mass of the mesh network module
+    "Mesh_network_module_x": 0.372,  # [m] CG location of the mesh network module
+    "SATCOM_module_mass": 0.036,  # [kg] mass of the SATCOM module
+    "SATCOM_module_x": 0.4605,  # [m] CG location of the SATCOM module
+    "Winch_motor_mass": 1.17,  # [kg] mass of the winch motor
+    "Winch_motor_x": 1.015,  # [m] CG location of the winch motor
+    "CUAV_airlink_mass": 0.052,  # [kg] mass of the CUAV airlink module
+    "CUAV_airlink_x": 0.280,  # [m] CG location of the CUAV airlink module
     # ───────────────────────────────────────────────────────────────────────
     # Propulsion & energy-storage
     # ───────────────────────────────────────────────────────────────────────
     # — Cruise motor + prop
-    "motor_mass_cruise": 0.5,
-    "propeller_mass_cruise": 0.25,
-    "motor_cruise_x": 1.30,
+    "motor_mass_cruise": 0.280,  # [kg] mass of the cruise motor
+    "propeller_mass_cruise": 0.097,  # [kg] mass of the cruise propeller
+    "motor_cruise_x": 2.150,  # [m] x-location of the cruise motor
     # — VTOL lift motors + props
-    "motor_mass_VTOL": 0.5,
-    "propeller_mass_VTOL": 0.20,
-    "motor_front_VTOL_x": 0.40,
-    "motor_rear_VTOL_x": -0.35,
+    "motor_mass_VTOL": 0.280,  # [kg] mass of each VTOL motor
+    "propeller_mass_VTOL": 0.097,  # [kg] mass of each VTOL propeller
+    "motor_front_VTOL_x": -0.551,  # [m] x-location of the front VTOL motor
+    "motor_rear_VTOL_x": 0.974,  # [m] x-location of the rear VTOL motor
     # — Battery & power distribution
-    "battery_mass": 2.80,
-    "battery_x": 0.00,
-    "PDB_mass": 0.15,
-    "PDB_x": 0.05,
+    "battery_mass": 3.619 * 2,  # [kg] mass of the battery (2 batteries)
+    "battery_x": 0.173,  # [m] x-location of the battery
+    "PDB_mass": 0.156,  # [kg] mass of the power distribution board
+    "PDB_x": 0.173,  # [m] x-location of the power distribution board
     # ───────────────────────────────────────────────────────────────────────
     # Longitudinal stability & tailplane
     # ───────────────────────────────────────────────────────────────────────
-    "l_fus": 2.3,  # [m] fuselage length
+    "l_fus": 2.15,  # [m] fuselage length
     "fuselage_diameter": 0.4,  # [m] fuselage diameter
     "lh": 1.0,  # [m] wing AC → tail AC
     "mac": 0.42,  # [m] mean aerodynamic chord
