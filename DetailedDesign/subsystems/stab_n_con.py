@@ -14,6 +14,7 @@ from typing import Any
 
 import numpy as np
 from scipy.integrate import simpson
+from scipy.differentiate import derivative
 import matplotlib.pyplot as plt
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -139,7 +140,7 @@ class StabCon:
             self.bo = new_bo
 
     # ~~~ Rudder sizing (static-trim gust criterion, τr varies with cr/cv) ~~~
-    def size_rudder_for_gust(self, step_frac: float = 0.02) -> tuple[float, float]:
+    def size_rudder(self, step_frac: float = 0.001) -> tuple[float, float]:
         """
         Iterate the rudder-to-fin chord ratio (cr/cv) until the rudder can
         *trim* the sideslip created by a design gust.
@@ -197,6 +198,51 @@ class StabCon:
                     f"Cannot meet gust-trim requirement: need Cnδr={Cn_req:.4f}, "
                     f"achieved {Cn_dr:.4f} at cr/cv={max_cr_cv:.2f}."
                 )
+
+    def size_elevator_static(self, d_ce=0.002, tol=1e-4):
+        """
+        Pick C_E/C_h so the elevator can trim the aircraft statically at
+        both CG extremes *within the linear range* of the tailplane.
+        Returns the required C_E/C_h and a dict of margin checks.
+        All angles in rad.
+        """
+        ce_ch = self.ce_cht_init
+        while ce_ch <= 0.45 + tol:
+            tau = self._tau_from_ca_over_c(ce_ch)
+
+            # tail CL available with max up & down deflections
+            cl_tail_up = self.CL_alpha_h * (self.alpha_h + tau * self.delta_e_max_up)
+            cl_tail_down = self.CL_alpha_h * (
+                self.alpha_h + tau * self.delta_e_max_down
+            )
+
+            # required to trim at fwd & aft CG
+            cl_req_fwd = (
+                (self.mac / (self.x_ac_h - self.most_forward_cg))
+                * (1 / self.Vh_V)
+                * (1 / self.Sh_S)
+                * (
+                    self.CL_A_h * ((self.x_ac - self.most_forward_cg) / self.mac)
+                    + self.Cm_ac_wing
+                )
+            )
+            cl_req_aft = (
+                (self.mac / (self.x_ac_h - self.most_aft_cg))
+                * (1 / self.Sh_S)
+                * (
+                    self.CL_A_h * ((self.x_ac - self.most_aft_cg) / self.mac)
+                    + self.Cm_ac_wing
+                )
+            )
+
+            ok = cl_tail_up >= cl_req_fwd and cl_tail_down <= cl_req_aft
+            if ok:
+                self.ce_c = ce_ch
+                return ce_ch, {"trim": ok}
+
+            ce_ch += d_ce
+
+        raise RuntimeError("Elevator chord ratio exceeded 0.45 without meeting trim.")
 
     # ~~~ VTOL sizing ~~~
 
@@ -407,8 +453,8 @@ class StabCon:
             (self.Winch_motor_mass, self.Winch_motor_x),
             (self.motor_mass_cruise + self.propeller_mass_cruise, self.motor_cruise_x),
             (self.CUAV_airlink_mass, self.CUAV_airlink_x),
-            (self.fuselage_structural_mass, self.fuselage_structural_x_cg),
-            (self.tailplane_structural_mass, self.tailplane_structural_x_cg),
+            # (self.fuselage_structural_mass, self.fuselage_structural_x_cg),
+            # (self.tailplane_structural_mass, self.tailplane_structural_x_cg),
         ]
 
         # ---------------------------------------------------------------------
@@ -420,7 +466,7 @@ class StabCon:
             (2 * lift_motor_mass, self.motor_rear_VTOL_x),
             (self.battery_mass, self.battery_x),
             (self.PDB_mass, self.PDB_x),
-            (self.wing_structural_mass, self.wing_structural_x_cg),
+            # (self.wing_structural_mass, self.wing_structural_x_cg),
         ]
 
         # ---------------------------------------------------------------------
@@ -702,6 +748,9 @@ if __name__ == "__main__":  # pragma: no cover
         print(f"  Fuselage CG x : {res['fuselage_x_cg']:.3f}  m")
         print(f"  Wing mass     : {res['wing_mass']:.3f}  kg")
         print(f"  Wing CG   x   : {res['wing_x_cg']:.3f}  m")
+        print(
+            f"Total (non-structural) mass : {res['fuselage_mass'] + res['wing_mass']:.3f}  kg"
+        )
 
     # ─────────────────────────────────────────────────────────────────────────────
     # 2. Loading diagram (uses calculate_uav_cg_chat internally)

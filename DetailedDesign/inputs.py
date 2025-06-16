@@ -348,7 +348,7 @@ stab_n_con_inputs = {
     "fuselage_diameter": 0.4,  # [m] fuselage diameter
     "lh": 1.0,  # [m] wing AC → tail AC
     "mac": 0.42,  # [m] mean aerodynamic chord
-    "x_ac_bar_wing": 0.25,  # [m] wing AC from LE (25% MAC)
+    "x_ac_bar_wing": 0.25,  # [-] wing AC from LE (25% MAC)
     "CL_alpha_Ah": 0.08 * 180 / np.pi,  # [1/rad] finite wing lift-curve slope
     "CL_alpha_h": 0.06 * 180 / np.pi,  # [1/rad] tail lift-curve slope
     "d_epsilon_d_alpha": 0.3,  # downwash gradient [rad/rad]
@@ -367,6 +367,10 @@ stab_n_con_inputs = {
     "br_bv": 0.9,  # rudder span ratio
     "delta_r_max": np.deg2rad(30),  # max rudder deflection [rad]
     "cr_cv_init": 0.3,  # rudder chord ratio
+    "ce_cht_init": 0.3,  # elevator chord ratio
+    "delta_e_max_up": np.deg2rad(20),  # max elevator deflection [rad]
+    "delta_e_max_down": np.deg2rad(25),  # max elevator deflection [rad]
+    "alpha_h": np.deg2rad(5),  # [rad] angle of attack at cruise
     # ───────────────────────────────────────────────────────────────────────
     # Environmental & propulsion limits
     # ───────────────────────────────────────────────────────────────────────
@@ -374,6 +378,11 @@ stab_n_con_inputs = {
     "gust_speed": 30 / 3.6,  # [m/s] gust speed
     "rpm_max": 4200,  # [rpm] motor limit
     "T_max": 17.6 * 9.81,  # [N] thrust per motor
+    # ───────────────────────────────────────────────────────────────────────
+    # CG Range
+    # ───────────────────────────────────────────────────────────────────────
+    "most_forward_cg": 0.1,  # [-] most forward CG location (as fraction of fuselage length)
+    "most_aft_cg": 0.9,  # [-] most aft CG location (as fraction of fuselage length)
 }
 
 inputs.update(stab_n_con_inputs)
