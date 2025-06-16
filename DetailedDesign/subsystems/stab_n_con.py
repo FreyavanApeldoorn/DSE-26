@@ -422,7 +422,7 @@ class StabCon:
             (self.battery_mass, self.battery_x),
             (self.PDB_mass, self.PDB_x),
             (self.wing_structural_mass, self.wing_structural_x_cg),
-            (self.thermal_control_mass, self.thermal_control_x_cg),
+            (self.thermal_control_mass, self.thermal_control_x),
         ]
 
         # ---------------------------------------------------------------------

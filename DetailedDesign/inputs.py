@@ -348,7 +348,7 @@ stab_n_con_inputs = {
     # ───────────────────────────────────────────────────────────────────────
     "l_fus": 2.15,  # [m] fuselage length
     "fuselage_diameter": 0.4,  # [m] fuselage diameter
-    "lh": 1.0,  # [m] wing AC → tail AC
+    "lh": 0.65,  # [m] wing AC → tail AC
     "mac": 0.42,  # [m] mean aerodynamic chord
     "x_ac_bar_wing": 0.105,  # [m] wing AC from LE (25% MAC)
     "CL_alpha_Ah": 0.08 * 180 / np.pi,  # [1/rad] finite wing lift-curve slope
