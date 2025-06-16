@@ -581,7 +581,7 @@ class StabCon:
             )
 
             # CG expressed as fraction of MAC behind LE-MAC
-            x_cg_bar = (x_cg - x_lemac) / self.mac
+            x_cg_bar = ((x_cg - x_lemac) / self.mac)*1.05
 
             results[config] = {"x_lemac": x_lemac, "x_cg": x_cg, "x_cg_bar": x_cg_bar}
 
@@ -632,7 +632,7 @@ class StabCon:
     #  Horizontal-tail sizing (scissor plot)
     # ─────────────────────────────────────────────────────────────────────────────
     def scissor_plot_chat(
-        self, n_pts: int = 200, static_margin: float = 0.05
+        self, n_pts: int = 200, static_margin: float = 0.1
     ) -> dict[str, tp.Any]:
         """
         Build data for a full scissor plot that is compatible with the new CG and
@@ -754,9 +754,7 @@ if __name__ == "__main__":  # pragma: no cover
         print(f"  Fuselage CG x : {res['fuselage_x_cg']:.3f}  m")
         print(f"  Wing mass     : {res['wing_mass']:.3f}  kg")
         print(f"  Wing CG   x   : {res['wing_x_cg']:.3f}  m")
-        print(
-            f"Total (non-structural) mass : {res['fuselage_mass'] + res['wing_mass']:.3f}  kg"
-        )
+        print(f"  Total mass    : {res['fuselage_mass'] + res['wing_mass']:.3f}  kg")
 
     # ─────────────────────────────────────────────────────────────────────────────
     # 2. Loading diagram (uses calculate_uav_cg_chat internally)
@@ -769,6 +767,12 @@ if __name__ == "__main__":  # pragma: no cover
         x_vals = data["x_cg_bar"]  # non-dimensional CG position
         y_vals = data["x_lemac"] / stabcon.l_fus  # LEMAC position / fuselage length
         plt.plot(x_vals, y_vals, label=f"{cfg} config")
+
+    # Add horizontal dashed lines at desired y-values
+    y1 = 0.53  # example value
+    y2 = 0.27  # example value
+    plt.axhline(y=y1, linestyle='--', label=f'y = {y1}')
+    plt.axhline(y=y2, linestyle='--', label=f'y = {y2}')
 
     plt.xlabel("Non-dimensional CG position, $(x_{cg}-x_{LE})/\\bar c$")
     plt.ylabel("LEMAC / fuselage length, $x_{LE}/l_{fus}$")

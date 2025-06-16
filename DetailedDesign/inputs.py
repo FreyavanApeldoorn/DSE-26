@@ -271,22 +271,22 @@ stab_n_con_inputs = {
     # ───────────────────────────────────────────────────────────────────────
     # Mass & CG placeholders
     # ───────────────────────────────────────────────────────────────────────
-    "fuselage_structural_mass": 3,  # [kg] fuselage structure mass
+    "fuselage_structural_mass": 3.166,  # [kg] fuselage structure mass
     "fuselage_structural_x_cg": 2.15 / 2,  # [m] fuselage CG location
-    "wing_structural_mass": 2.4 * 2,  # [kg] wing structure mass
+    "wing_structural_mass": (2.24 + 0.255 + 0.047*4) * 2,  # [kg] wing structure mass
     "wing_structural_x_cg": 0.42 * 0.25,  # [m] wing CG location (25% MAC)
-    "tailplane_structural_mass": 1.67,  # [kg] tailplane structure mass
+    "tailplane_structural_mass": 1.656,  # [kg] tailplane structure mass
     "tailplane_structural_x_cg": 2.15 - 0.35 * 0.75,  # [m] tailplane CG location,
     # → wildfire
     "wildfire_sensor_mass": 0.92,  # [kg] wildfire sensor mass
-    "wildfire_sensor_x": 0.172,  # [m] wildfire sensor CG location
+    "wildfire_sensor_x": 0.174,  # [m] wildfire sensor CG location
     "wildfire_fuselage_mass": 0.0,  # [kg] wildfire fuselage mass
     "wildfire_fuselage_x": 0.0,  # [m] wildfire fuselage CG location
     "wildfire_wing_mass": 0.0,  # [kg] wildfire wing mass
     "wildfire_wing_x": 0.0,  # [m] wildfire wing CG location
     # → oil spill
     "oil_spill_sensor_mass": 0.905,  # [kg] oil spill sensor mass
-    "oil_spill_sensor_x": 0.172,  # [m] oil spill sensor CG location
+    "oil_spill_sensor_x": 0.174,  # [m] oil spill sensor CG location
     "oil_spill_fuselage_mass": 0.0,  # [kg] oil spill fuselage mass
     "oil_spill_fuselage_x": 0.0,  # [m] oil spill fuselage CG location
     "oil_spill_wing_mass": 0.0,  # [kg] oil spill wing mass
@@ -298,32 +298,28 @@ stab_n_con_inputs = {
     # Payload & sensor modules
     # ───────────────────────────────────────────────────────────────────────
     "payload_mass": 5.0,  # [kg] payload mass (aerogel blanket)
-    "payload_x": 1.08,  # [m] payload CG location (initially set to oil-spill buoy location)
-    "buoy_mass": 0.140 * 4,  # [kg] Oil-spill buoy mass (4 buoys)
+    "payload_x": 1.15,  # [m] payload CG location (initially set to oil-spill buoy location)
+    "buoy_mass": 0.140*4,  # [kg] Oil-spill buoy mass (4 buoys)
     "buoy_x": 1.08,  # [m] Buoy CG location (initially set to oil-spill buoy location)
-    "wildfire_sensor_mass": 0.92,  # [kg] Wildfire sensor mass
-    "wildfire_sensor_x": 0.172,  # [m] Wildfire sensor CG location
-    "oil_spill_sensor_mass": 0.905,  # [kg] Oil spill sensor mass
-    "oil_spill_sensor_x": 0.172,  # [m] Oil spill sensor CG location
     # ───────────────────────────────────────────────────────────────────────
     # Fuselage-mounted avionics & structure
     # ───────────────────────────────────────────────────────────────────────
     "gymbal_connection_mass": 0.070,  # [kg] mass of the gymbal connection
-    "gymbal_connection_x": 0.172,  # [m] CG location of the gymbal connection
+    "gymbal_connection_x": 0.174,  # [m] CG location of the gymbal connection
     "flight_controller_mass": 0.032,  # [kg] mass of the flight controller
-    "flight_controller_x": 0.567,  # [m] CG location of the flight controller
+    "flight_controller_x": 0.415,  # [m] CG location of the flight controller
     "OBC_mass": 0.7,  # [kg] mass of the on-board computer
-    "OBC_x": 0.659,  # [m] CG location of the on-board computer
+    "OBC_x": 0.223,  # [m] CG location of the on-board computer
     "GPS_mass": 0.012,  # [kg] mass of the GPS module
-    "GPS_x": 0.113,  # [m] CG location of the GPS module
+    "GPS_x": 0.321,  # [m] CG location of the GPS module
     "Mesh_network_module_mass": 0.0365,  # [kg] mass of the mesh network module
-    "Mesh_network_module_x": 0.372,  # [m] CG location of the mesh network module
-    "SATCOM_module_mass": 0.036,  # [kg] mass of the SATCOM module
-    "SATCOM_module_x": 0.4605,  # [m] CG location of the SATCOM module
+    "Mesh_network_module_x": 0.080,  # [m] CG location of the mesh network module
+    "SATCOM_module_mass": 0.033,  # [kg] mass of the SATCOM module
+    "SATCOM_module_x": 0.036,  # [m] CG location of the SATCOM module
     "Winch_motor_mass": 1.17,  # [kg] mass of the winch motor
-    "Winch_motor_x": 1.015,  # [m] CG location of the winch motor
+    "Winch_motor_x": 0.537,  # [m] CG location of the winch motor
     "CUAV_airlink_mass": 0.052,  # [kg] mass of the CUAV airlink module
-    "CUAV_airlink_x": 0.280,  # [m] CG location of the CUAV airlink module
+    "CUAV_airlink_x": 0.138,  # [m] CG location of the CUAV airlink module
     # ───────────────────────────────────────────────────────────────────────
     # Propulsion & energy-storage
     # ───────────────────────────────────────────────────────────────────────
@@ -344,23 +340,23 @@ stab_n_con_inputs = {
     "battery_x": 0.173,  # [m] x-location of the battery w.r.t leading edge wing
     "PDB_mass": 0.156,  # [kg] mass of the power distribution board
     "PDB_x": 0.173,  # [m] x-location of the power distribution board w.r.t leading edge wing
-    "thermal_control_mass": 2.5,  # [kg] mass of the thermal control system
+    "thermal_control_mass": 1.75,  # [kg] mass of the thermal control system
     "thermal_control_x": 0.173,  # [m] x-location of the thermal control system w.r.t leading edge wing
     # ───────────────────────────────────────────────────────────────────────
     # Longitudinal stability & tailplane
     # ───────────────────────────────────────────────────────────────────────
     "l_fus": 2.15,  # [m] fuselage length
     "fuselage_diameter": 0.4,  # [m] fuselage diameter
-    "lh": 0.65,  # [m] wing AC → tail AC
+    "lh": 0.831,  # [m] wing AC → tail AC
     "mac": 0.42,  # [m] mean aerodynamic chord
     "x_ac_bar_wing": 0.25,  # [-] wing AC from LE (25% MAC)
     "CL_alpha_Ah": 0.08 * 180 / np.pi,  # [1/rad] finite wing lift-curve slope
     "CL_alpha_h": 0.06 * 180 / np.pi,  # [1/rad] tail lift-curve slope
     "d_epsilon_d_alpha": 0.3,  # downwash gradient [rad/rad]
     "Vh_V": 0.9**2,  # tail/wing velocity ratio
-    "Cm_ac_wing": -0.13,  # moment coeff. at wing AC
+    "Cm_ac_wing": -0.017,  # moment coeff. at wing AC
     "AR_h": 3.5,  # tail aspect ratio
-    "CL_A_h": 0.55,  # C_L aircraft-tail at cruise
+    "CL_A_h": 0.55,  # C_L aircraft minus tail at cruise
     # ───────────────────────────────────────────────────────────────────────
     # Lateral/directional & vertical tail
     # ───────────────────────────────────────────────────────────────────────
