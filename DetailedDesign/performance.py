@@ -7,6 +7,8 @@ class Performance:
         self.outputs = self.inputs.copy()
         self.hardware = hardware
 
+        self.mission_type = inputs["mission_type"]
+
         self.total_mission_time = inputs["total_mission_time"]
         self.mission_perimeter = inputs["mission_perimeter"]
         self.time_uav_max = inputs["time_uav_max"]
@@ -30,8 +32,29 @@ class Performance:
         `self.time_uav` and `self.total_mission_time` before the rates are calculated.
         """
         
-        self.uav_deployment_rate = self.mission_perimeter / self.time_uav_max
-        self.mission_deployment_rate = self.mission_perimeter / self.total_mission_time
+        if self.mission_type == "wildfire":
+            self.uav_deployment_rate = self.mission_perimeter / self.time_uav_max
+            self.mission_deployment_rate = self.mission_perimeter / self.total_mission_time
+
+        # elif self.mission_type == "oil_spill":
+        #     self.uav_deployment_rate = self.mission_mass
+
+        else:
+            raise ValueError(f"Unsupported mission type: {self.mission_type}")
+
+    def response_time(self) -> float:
+        pass
+
+    def turnaround_time(self) -> float:
+        pass
+
+    def energy_consumption(self) -> float:
+        pass
+
+    def total_mass(self) -> float:
+        pass
+
+    
 
 
     # ~~~ Output functions ~~~ 
