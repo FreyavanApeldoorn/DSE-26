@@ -46,11 +46,12 @@ class Power:
         self.battery_capacity = self.hardware["battery_capacity"]  # Battery capacity in Ah
         self.battery_voltage =self.hardware["battery_voltage"]  # Battery voltage in V
         self.battery_maximum_peak_current = self.hardware["battery_maximum_peak_current"] 
+        self.DOD_fraction = self.hardware["battery_DOD_fraction"]  # Depth of discharge fraction
 
         #Calculate the total power 
         self.power_scan_total = self.power_scan + 4228
         self.power_deploy_total = self.power_deploy + 4228
-        self.power_cruise_total = self.power_cruise_hardware + 647
+        self.power_cruise_total = self.power_cruise_hardware + self.power_required_cruise  # Total power for cruise operations
 
     # ~~~ Intermediate Functions ~~~
     # def power_consumptions_motors(self) -> float:
@@ -131,7 +132,7 @@ class Power:
 
     def calculate_battery_capacity(self) -> float:
         
-        battery_capacity = self.battery_capacity * self.battery_voltage  # Convert battery capacity from Ah to Wh
+        battery_capacity = self.battery_capacity * self.battery_voltage * self.DOD_fraction # Convert battery capacity from Ah to Wh
 
         return battery_capacity 
 

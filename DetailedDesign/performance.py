@@ -86,6 +86,26 @@ class Performance:
             plt.show()      
     
 
+        # elif self.mission_type == "oil_spill":
+        #     self.uav_deployment_rate = self.mission_mass
+
+        else:
+            raise ValueError(f"Unsupported mission type: {self.mission_type}")
+
+    def response_time(self) -> float:
+        pass
+
+    def turnaround_time(self) -> float:
+        pass
+
+    def energy_consumption(self) -> float:
+        pass
+
+    def total_mass(self) -> float:
+        pass
+
+    
+
 
     # ~~~ Output functions ~~~ 
 
