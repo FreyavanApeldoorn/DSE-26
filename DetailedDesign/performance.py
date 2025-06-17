@@ -86,8 +86,8 @@ class Performance:
                     mis = Mission(self.inputs)
                     mis.oil_mass = m
                     mis.mission_type = 'oil_spill'
-                    print(self.n_uavs, self.n_nests, self.n_workers)
                     res, _ = mis.performance_calcs(r, self.n_uavs, self.n_nests, self.n_workers)
+                    res = m / (res/60/60)
                     dep_range.append(res)
                     grid.append((r, m))
                     print(r, m, res)
@@ -100,21 +100,21 @@ class Performance:
             X, Y = np.meshgrid(range_vals, oil_vals)  # X: range, Y: AR
 
             plt.figure(figsize=(8, 6))
-            cp = plt.contourf(X, Y, Z, cmap='plasma')
-            plt.colorbar(cp, label='deployment_rate [kg/s]')
+            cp = plt.pcolormesh(X, Y, Z, cmap='plasma')
+            plt.colorbar(cp, label='deployment_rate [kg/h]')
             plt.xlabel('Range [m]')
             plt.ylabel('oil mass [kg]')
             plt.savefig('DetailedDesign\plots\oil_range.png')
             plt.show()
             
 
+            '''
             #Deployment range based on nr_nests and nr_workers
-            uavs_range = range(10, 26)
-            workers_range = range(2, 11)
+            uavs_range = range(10, 51)
+            workers_range = range(2, 13)
 
             uav_worker_table = pd.DataFrame(index=workers_range, columns=uavs_range, dtype=float)
 
-            #6 in the generator one, 10 in the general one
 
             for strat in ['oil_spill', 'wildfire']:
                 for workers in workers_range:
@@ -127,7 +127,7 @@ class Performance:
                         if strat == 'oil_spill':
                             uav_worker_table.loc[workers, uavs] = self.oil_mass / dep_time
                         else:
-                            if nests <= workers <= 2 * self.n_nests:
+                            if nests <= workers <= 2 * nests:
                                 uav_worker_table.loc[workers, uavs] = self.mission_perimeter / dep_time
                             else:
                                 uav_worker_table.loc[workers, uavs] = np.nan
@@ -140,6 +140,7 @@ class Performance:
                 plt.tight_layout()
                 plt.savefig(f"DetailedDesign\plots\{strat}_worker_nest_heatmap.png")
                 plt.show()   
+                '''
 
 
 
