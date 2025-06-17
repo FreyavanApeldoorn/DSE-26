@@ -275,7 +275,7 @@ class Thermal:
 
         # Heat and heat energy entering due to outside temperature
         heat_env_onsite, Q_env_onsite = self.Q_env_leak(time_onsite, self.T_amb_onsite, insulation_thickness) # J
-        # heat_env_approach, Q_env_approach = self.Q_env_leak(time_approach, self.T_amb_enroute) # W, J, same as return if time_ascent = time_descent
+        # heat_env_approach, Q_env_approach = self.Q_env_leak(time_approach, self.T_amb_enroute, insulation_thickness) # W, J, same as return if time_ascent = time_descent
         heat_env_return, Q_env_return = self.Q_env_leak(time_return, self.T_amb_enroute, insulation_thickness=insulation_thickness) # W, J 
 
         # Heat and heat energy entering due to internal components 
@@ -291,6 +291,11 @@ class Thermal:
         total_Q_return = Q_int_return + Q_env_return + total_Q_onsite # Total heat produced on the return 
         # total_heat_return = heat_int_return + heat_env_return + (total_Q_onsite / time_return)
         heat_dissipated_req_sink = total_Q_return / (time_return + self.time_turnaround_min + self.sink_time_margin)
+
+        # Return time margin
+        '''Adds an additional margin allowing the UAV to continue to dissipate heat on its second round approach phase'''
+        # return_time_margin = self.time_ascent + self.time_cruise_min
+        # heat_dissipated_req_sink = (total_Q_return + Q_int_approach + Q_env_approach) / (time_return + self.time_turnaround_min + return_time_margin)
 
         # Heat sink 
         fin_spacing_opt, n_fin, total_heat_dissipated_sink = self.heat_dissipated_sink(sink_length, sink_width)
@@ -327,7 +332,7 @@ class Thermal:
         Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
         '''
         x0 = [0.100, 0.500, 0.0500] # initial: sink_length (m), sink_width (m), insulation_thickness (m)
-        bounds = [(0.1, 0.4), (0.001, 1.), (0.001, 0.03)]  # sink_length (m), sink_width (m)), insulation_thickness (m)
+        bounds = [(0.1, 0.45), (0.01, 1.), (0.001, 0.03)]  # sink_length (m), sink_width (m)), insulation_thickness (m)
         constraints = {'type': 'ineq', 'fun': self.constraint}
         
         total_mass_result =  minimize(self.objective, x0=x0, bounds=bounds, constraints=constraints, method="SLSQP")

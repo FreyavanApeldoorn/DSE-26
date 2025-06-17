@@ -14,6 +14,7 @@ from typing import Any
 
 import numpy as np
 from scipy.integrate import simpson
+from scipy.differentiate import derivative
 import matplotlib.pyplot as plt
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -139,7 +140,7 @@ class StabCon:
             self.bo = new_bo
 
     # ~~~ Rudder sizing (static-trim gust criterion, τr varies with cr/cv) ~~~
-    def size_rudder_for_gust(self, step_frac: float = 0.02) -> tuple[float, float]:
+    def size_rudder(self, step_frac: float = 0.001) -> tuple[float, float]:
         """
         Iterate the rudder-to-fin chord ratio (cr/cv) until the rudder can
         *trim* the sideslip created by a design gust.
@@ -197,6 +198,51 @@ class StabCon:
                     f"Cannot meet gust-trim requirement: need Cnδr={Cn_req:.4f}, "
                     f"achieved {Cn_dr:.4f} at cr/cv={max_cr_cv:.2f}."
                 )
+
+    def size_elevator_static(self, d_ce=0.002, tol=1e-4):
+        """
+        Pick C_E/C_h so the elevator can trim the aircraft statically at
+        both CG extremes *within the linear range* of the tailplane.
+        Returns the required C_E/C_h and a dict of margin checks.
+        All angles in rad.
+        """
+        ce_ch = self.ce_cht_init
+        while ce_ch <= 0.45 + tol:
+            tau = self._tau_from_ca_over_c(ce_ch)
+
+            # tail CL available with max up & down deflections
+            cl_tail_up = self.CL_alpha_h * (self.alpha_h + tau * self.delta_e_max_up)
+            cl_tail_down = self.CL_alpha_h * (
+                self.alpha_h + tau * self.delta_e_max_down
+            )
+
+            # required to trim at fwd & aft CG
+            cl_req_fwd = (
+                (self.mac / (self.x_ac_h - self.most_forward_cg))
+                * (1 / self.Vh_V)
+                * (1 / self.Sh_S)
+                * (
+                    self.CL_A_h * ((self.x_ac - self.most_forward_cg) / self.mac)
+                    + self.Cm_ac_wing
+                )
+            )
+            cl_req_aft = (
+                (self.mac / (self.x_ac_h - self.most_aft_cg))
+                * (1 / self.Sh_S)
+                * (
+                    self.CL_A_h * ((self.x_ac - self.most_aft_cg) / self.mac)
+                    + self.Cm_ac_wing
+                )
+            )
+
+            ok = cl_tail_up >= cl_req_fwd and cl_tail_down <= cl_req_aft
+            if ok:
+                self.ce_c = ce_ch
+                return ce_ch, {"trim": ok}
+
+            ce_ch += d_ce
+
+        raise RuntimeError("Elevator chord ratio exceeded 0.45 without meeting trim.")
 
     # ~~~ VTOL sizing ~~~
 
@@ -379,13 +425,18 @@ class StabCon:
             ),
             "oil_spill": dict(
                 sensor=(self.oil_spill_sensor_mass, self.oil_spill_sensor_x),
-                payload=(0.0, 0.0),
+                payload=(self.payload_mass, self.payload_x),
                 buoy=(self.buoy_mass, self.buoy_x),
             ),
-            "no_payload": dict(
+            "no_payload_wildfire": dict(
                 sensor=(self.wildfire_sensor_mass, self.wildfire_sensor_x),
                 payload=(0.0, 0.0),
                 buoy=(0.0, 0.0),
+            ),
+            "no_payload_oil_spill": dict(
+                sensor=(self.oil_spill_sensor_mass, self.oil_spill_sensor_x),
+                payload=(0.0, 0.0),
+                buoy=(self.buoy_mass, self.buoy_x),
             ),
         }
 
@@ -401,17 +452,25 @@ class StabCon:
             (self.SATCOM_module_mass, self.SATCOM_module_x),
             (self.Winch_motor_mass, self.Winch_motor_x),
             (self.motor_mass_cruise + self.propeller_mass_cruise, self.motor_cruise_x),
+            (self.CUAV_airlink_mass, self.CUAV_airlink_x),
+            (self.fuselage_structural_mass, self.fuselage_structural_x_cg),
+            (self.tailplane_structural_mass, self.tailplane_structural_x_cg),
+            (self.motor_esc_cruise_mass, self.motor_esc_cruise_x),
         ]
 
         # ---------------------------------------------------------------------
         # 3. Wing group (identical for all variants)
         # ---------------------------------------------------------------------
-        lift_motor_mass = self.motor_mass_VTOL + self.propeller_mass_VTOL
+        lift_motor_mass = (
+            self.motor_mass_VTOL + self.propeller_mass_VTOL + self.motor_esc_VTOL_mass
+        )
         wing_items = [
             (2 * lift_motor_mass, self.motor_front_VTOL_x),
             (2 * lift_motor_mass, self.motor_rear_VTOL_x),
             (self.battery_mass, self.battery_x),
             (self.PDB_mass, self.PDB_x),
+            (self.wing_structural_mass, self.wing_structural_x_cg),
+            (self.thermal_control_mass, self.thermal_control_x),
         ]
 
         # ---------------------------------------------------------------------
@@ -522,7 +581,7 @@ class StabCon:
             )
 
             # CG expressed as fraction of MAC behind LE-MAC
-            x_cg_bar = (x_cg - x_lemac) / self.mac
+            x_cg_bar = ((x_cg - x_lemac) / self.mac)*1.05
 
             results[config] = {"x_lemac": x_lemac, "x_cg": x_cg, "x_cg_bar": x_cg_bar}
 
@@ -573,7 +632,7 @@ class StabCon:
     #  Horizontal-tail sizing (scissor plot)
     # ─────────────────────────────────────────────────────────────────────────────
     def scissor_plot_chat(
-        self, n_pts: int = 200, static_margin: float = 0.05
+        self, n_pts: int = 200, static_margin: float = 0.1
     ) -> dict[str, tp.Any]:
         """
         Build data for a full scissor plot that is compatible with the new CG and
@@ -601,13 +660,16 @@ class StabCon:
             * (self.lh / self.mac)
             * self.Vh_V  # already the squared velocity ratio
         )
-        sh_s_stability = (x_cg_bar - self.x_ac_bar_wing - static_margin) / stab_den
+        sh_s_stability = (x_cg_bar - self.x_ac_bar_wing + static_margin) / stab_den
+        sh_s_stability_no_margin = (x_cg_bar - self.x_ac_bar_wing) / stab_den
 
         # 3.   ——— Control requirement ———
         # Tail CL in a pull-up is approximated as −0.35 AR_h^(1/3)
         CL_h = -0.35 * self.AR_h ** (1.0 / 3.0)
         CL_Ah = self.CL_A_h  # aircraft lift coeff. (wing + body – tail)
-        Cm_ac = self.Cm_ac_wing  # aerodynamic-centre moment coefficient
+        Cm_ac = (
+            self.Cm_ac_wing
+        )  # aerodynamic-centre moment coefficient STILL ADD FUSELAGE contribution based on XFLR5
 
         ctrl_den = (CL_h / CL_Ah) * (self.lh / self.mac) * self.Vh_V
         sh_s_control = (x_cg_bar + (Cm_ac / CL_Ah - self.x_ac_bar_wing)) / ctrl_den
@@ -622,6 +684,7 @@ class StabCon:
         return {
             "x_cg_bar": x_cg_bar,
             "sh_s_stability": sh_s_stability,
+            "sh_s_stability_no_margin": sh_s_stability_no_margin,
             "sh_s_control": sh_s_control,
             "cg_tracks": cg_tracks,
         }
@@ -691,6 +754,7 @@ if __name__ == "__main__":  # pragma: no cover
         print(f"  Fuselage CG x : {res['fuselage_x_cg']:.3f}  m")
         print(f"  Wing mass     : {res['wing_mass']:.3f}  kg")
         print(f"  Wing CG   x   : {res['wing_x_cg']:.3f}  m")
+        print(f"  Total mass    : {res['fuselage_mass'] + res['wing_mass']:.3f}  kg")
 
     # ─────────────────────────────────────────────────────────────────────────────
     # 2. Loading diagram (uses calculate_uav_cg_chat internally)
@@ -704,6 +768,12 @@ if __name__ == "__main__":  # pragma: no cover
         y_vals = data["x_lemac"] / stabcon.l_fus  # LEMAC position / fuselage length
         plt.plot(x_vals, y_vals, label=f"{cfg} config")
 
+    # Add horizontal dashed lines at desired y-values
+    y1 = 0.53  # example value
+    y2 = 0.27  # example value
+    plt.axhline(y=y1, linestyle='--', label=f'y = {y1}')
+    plt.axhline(y=y2, linestyle='--', label=f'y = {y2}')
+
     plt.xlabel("Non-dimensional CG position, $(x_{cg}-x_{LE})/\\bar c$")
     plt.ylabel("LEMAC / fuselage length, $x_{LE}/l_{fus}$")
     plt.title("Longitudinal Loading Diagram")
@@ -711,25 +781,44 @@ if __name__ == "__main__":  # pragma: no cover
     plt.grid(True)
     plt.legend()
     plt.show()
+    plt.close()
 
     sc_data = stabcon.scissor_plot_chat()
 
     # Plot the two sizing curves
-    plt.plot(sc_data["x_cg_bar"], sc_data["sh_s_stability"], "k--", label="Stability")
+    plt.plot(
+        sc_data["x_cg_bar"],
+        sc_data["sh_s_stability"],
+        "k--",
+        label="Stability + 5% Static Margin",
+    )
+    plt.plot(
+        sc_data["x_cg_bar"],
+        sc_data["sh_s_stability_no_margin"],
+        "k:",
+        label="Stability",
+    )
     plt.plot(sc_data["x_cg_bar"], sc_data["sh_s_control"], "k-", label="Control")
 
     # Overlay the CG tracks for each payload case
-    for cfg, track in sc_data["cg_tracks"].items():
-        plt.plot(
-            track, sc_data["x_cg_bar"], label=f"{cfg} CG track"
-        )  # y-axis is same x_cg_bar
+    # for cfg, track in sc_data["cg_tracks"].items():
+    #     plt.plot(
+    #         track, sc_data["x_cg_bar"], label=f"{cfg} CG track"
+    #     )  # y-axis is same x_cg_bar
 
     plt.xlabel("Non-dimensional CG position, $(x_{cg}-x_{LE})/\\bar c$")
     plt.ylabel("$S_h/S$ or CG track")
     plt.title("Scissor Plot with CG Tracks")
+    plt.xlim(-0.5, 1.5)
+    plt.ylim(0, 1.5)
     plt.grid(True)
     plt.legend()
     plt.show()
+
+    user_input = float(input("Please enter the x_lemac/fuselage_length: "))
+    user_input2 = float(input("Please enter the x_cg_bar: "))
+    x_cg_location = user_input * stabcon.l_fus + user_input2 * stabcon.mac
+    print(f"The x_cg location is: {x_cg_location:.3f} m")
 
     """
 
