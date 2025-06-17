@@ -243,7 +243,7 @@ class Mission:
 
         mission_times = np.array([self.time_ascent, self.time_transition, self.time_cruise, self.time_transition, 
                          self.time_scan, self.time_descent, self.time_deploy, self.time_ascent, 
-                         self.time_transition, self.time_cruise, self.time_transition, self.time_descent, self.time_turnaround_min])
+                         self.time_transition, self.time_cruise, self.time_transition, self.time_descent, self.time_min_launch])
         self.time_uav = np.sum(mission_times)
         self.time_uav_min = self.time_uav - self.time_cruise + self.time_cruise_min
 
