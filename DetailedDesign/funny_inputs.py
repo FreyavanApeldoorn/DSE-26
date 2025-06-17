@@ -190,16 +190,16 @@ funny_inputs.update(stab_n_con_funny_inputs)
 
 structures_funny_inputs = {
     "wing_span": 3.0,  # m, guesstimate
-    "mass_battery": 2.800 , # kg
-    "battery_length": 0.182, # m 
+    "mass_battery": 4.691 , # kg
+    "battery_length": 0.1393, # m 
     "mass_wing": 3, #kg
     "taper_ratio": 0.83, #-
-    "propeller_diameter_VTOL": 0.66, #m
+    "propeller_diameter_VTOL": 0.762, #m
     "mass_propulsion": 5, #kg
-    "propeller_mass_VTOL": 0.073, #kg
-    "y_prop": 0.66 / 2, #m, how far out from the root chord the propeller beam is placed. 
+    "propeller_mass_VTOL": 0.97, #kg
+    "y_prop": 0.762, #m, how far out from the root chord the propeller beam is placed. 
     "VTOL_boom_thickness": 0.05, #m
-    "VTOL_boom_length": 0.66 * 2, #m, based on 1 propeller diameter between propellers
+    "VTOL_boom_length": 0.762 * 2, #m, based on 1 propeller diameter between propellers
     "titanium_density": 4.43 * 1000, #kg/m3
     "titanium_E": 110 * 10**9, #kg/m3
     "max_deflection_VTOL_boom": 0.02, #m, guesstimate
