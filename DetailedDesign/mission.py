@@ -13,8 +13,8 @@ class Mission:
 
     def __init__(self, inputs: dict[str, float], verbose: bool = False) -> None:
         
-        self.inputs = inputs
-        self.outputs = self.inputs.copy() # Copy inputs to outputs
+        # self.inputs = inputs
+        # self.outputs = self.inputs.copy() # Copy inputs to outputs
         self.verbose = verbose
 
         #Nest
@@ -83,7 +83,7 @@ class Mission:
         self.R_min = inputs["R_min"]
 
 
-        self.deployment = Deployment(self.inputs, 'perimeter', self.mission_perimeter)
+        self.deployment = Deployment(inputs, 'perimeter', self.mission_perimeter)
 
         #Aerogel Specifics
         #self.num_aerogels = inputs["nr_aerogels"]
@@ -348,6 +348,9 @@ class Mission:
         # else:
         total_mission_time = self.time_preparation + self.time_operation #+ self.time_wrapup
         self.total_mission_time = total_mission_time
+
+        if self.verbose:
+            print('total_mission_time', total_mission_time)
 
         # if self.UAV_launch_time > self.time_turnaround + self.margin:
         #     pass # ADD MARGIN STUFF

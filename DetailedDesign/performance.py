@@ -62,10 +62,6 @@ class Performance:
         `self.time_uav` and `self.total_mission_time` before the rates are calculated.
         """
 
-
-        self.total_mission_time_oil = ... # Func(range, n_UAVs, n_workers, self.nr_runs_oil)
-        self.total_mission_time_fire = ... #
-
         #single calculation
 
         # Deployment rate is from the time the first UAV takes off to the time the last one lands
@@ -76,21 +72,24 @@ class Performance:
         if plot:
 
             range_range = range(10000, 25000, 1000)
-            oil_range = range(1, 8000, 1000)
-            perimeter_range = range(1, 2000, 1000)
+            oil_range = range(1000, 8001, 1000)
+            perimeter_range = range(100, 2000, 1000)
             
             dep_range = []
             grid = []
             for r in range_range:
+                print(r)
                 for m in oil_range:
-                    mis = Mission(self.inputs)
+                    mis = Mission(self.inputs, verbose=True)
                     mis.oil_mass = m
                     mis.mission_type = 'oil_spill'
-                    res, _ = mis.performance_calcs(r, self.n_uavs, self.n_nests, self.n_workers)
-                    res = m / (res/60/60)
+                    mis.R_max = r
+                    # res, _ = mis.performance_calcs(r, self.n_uavs, self.n_nests, self.n_workers)
+                    # res = m / (res/60/60)
+                    mis.calc_total_mission_time()
+                    res = mis.time_operation
                     dep_range.append(res)
                     grid.append((r, m))
-                    print(r, m, res)
 
 
             range_vals = sorted(set([pt[0] for pt in grid]))
@@ -193,7 +192,7 @@ if __name__ == '__main__':
         "time_scan": 60.0,
         "mission_type": "oil_spill",
         "mission_perimeter": 1000.0,
-        "oil_mass": 5000.0,
+        "oil_mass": 7000.0,
         "R_max": 20000.0,
         "R_min": 1000.0,
         #"nr_aerogels": 12,
@@ -205,8 +204,33 @@ if __name__ == '__main__':
         "time_between_containers": 60.0,
         "time_final_wrapup": 60.0,
     }
+
     test_inputs_performance.update(deployment_funny_inputs)
 
     perf = Performance(test_inputs_performance)
 
     perf.deployment_rates()
+
+
+'''
+17 km
+UAV Mission Time: 2578.333333333333 seconds
+Number of cycles: 1.0
+Time Operation: 42.972222222222214 minutes
+UAV Mission Time: 2578.333333333333 seconds
+total_mission_time 6066.666666666666
+
+18 km
+UAV Mission Time: 2711.6666666666665 seconds
+Number of cycles: 1.0
+Time Operation: 45.19444444444444 minutes
+UAV Mission Time: 2711.6666666666665 seconds
+total_mission_time 6333.333333333333
+
+19 km
+UAV Mission Time: 2845.0 seconds
+Number of cycles: 1.0
+Time Operation: 47.416666666666664 minutes
+UAV Mission Time: 2845.0 seconds
+
+'''
