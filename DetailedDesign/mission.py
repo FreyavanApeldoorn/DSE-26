@@ -398,7 +398,7 @@ class Mission:
 
 
         #reset all the values in self
-        return total_time
+        return self.total_mission_time, self.time_operation
 
 
     # ~~~ Output functions ~~~ 
