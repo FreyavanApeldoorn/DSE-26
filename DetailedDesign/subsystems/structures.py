@@ -50,7 +50,7 @@ class Structures:
         self.taper_ratio = inputs['taper_ratio']
         
         self.wing_span = inputs["wing_span"]
-        self.mass_wing = 3
+        self.mass_wing = inputs['mass_wing']
 
         self.motor_mass_VTOL = inputs['motor_mass_VTOL']
         self.propeller_mass_VTOL = inputs['propeller_mass_VTOL']
@@ -63,7 +63,7 @@ class Structures:
         self.load_factor = inputs['max_load_factor']
 
         self.fuselage_diameter = inputs['fuselage_diameter']
-        self.y_prop = max(self.propeller_diameter_VTOL / 2 - self.fuselage_diameter / 2, self.battery_length*2)
+        self.y_prop = inputs['y_prop']
         self.wind_speed = inputs['wind_speed']
         self.rho_0 = inputs['rho_0']
         self.wing_area = inputs['wing_area']
@@ -83,8 +83,13 @@ class Structures:
         self.first_spar_position = inputs['first_spar_position'] * self.root_chord
         self.second_spar_position = inputs['second_spar_position'] *self.root_chord
 
+        self.E_glass_fibre = 21.9*10**9 #Pa
+        self.density_glass_fibre = 1840 #kg/m3
+        self.max_shear_glass_fibre = 85*10**9
+        self.max_stress_glass_fibre = 304*10**6 # best orientation
 
-        self.VTOL_boom_thickness = self.determine_VTOL_boom_thickness()
+
+        self.VTOL_boom_thickness = 0.001
         self.VTOL_boom_mass = (np.pi*(self.boom_inner_diameter + self.VTOL_boom_thickness)**2 - np.pi*self.boom_inner_diameter**2)*self.VTOL_boom_length*self.density_alu
 
 
@@ -165,7 +170,7 @@ class Structures:
 
         # Distributed load from the battery
 
-        W_batt = np.array([2*self.mass_battery*9.81 / (2*self.battery_length) if i < self.battery_length*2 else 0 for i in y])
+        W_batt = np.array([self.mass_battery*9.81 / (self.battery_length) if i < self.battery_length else 0 for i in y])
 
         # Distributed load from the wing weight
 
@@ -198,20 +203,20 @@ class Structures:
 
         axs[0].plot(y, total_forces, color='tab:blue', linewidth=2, label="Distributed Load")
         axs[0].fill_between(y, total_forces, color='tab:blue', alpha=0.3)
-        axs[0].set_ylabel("Load [N]")
-        axs[0].set_xlabel("Spanwise Position $y$ (m)")
+        axs[0].set_ylabel("Distributed Load [N]")
+        axs[0].set_xlabel("Spanwise Position $y$ [m]")
         axs[0].grid(True)
 
         axs[1].plot(y[:-1], V, color='tab:orange', linewidth=2, label="Shear Force")
         axs[1].fill_between(y[:-1], V, color='tab:orange', alpha=0.3)
         axs[1].set_ylabel("Shear [N]")
-        axs[1].set_xlabel("Spanwise Position $y$ (m)")
+        axs[1].set_xlabel("Spanwise Position $y$ [m]")
         axs[1].grid(True)
 
         axs[2].plot(y[:-2], M, color='tab:green', linewidth=2, label="Bending Moment")
         axs[2].fill_between(y[:-2], M, color='tab:green', alpha=0.3)
         axs[2].set_ylabel("Moment [N·m]")
-        axs[2].set_xlabel("Spanwise Position $y$ (m)")
+        axs[2].set_xlabel("Spanwise Position $y$ [m]")
         axs[2].grid(True)
 
         plt.tight_layout(rect=[0, 0, 1, 0.97])
@@ -239,7 +244,7 @@ class Structures:
         half_span = self.span / 2.0
         y = np.linspace(0, half_span, 500)  # 0 (root) to b/2 (tip)
 
-        W_batt = np.array([2*self.mass_battery*9.81 / (2*self.battery_length) if i < self.battery_length*2 else 0 for i in y])
+        W_batt = np.array([self.mass_battery*9.81 / (self.battery_length) if i < self.battery_length else 0 for i in y])
 
         # Distributed load from the wing weight
 
@@ -278,20 +283,20 @@ class Structures:
 
         axs[0].plot(y, total_forces, color='tab:blue', linewidth=2, label="Distributed Load")
         axs[0].fill_between(y, total_forces, color='tab:blue', alpha=0.3)
-        axs[0].set_ylabel("Load [N]")
-        axs[0].set_xlabel("Spanwise Position $y$ (m)")
+        axs[0].set_ylabel("Distributed Load [N]")
+        axs[0].set_xlabel("Spanwise Position $y$ [m]")
         axs[0].grid(True)
 
         axs[1].plot(y[:-1], V, color='tab:orange', linewidth=2, label="Shear Force")
         axs[1].fill_between(y[:-1], V, color='tab:orange', alpha=0.3)
         axs[1].set_ylabel("Shear [N]")
-        axs[1].set_xlabel("Spanwise Position $y$ (m)")
+        axs[1].set_xlabel("Spanwise Position $y$ [m]")
         axs[1].grid(True)
 
         axs[2].plot(y[:-2], M, color='tab:green', linewidth=2, label="Bending Moment")
         axs[2].fill_between(y[:-2], M, color='tab:green', alpha=0.3)
         axs[2].set_ylabel("Moment [N·m]")
-        axs[2].set_xlabel("Spanwise Position $y$ (m)")
+        axs[2].set_xlabel("Spanwise Position $y$ [m]")
         axs[2].grid(True)
 
         plt.tight_layout(rect=[0, 0, 1, 0.97])
@@ -315,7 +320,7 @@ class Structures:
         # Distributed load from the boom weight
 
         I_circle = (np.pi / 4)* ((self.boom_inner_diameter/2+self.VTOL_boom_thickness)**4 - (self.boom_inner_diameter/2)**4)
-        boom_weight = (0.5*self.VTOL_boom_thickness)**2 * np.pi * self.VTOL_boom_length * self.density_alu *9.81
+        boom_weight = (0.5*self.VTOL_boom_thickness)**2 * np.pi * self.VTOL_boom_length * self.density_glass_fibre *9.81
         #print('boom_mass', boom_weight / 9.81)
         W_boom = np.array([boom_weight / self.VTOL_boom_length for _ in y])
 
@@ -340,39 +345,40 @@ class Structures:
 
         M = np.concatenate((-M_left[:len(y)//2], -M_rev[::-1][len(y)//2:]))
 
-        deflection_left = -(1/(self.E_alu*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_left, x=y[:-2]), x=y[:-3])
-        deflection_rev = -(1/(self.E_alu*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_rev, x=y[:-2]), x=y[:-3])
+        deflection_left = -(1/(self.E_glass_fibre*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_left, x=y[:-2]), x=y[:-3])
+        deflection_rev = -(1/(self.E_glass_fibre*I_circle))* integrate.cumulative_simpson(integrate.cumulative_simpson(M_rev, x=y[:-2]), x=y[:-3])
 
         deflection = np.concatenate((deflection_rev[::-1][len(y)//2:], deflection_left[:len(y)//2]))
 
         if size_thickness:
             return max(deflection)
+    
 
-        fig, axs = plt.subplots(4, 1, figsize=(10, 10), sharex=True)
+        fig, axs = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
 
         axs[0].plot(y, total_forces, color='tab:blue', linewidth=2, label="Distributed Load")
         axs[0].fill_between(y, total_forces, color='tab:blue', alpha=0.3)
-        axs[0].set_ylabel("Load [N/m]")
-        axs[0].set_xlabel("Spanwise Position $y$ (m)")
+        axs[0].set_ylabel("Distributed Load [N/m]")
+        axs[0].set_xlabel("Spanwise Position $x$ [m]")
         axs[0].grid(True)
 
         axs[1].plot(y[:-1], V, color='tab:orange', linewidth=2, label="Shear Force")
         axs[1].fill_between(y[:-1], V, color='tab:orange', alpha=0.3)
         axs[1].set_ylabel("Shear [N]")
-        axs[1].set_xlabel("Spanwise Position $y$ (m)")
+        axs[1].set_xlabel("Spanwise Position $x$ [m]")
         axs[1].grid(True)
 
         axs[2].plot(y[:-2], M, color='tab:green', linewidth=2, label="Bending Moment")
         axs[2].fill_between(y[:-2], M, color='tab:green', alpha=0.3)
         axs[2].set_ylabel("Moment [N·m]")
-        axs[2].set_xlabel("Spanwise Position $y$ (m)")
+        axs[2].set_xlabel("Spanwise Position $x$ [m]")
         axs[2].grid(True)
 
-        axs[3].plot(y[:len(deflection)], deflection, color='tab:pink', linewidth=2, label="Bending Moment")
-        axs[3].fill_between(y[:len(deflection)], deflection, color='tab:pink', alpha=0.3)
-        axs[3].set_ylabel("deflection [m]")
-        axs[3].set_xlabel("Spanwise Position $y$ (m)")
-        axs[3].grid(True)
+        # axs[3].plot(y[:len(deflection)], deflection, color='tab:pink', linewidth=2, label="Bending Moment")
+        # axs[3].fill_between(y[:len(deflection)], deflection, color='tab:pink', alpha=0.3)
+        # axs[3].set_ylabel("deflection [m]")
+        # axs[3].set_xlabel("Spanwise Position $y$ (m)")
+        # axs[3].grid(True)
 
         plt.tight_layout(rect=[0, 0, 1, 0.97])
         plt.savefig("DetailedDesign/subsystems/Plots/NVM_plot_propeller_boom.png", dpi=300)
@@ -381,12 +387,12 @@ class Structures:
         return None
     
     def determine_VTOL_boom_thickness(self) -> float:
-        t_range = np.linspace(0.001, 0.05, 100)
+        t_range = np.linspace(0.0001, 0.05, 1000)
         for t in t_range:
             self.VTOL_boom_thickness = t
             deflection = self.NVM_propeller_boom(size_thickness=True)
             if deflection <= self.max_deflection_VTOL_boom:
-                return round(t, 4) #rounded to half a mm
+                return round(t, 5)*1.5 #rounded to half a mm, 1.5 safety factor
         return None
     
     def determine_fuselage_thickness(self) -> float:
@@ -404,14 +410,14 @@ class Structures:
         V = 2 * max(abs(V_cruise), abs(V_VTOL))
         M = 2 * max(abs(M_cruise), abs(M_VTOL))
 
-        t_V = V / (self.max_shear_titanium*np.pi*self.fuselage_diameter)
-        t_M = (8*M) / (np.pi*self.fuselage_diameter**3*self.max_stress_titanium)
+        t_V = V / (self.max_shear_glass_fibre*np.pi*self.fuselage_diameter)
+        t_M = (8*M) / (np.pi*self.fuselage_diameter**3*self.max_stress_glass_fibre)
 
         # Because of manufacturing
-        if max(t_V, t_M) >= 0.001:
+        if max(t_V, t_M) >= 0.00026:
             return max(t_V, t_M)
         else:
-            return 0.001
+            return 0.00026
         
     def sandwich(self):
 
@@ -656,4 +662,5 @@ if __name__ == "__main__":  # pragma: no cover
     a.NVM_cruise()
     a.NVM_propeller_boom()
     # a.sandwich()
-    print(a.mass_battery)
+    print(a.VTOL_boom_mass)
+    # print(a.determine_fuselage_thickness())

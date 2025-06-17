@@ -6,6 +6,7 @@ from hardware import Hardware
 from mission import Mission
 from uav import UAV
 from nest import Nest
+from performance import Performance
 
 '''
 This is the file where the code actually gets executed.
@@ -32,6 +33,9 @@ hardware = Hardware(inputs, components)
 component = hardware.get_all()
 
 
+print("\nHardware outputs:")
+print(component)
+
 for _ in range(total_iterations):
 
     deployment = Deployment(outputs, strategy='perimeter', amt=outputs['mission_perimeter'])
@@ -46,11 +50,14 @@ for _ in range(total_iterations):
     uav = UAV(outputs, component, iterations=10, history=False, verbose=False)
     outputs = uav.get_all()
 
-    # nest = Nest(outputs, component)
+    # nest = Nest(outputs, components, verbose=True)
     # outputs = nest.get_all()
 
-    print(f"Iteration percentage: {(_ + 1) / total_iterations * 100:.2f}%")
+    performance = Performance(outputs, components)
+    outputs = performance.get_all()
 
+
+    print(f"Iteration percentage: {(_ + 1) / total_iterations * 100:.2f}%")
 
     if history:
         print("History is enabled, but not implemented in this run.")
@@ -68,5 +75,5 @@ if False:
     print("}")
 
 print(f"Payload mass: {outputs['payload_mass']} kg")
-print(f'Deployment rate {outputs["true_deployment_rate"]*3600} m/h')
+print(f'Deployment rate {outputs["mission_deployment_rate"]*3600} m/h')
 
