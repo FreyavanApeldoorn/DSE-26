@@ -374,7 +374,8 @@ class Mission:
         #self.calc_time_wrapup()
 
         if self.time_uav < self.time_preparation - self.time_startup_nest:
-            raise ValueError(f"UAV mission time ({self.time_uav}) is less than preparation time, so UAVs will overlap. Check inputs.")
+            self.total_mission_time = np.nan
+            # raise ValueError(f"UAV mission time ({self.time_uav}) is less than preparation time, so UAVs will overlap. Check inputs.")
         else:
             total_mission_time = self.time_preparation + self.time_operation #+ self.time_wrapup
             self.total_mission_time = total_mission_time
@@ -469,10 +470,7 @@ if __name__ == '__main__':
     test_inputs_mission.update(deployment_funny_inputs)
 
     mission = Mission(test_inputs_mission)
-    outputs = mission.get_all()
-
-    for key, value in outputs.items():
-        print(f"{key}: {value}")
+    mission.performance_calcs(20000, 20, 3, 6)
 
 
     

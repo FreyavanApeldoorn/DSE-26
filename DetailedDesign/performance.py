@@ -9,21 +9,27 @@ from deployment import Deployment
 
 class Performance:
 
-    def __init__(self, inputs: dict[str, float], hardware) -> None:
+    def __init__(self, inputs: dict[str, float]) -> None:
         self.inputs = inputs
         self.outputs = self.inputs.copy()
-        self.hardware = hardware
-        self.deployment = Deployment(self.inputs, 'perimeter', self.mission_perimeter)
-        self.mission = Mission(inputs)
-
-        self.n_workers = ...
-        self.n_nests = ...
-        self.range = ...
-
-        self.aerogel_absorption_factor = 50 #g/g https://www.sciencedirect.com/science/article/pii/S2213343722002299, https://www.sciencedirect.com/science/article/pii/S1385894715002326#:~:text=50%20°C.-,Abstract,their%20high%20oil%20absorption%20capacities.
+        # self.hardware = hardware
 
         self.mission_perimeter = inputs["mission_perimeter"]
         self.oil_mass = inputs['oil_mass']
+
+        self.deployment = Deployment(self.inputs, 'perimeter', self.mission_perimeter)
+        self.mission = Mission(inputs)
+
+        # Standard case
+        self.n_workers = 6 #2 per nest
+        self.n_nests = 3 #fits 20 UAVs
+        self.n_uavs = 20 #from requirement
+        self.range = inputs['R_max']
+
+        self.generator_nest_cap = 6
+        self.reg_nest_cap = 10
+
+        self.aerogel_absorption_factor = 50 #g/g https://www.sciencedirect.com/science/article/pii/S2213343722002299, https://www.sciencedirect.com/science/article/pii/S1385894715002326#:~:text=50%20°C.-,Abstract,their%20high%20oil%20absorption%20capacities.
 
     # ~~~ Intermediate Functions ~~~
 
@@ -34,6 +40,10 @@ class Performance:
         # For oil
         aerogel_mass, _, _ =  self.deployment.aerogel_size()
         self.nr_runs_oil = math.ceil((self.oil_mass / self.aerogel_absorption_factor) / aerogel_mass)
+
+    def test(self):
+        self.mission.get_all()
+        print(self.mission.total_mission_time / 60 / 60)
 
 
     def deployment_rates(self, plot=True) -> float:
@@ -59,80 +69,79 @@ class Performance:
         #single calculation
 
         # Deployment rate is from the time the first UAV takes off to the time the last one lands
-        self.mission_deployment_rate_oil = self.oil_mass / self.total_mission_time_oil
-        self.mission_deployment_rate_fire = self.mission_perimeter / self.total_mission_time_fire
+        # self.mission_deployment_rate_oil = self.oil_mass / self.total_mission_time_oil
+        # self.mission_deployment_rate_fire = self.mission_perimeter / self.total_mission_time_fire
 
         
         if plot:
-            #Deployment rate based on range 
-            range_range = np.arange(1, 21)
-            oil_mass_range = np.arange(1, 1000)
-            perimeter_range = np.arange(1, 1000)
 
-            R_oil, Y_oil = np.meshgrid(range_range, oil_mass_range)
-            R_fire, Y_fire = np.meshgrid(range_range, perimeter_range)
+            range_range = range(10000, 25000, 1000)
+            oil_range = range(1, 8000, 1000)
+            perimeter_range = range(1, 2000, 1000)
+            
+            dep_range = []
+            grid = []
+            for r in range_range:
+                for m in oil_range:
+                    mis = Mission(self.inputs)
+                    mis.oil_mass = m
+                    mis.mission_type = 'oil_spill'
+                    print(self.n_uavs, self.n_nests, self.n_workers)
+                    res, _ = mis.performance_calcs(r, self.n_uavs, self.n_nests, self.n_workers)
+                    dep_range.append(res)
+                    grid.append((r, m))
+                    print(r, m, res)
 
-            # Example dep_time formula (can be adjusted)
-            dep_time_oil = ...
-            dep_time_fire = ...
 
-            dep_rate_oil = Y_oil / dep_time_oil
-            dep_rate_fire = Y_fire / dep_time_fire
+            range_vals = sorted(set([pt[0] for pt in grid]))
+            oil_vals = sorted(set([pt[1] for pt in grid]))
 
+            Z = np.array(dep_range).reshape(len(oil_vals), len(range_vals))
+            X, Y = np.meshgrid(range_vals, oil_vals)  # X: range, Y: AR
 
             plt.figure(figsize=(8, 6))
-            contour = plt.contourf(R_oil, Y_oil, dep_rate_oil, levels=50, cmap='plasma')
-            plt.colorbar(contour, label='Deployment Rate [kg/s]')
-            plt.xlabel('Range [km]')
-            plt.ylabel('Oil Mass [kg]')
-            plt.tight_layout()
-            plt.savefig('DetailedDesign\plots\oil_range_mass_diagram')
+            cp = plt.contourf(X, Y, Z, cmap='plasma')
+            plt.colorbar(cp, label='deployment_rate [kg/s]')
+            plt.xlabel('Range [m]')
+            plt.ylabel('oil mass [kg]')
+            plt.savefig('DetailedDesign\plots\oil_range.png')
             plt.show()
-
-            plt.figure(figsize=(8, 6))
-            contour = plt.contourf(R_fire, Y_fire, dep_rate_fire, levels=50, cmap='plasma')
-            plt.colorbar(contour, label='Deployment Rate [m/s]')
-            plt.xlabel('Range [km]')
-            plt.ylabel('Oil Mass [kg]')
-            plt.tight_layout()
-            plt.savefig('DetailedDesign\plots\oil_range_mass_diagram')
-            plt.show()
+            
 
             #Deployment range based on nr_nests and nr_workers
-            nests_range = range(1, 11)
-            workers_range = range(0, 21)
+            uavs_range = range(10, 26)
+            workers_range = range(2, 11)
 
-            nest_worker_table = pd.DataFrame(index=workers_range, columns=nests_range, dtype=float)
+            uav_worker_table = pd.DataFrame(index=workers_range, columns=uavs_range, dtype=float)
 
-            for strat in ['oil', 'wildfire']:
+            #6 in the generator one, 10 in the general one
+
+            for strat in ['oil_spill', 'wildfire']:
                 for workers in workers_range:
-                    for nests in nests_range:
-
-                        if workers % 2 == 0:
-                            dep_time = ... #Add
-                            if strat == 'oil':
-                                nest_worker_table.loc[workers, nests] = self.oil_mass / dep_time
-                            else:
-                                if nests <= workers <= 2 * nests:
-                                    nest_worker_table.loc[workers, nests] = self.mission_perimeter / dep_time
+                    for uavs in uavs_range:
+                        nests = 1 + max(0, math.ceil((uavs - self.generator_nest_cap) / self.reg_nest_cap))
+                        mis = Mission(self.inputs)
+                        mis.mission_type = strat
+                        dep_time, _ = mis.performance_calcs(self.range, uavs, nests, workers)
+                        dep_time = dep_time / (60*60)
+                        if strat == 'oil_spill':
+                            uav_worker_table.loc[workers, uavs] = self.oil_mass / dep_time
                         else:
-                            nest_worker_table.loc[workers, nests] = np.nan
+                            if nests <= workers <= 2 * self.n_nests:
+                                uav_worker_table.loc[workers, uavs] = self.mission_perimeter / dep_time
+                            else:
+                                uav_worker_table.loc[workers, uavs] = np.nan
 
-                plt.figure(figsize=(10, 6))
-                sns.heatmap(nest_worker_table, annot=True, fmt=".2f", cmap="RdYlGn", cbar_kws={'label': 'Deployment Rate'})
+                plt.figure(figsize=(20, 15))
+                sns.heatmap(uav_worker_table, annot=True, fmt=".2f", cmap="RdYlGn", cbar_kws={'label': 'Deployment Rate'})
                 plt.title(f"Deployment Rate by Number of Workers and Nests for {strat}")
-                plt.xlabel("Number of Nests")
+                plt.xlabel("Number of UAVs")
                 plt.ylabel("Number of Workers")
                 plt.tight_layout()
                 plt.savefig(f"DetailedDesign\plots\{strat}_worker_nest_heatmap.png")
                 plt.show()   
 
 
-        # elif self.mission_type == "oil_spill":
-        #     self.uav_deployment_rate = self.mission_mass
-
-        else:
-            raise ValueError(f"Unsupported mission type: {self.mission_type}")
 
     def response_time(self) -> float:
         pass
@@ -160,6 +169,43 @@ class Performance:
 
         return self.outputs
     
+
 if __name__ == '__main__':
     # Perform sanity checks here
-    ...
+
+    from funny_inputs import deployment_funny_inputs
+
+    test_inputs_performance = {
+        "number_of_UAVs": 6,
+        "number_of_containers": 2,
+        "capacity_gen": 6,
+        "capacity_nogen": 10,
+        "number_of_workers": 6,
+        "margin": 60,
+        "h_cruise": 100.0,
+        "ROC_VTOL": 3.0,
+        "ROD_VTOL": 2.0,
+        "V_cruise": 20.0,
+        "wind_speed": 5.0,
+        "time_transition": 10.0,
+        "time_deploy": 20.0,
+        "time_scan": 60.0,
+        "mission_type": "oil_spill",
+        "mission_perimeter": 1000.0,
+        "oil_mass": 5000.0,
+        "R_max": 20000.0,
+        "R_min": 1000.0,
+        #"nr_aerogels": 12,
+        # The following are needed for wrapup (used in calc_time_wrapup)
+        "time_wing_attachment": 30.0,
+        "time_put_back_UAV": 30.0,
+        "time_UAV_wrapup_check": 15.0,
+        "time_between_UAV": 10.0,
+        "time_between_containers": 60.0,
+        "time_final_wrapup": 60.0,
+    }
+    test_inputs_performance.update(deployment_funny_inputs)
+
+    perf = Performance(test_inputs_performance)
+
+    perf.deployment_rates()
