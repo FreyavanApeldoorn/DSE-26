@@ -581,7 +581,7 @@ class StabCon:
             )
 
             # CG expressed as fraction of MAC behind LE-MAC
-            x_cg_bar = ((x_cg - x_lemac) / self.mac)*1.05
+            x_cg_bar = ((x_cg - x_lemac) / self.mac)
 
             results[config] = {"x_lemac": x_lemac, "x_cg": x_cg, "x_cg_bar": x_cg_bar}
 
@@ -673,6 +673,7 @@ class StabCon:
 
         ctrl_den = (CL_h / CL_Ah) * (self.lh / self.mac) * self.Vh_V
         sh_s_control = (x_cg_bar + (Cm_ac / CL_Ah - self.x_ac_bar_wing)) / ctrl_den
+        sh_s_control_with_margin = (x_cg_bar + (Cm_ac / CL_Ah - self.x_ac_bar_wing)- static_margin) / ctrl_den
 
         # 4. Fetch the *actual* CG tracks so the user can plot them together
         cg_tracks: dict[str, np.ndarray] = {}
@@ -686,6 +687,7 @@ class StabCon:
             "sh_s_stability": sh_s_stability,
             "sh_s_stability_no_margin": sh_s_stability_no_margin,
             "sh_s_control": sh_s_control,
+            "sh_s_control_with_margin": sh_s_control_with_margin,
             "cg_tracks": cg_tracks,
         }
 
@@ -790,7 +792,7 @@ if __name__ == "__main__":  # pragma: no cover
         sc_data["x_cg_bar"],
         sc_data["sh_s_stability"],
         "k--",
-        label="Stability + 5% Static Margin",
+        label="Stability + 10% Static Margin",
     )
     plt.plot(
         sc_data["x_cg_bar"],
@@ -799,6 +801,7 @@ if __name__ == "__main__":  # pragma: no cover
         label="Stability",
     )
     plt.plot(sc_data["x_cg_bar"], sc_data["sh_s_control"], "k-", label="Control")
+    plt.plot(sc_data["x_cg_bar"], sc_data["sh_s_control_with_margin"], "k-.", label="Control + 10% Static Margin")
 
     # Overlay the CG tracks for each payload case
     # for cfg, track in sc_data["cg_tracks"].items():
