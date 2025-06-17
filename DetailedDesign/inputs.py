@@ -38,6 +38,7 @@ inputs.update(requirements_inputs)
 mission_inputs = {
     "mission_type": "wildfire",
     "mission_perimeter": 1000,  # Mission perimeter [m]
+    "oil_mass": 1000,
     "number_of_UAVs": 20,  # Number of UAVs in the swarm
     "number_of_containers": 3,  # Number of containers in the nest
     "number_of_workers": 2,  # Number of workers per UAV

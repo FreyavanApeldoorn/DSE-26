@@ -194,6 +194,8 @@ class Nest:
 
         n_uavs_gennest = l_remaining // (self.uav_folded_height * (1 + margin) )
         n_uavs_nogennest = self.nest_length // (self.uav_folded_height * (1 + margin) )
+        self.n_uavs_gennest = int(n_uavs_gennest)  
+        self.n_uavs_nogennest = int(n_uavs_nogennest)
 
         print(f"nest length: {self.nest_length:.2f} m")
         print(f'uav folded height: {self.uav_folded_height:.2f} m')
@@ -273,7 +275,9 @@ class Nest:
         #self.outputs["Nest_mass"] = ...
 
         self.outputs["number_of_containers"] = self.n_containers
-        self.outputs["number_of_UAVs"] = self.n_total_uavs
+        self.outputs["capacity_gen"] = self.n_uavs_gennest
+        self.outputs["capacity_nogen"] = self.n_uavs_nogennest
+        #self.outputs["number_of_UAVs"] = self.n_total_uavs
 
         self.outputs["nest_trips_capacity"] = self.nest_trips_capacity
         self.outputs["nest_cycles_capacity"] = self.nest_cycle_capacity
