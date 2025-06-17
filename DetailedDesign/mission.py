@@ -261,6 +261,9 @@ class Mission:
         if self.UAV_launch_time > self.time_turnaround + self.margin:
             pass # ADD MARGIN STUFF
 
+    def plot_personnel(self) -> None:
+        pass
+
 
     # ~~~ Output functions ~~~ 
  

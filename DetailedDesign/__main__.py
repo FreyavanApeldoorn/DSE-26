@@ -50,8 +50,8 @@ for _ in range(total_iterations):
     uav = UAV(outputs, component, iterations=10, history=False, verbose=False)
     outputs = uav.get_all()
 
-    nest = Nest(outputs, components, verbose=True)
-    outputs = nest.get_all()
+    # nest = Nest(outputs, components, verbose=True)
+    # outputs = nest.get_all()
 
     performance = Performance(outputs, components)
     outputs = performance.get_all()

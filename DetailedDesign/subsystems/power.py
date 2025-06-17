@@ -21,7 +21,8 @@ class Power:
         #self.specific_energy = inputs["battery_specific_energy"] 
         self.eta_battery = self.inputs["eta_battery"]  # battery efficiency
 
-        self.time_cruise = inputs["time_cruise_max"]
+        self.time_cruise_max = inputs["time_cruise_max"]
+        self.time_cruise_min = inputs["time_cruise_min"]  # Minimum cruise time, if applicable
         self.time_ascent = inputs["time_ascent"]
         self.time_descent = inputs["time_descent"]
         self.time_deploy = inputs["time_deploy"]
@@ -59,8 +60,8 @@ class Power:
     def calculate_required_capacity(self) -> float:
         
         
-        times = np.array([
-            self.time_cruise,
+        times_max = np.array([
+            self.time_cruise_max,
             self.time_ascent,
             self.time_descent,
             self.time_deploy,
@@ -68,7 +69,7 @@ class Power:
             self.time_scan,
             self.time_idle
         ])
-        powers = np.array([
+        powers_max = np.array([
             self.power_cruise_total,
             self.power_ascent,
             self.power_descent,
@@ -79,8 +80,21 @@ class Power:
 
         ])
 
-        self.trip_capacity = np.sum(times * powers)
+        self.trip_capacity = np.sum(times_max * powers_max)
         self.trip_capacity_wh = self.trip_capacity / 3600
+
+        times_min = np.array([
+            self.time_cruise_min,
+            self.time_ascent,
+            self.time_descent,
+            self.time_deploy,
+            self.time_transition,
+            self.time_scan,
+            self.time_idle
+        ])
+
+        self.trip_capacity_min = np.sum(times_min * powers_max)
+        self.trip_capacity_min_wh = self.trip_capacity_min / 3600
 
 
     def old_calculate_battery_mass(self) -> float:
@@ -139,6 +153,7 @@ class Power:
 
         #self.outputs["mass_battery"] = self.battery_mass # if self.hardware["battery_mass"] is None else self.hardware["battery_mass"]
         self.outputs["required_capacity_wh"] = self.trip_capacity_wh
+        self.outputs["required_capacity_min_wh"] = self.trip_capacity_min_wh
         self.outputs["battery_capacity"] = battery_capacity   
 
 
@@ -149,7 +164,7 @@ if __name__ == '__main__': # pragma: no cover
     # Perform sanity checks here
     
     inputs = {
-        "time_cruise": 1440.0,  # seconds
+        "time_cruise_max": 1440.0,  # seconds
         "time_ascent": 40.0,  # seconds
         "time_descent": 80.0,  # seconds
         "time_deploy": 130.0,  # seconds
