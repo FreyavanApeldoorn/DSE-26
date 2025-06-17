@@ -106,8 +106,9 @@ class Mission:
 
         time_turnaround_min = self.time_turnaround_check + self.time_reload_aerogel + self.time_replace_battery # Time for 1 UAV to turnaround nothing special
         
-        self.time_turnaround = time_turnaround_min  
-        self.time_min_launch = self.time_turnaround
+        pairs = self.number_of_workers // 2  # how many pairs of workers we have
+
+        self.time_min_launch = time_turnaround_min / pairs  # time between launches, assuming pairs of workers handle one UAV each
 
 
 
@@ -242,7 +243,7 @@ class Mission:
 
         mission_times = np.array([self.time_ascent, self.time_transition, self.time_cruise, self.time_transition, 
                          self.time_scan, self.time_descent, self.time_deploy, self.time_ascent, 
-                         self.time_transition, self.time_cruise, self.time_transition, self.time_descent, self.time_turnaround])
+                         self.time_transition, self.time_cruise, self.time_transition, self.time_descent, self.time_turnaround_min])
         self.time_uav = np.sum(mission_times)
         self.time_uav_min = self.time_uav - self.time_cruise + self.time_cruise_min
 
