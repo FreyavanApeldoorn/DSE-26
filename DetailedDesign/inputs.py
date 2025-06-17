@@ -214,12 +214,12 @@ thermal_inputs = {
     "thickness_alu_fuselage": 0.00078,  # m
     "conductivity_alu": 0.36,  # 237., # W / (mK)
     "conductivity_foam": 0.0,  # 0.03, # W / (mK)
-    "conductivity_insulation": 0.012,  # W / (mK)
+    "conductivity_insulation": 0.013,  # W / (mK)
     "insulation_density": 30,  # kg/m^3
     "pcm_latent_heat": 197000.0,  # J/kg
     "n_battery": 2,
     "battery_resistance": 0.015,  # Ohm, based on guessing
-    "processor_heat_diss": 40.0,  # W, guesstimate which should eventually come from the chosen processor
+    "processor_heat_diss": 50.0,  # W, guesstimate which should eventually come from the chosen processor
     "winch_eff": 0.65,  # Winch efficiency fraction (0.35=35% efficiency) used to compute the heat generated
 }
 inputs.update(thermal_inputs)
