@@ -111,45 +111,6 @@ class Mission:
         self.time_min_launch = time_turnaround_min / pairs  # time between launches, assuming pairs of workers handle one UAV each
 
 
-
-    # def calc_time_preparation(self) -> float:
-    #     """
-    #     Calculate the total preparation time required for UAV launch.
-    #     This method computes the time needed to prepare all UAVs and containers for launch,
-    #     taking into account the number of UAVs, number of containers, number of available workers,
-    #     and various time components such as wing attachment, aerogel loading, UAV startup, and nest startup.
-    #     The calculation considers different scenarios based on the number of workers relative to the number of UAVs.
-    #     Returns
-    #     -------
-    #     float
-    #         The total preparation time in seconds.
-    #     Raises
-    #     ------
-    #     ValueError
-    #         If the number of slaves (workers) is less than 1.
-    #     Notes
-    #     -----
-    #     - If the number of slaves is greater than or equal to the number of UAVs, preparation time is minimized.
-    #     - If the number of slaves is less than the number of UAVs, a linear relation is assumed for walking time between containers.
-    #     - The method caches the calculated launch and preparation times as instance attributes.
-    #     """
-        
-    #     #Bottom point graph - the maximum time based on a single worker
-    #     UAV_launch_time = self.time_wing_attachment + self.time_aerogel_loading +  self.time_startup_UAV + self.time_between_UAV # Time for 1 UAV to prepare
-    #     self.UAV_launch_time = UAV_launch_time  # cache launch time
-
-    #     #Top point graph - the minimum time 
-    #     time_launch_1worker = (UAV_launch_time * self.number_of_UAV + self.time_between_containers * self.number_of_containers) #Assume containers relatively closer together, linear relation walking time, upper bound
-    #     time_slope = (UAV_launch_time - time_launch_1worker)/(self.number_of_UAV - 1)
-    #     if self.number_of_slaves >= self.number_of_UAV:
-    #         time_preparation = UAV_launch_time + self.time_startup_nest
-    #     elif self.number_of_slaves < 1:
-    #         raise ValueError("Number of slaves is less than 1, and that's a big problem!")
-    #     else: 
-    #         time_preparation = time_launch_1worker + time_slope * (self.number_of_slaves - 1) + self.time_startup_nest #Assume containers relatively closer together, linear relation walking time, upper bound
-        
-    #     self.time_preparation = time_preparation
-
     def calc_time_preparation(self) -> float:
         # first, ensure our turnaround time is up to date
         self.calc_time_turn_around()
@@ -171,15 +132,21 @@ class Mission:
             + self.time_startup_uav
         )
 
-        # how many pairs of workers we have (each pair handles one UAV in parallel)
+        print(f"Number of Workers: {self.number_of_workers}")
+
         pairs = self.number_of_workers // 2
-        # we’ll track how many we’ve done so far
+        
         uavs_launched = 0
         total_time = 0.0
 
         # list of nest capacities: first nest is the generator nest with 6 UAVs
         nest_capacities = [self.cap_gen] + [self.cap_nogen] * (self.number_of_containers - 1)
         # (you’d set number_of_containers_minus_one appropriately elsewhere)
+
+
+        if self.verbose:
+            print(f"Number of Pairs: {pairs}")
+            print(f"Number of UAVs: {self.number_of_UAV}")
 
         for cap in nest_capacities:
             if uavs_launched >= self.number_of_UAV:
@@ -217,6 +184,11 @@ class Mission:
 
         self.time_preparation = total_time
 
+        if self.verbose:
+            print(f"Preparation Time: {self.time_preparation/60} minutes")
+            print(f"UAV Launch Time: {(self.time_preparation - time_nest_setup)/60} minutes")
+
+
 
     def uav_mission_time(self) -> float: 
         """
@@ -239,6 +211,12 @@ class Mission:
         self.time_cruise = self.R_max / (self.V_cruise - self.wind_speed) # Slowest-case scenario, wind against the UAV
         self.time_cruise_min = self.R_min / (self.V_cruise + self.wind_speed) # Fastest-case scenario, wind with the UAV
 
+        if self.verbose:
+            print(f"Time Ascent: {self.time_ascent} seconds")
+            print(f"Time Descent: {self.time_descent} seconds")
+            print(f"Time Cruise: {self.time_cruise} seconds")
+            print(f"Time Cruise Min: {self.time_cruise_min} seconds")
+
         self.calc_time_turn_around()   # calculate time for turnaround
 
         mission_times = np.array([self.time_ascent, self.time_transition, self.time_cruise, self.time_transition, 
@@ -260,19 +238,6 @@ class Mission:
             print(f"UAV Mission Time: {self.time_uav} seconds")
 
 
-    # def deployment_rate_uav(self) -> float: 
-        
-    #     effective_width = self.aerogel_width - (2*self.deployment_accuracy)
-    #     if effective_width <= 0:
-    #         raise ValueError("Effective aerogel width must be positive. Check deployment_accuracy.")
-        
-    #     n_layers = np.ceil(self.fire_break_width / effective_width)
-    #     self.n_layers = n_layers
-
-    #     self.uav_mission_time()
-
-    #     perimeter_per_trip = self.aerogel_length / self.n_layers
-    #     self.uav_deployment_rate = perimeter_per_trip / self.time_uav
 
     def calc_UAV_runs(self):
 
@@ -291,6 +256,9 @@ class Mission:
 
         else:
             raise ValueError(f"Unsupported mission type: {self.mission_type}")
+        
+        if self.verbose:
+            print(f"Number of trips for mission: {self.num_trips}")
 
 
     def calc_time_operation(self) -> float:
@@ -389,10 +357,14 @@ class Mission:
 
 
     def performance_calcs(self, r_max: float, nr_UAvs: int, nr_containers: int, nr_workers: int) -> None:
-        self.R_max = r_max
-        self.number_of_UAV = nr_UAvs
-        self.number_of_containers = nr_containers
-        self.number_of_workers = nr_workers
+        
+        update = True
+
+        if update:
+            self.R_max = r_max 
+            self.number_of_UAV = nr_UAvs
+            self.number_of_containers = nr_containers
+            self.number_of_workers = nr_workers
 
 
 
@@ -440,24 +412,24 @@ if __name__ == '__main__':
     from funny_inputs import deployment_funny_inputs
 
     test_inputs_mission = {
-        "number_of_UAVs": 6,
-        "number_of_containers": 2,
+        "number_of_UAVs": 20,
+        "number_of_containers": 3,
         "capacity_gen": 6,
-        "capacity_nogen": 4,
-        "number_of_workers": 4,
+        "capacity_nogen": 10,
+        "number_of_workers": 2,
         "margin": 60,
-        "h_cruise": 100.0,
+        "h_cruise": 120.0,
         "ROC_VTOL": 3.0,
         "ROD_VTOL": 2.0,
-        "V_cruise": 20.0,
-        "wind_speed": 5.0,
-        "time_transition": 10.0,
-        "time_deploy": 20.0,
+        "V_cruise": 100/3.6,
+        "wind_speed": 30.0/3.6,
+        "time_transition": 30.0,
+        "time_deploy": 5*60,
         "time_scan": 60.0,
-        "mission_type": "oil_spill",
+        "mission_type": "wildfire",
         "mission_perimeter": 1000.0,
-        "oil_mass": 5000.0,
-        "R_max": 20000.0,
+        "oil_mass": 1000.0,
+        "R_max": 30000.0,
         "R_min": 1000.0,
         #"nr_aerogels": 12,
         # The following are needed for wrapup (used in calc_time_wrapup)
@@ -466,11 +438,11 @@ if __name__ == '__main__':
         "time_UAV_wrapup_check": 15.0,
         "time_between_UAV": 10.0,
         "time_between_containers": 60.0,
-        "time_final_wrapup": 60.0,
+        "time_final_wrapup": 60.0
     }
-    test_inputs_mission.update(deployment_funny_inputs)
+    deployment_funny_inputs.update(test_inputs_mission)  # Update with deployment inputs
 
-    mission = Mission(test_inputs_mission)
+    mission = Mission(deployment_funny_inputs, verbose=True)
     print(mission.performance_calcs(20000, 20, 3, 6), mission.num_trips)
 
 
