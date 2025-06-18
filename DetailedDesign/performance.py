@@ -72,42 +72,69 @@ class Performance:
         if plot:
 
             range_range = range(10000, 25000, 1000)
-            oil_range = range(1000, 8001, 1000)
-            perimeter_range = range(100, 2000, 1000)
+            oil_range = range(1000, 9001, 1000)
+            perimeter_range = range(100, 601, 100)
             
-            dep_range = []
+            time_range = []
             grid = []
             for r in range_range:
-                print(r)
                 for m in oil_range:
-                    mis = Mission(self.inputs, verbose=True)
+                    mis = Mission(self.inputs)
                     mis.oil_mass = m
                     mis.mission_type = 'oil_spill'
                     mis.R_max = r
-                    # res, _ = mis.performance_calcs(r, self.n_uavs, self.n_nests, self.n_workers)
-                    # res = m / (res/60/60)
                     mis.calc_total_mission_time()
-                    res = mis.time_operation
-                    dep_range.append(res)
+                    res = mis.total_mission_time / (60)
+                    time_range.append(res)
                     grid.append((r, m))
+                    if r == 20000 and m == 7000:
+                        print(res)
 
 
             range_vals = sorted(set([pt[0] for pt in grid]))
             oil_vals = sorted(set([pt[1] for pt in grid]))
 
-            Z = np.array(dep_range).reshape(len(oil_vals), len(range_vals))
+            Z = np.array(time_range).reshape(len(range_vals), len(oil_vals)).T
             X, Y = np.meshgrid(range_vals, oil_vals)  # X: range, Y: AR
 
             plt.figure(figsize=(8, 6))
             cp = plt.pcolormesh(X, Y, Z, cmap='plasma')
-            plt.colorbar(cp, label='deployment_rate [kg/h]')
+            plt.colorbar(cp, label='total response time [min]')
             plt.xlabel('Range [m]')
             plt.ylabel('oil mass [kg]')
             plt.savefig('DetailedDesign\plots\oil_range.png')
             plt.show()
+
+            time_range = []
+            grid = []
+            for r in range_range:
+                for p in perimeter_range:
+                    mis = Mission(self.inputs)
+                    mis.mission_perimeter = p
+                    mis.mission_type = 'wildfire'
+                    mis.R_max = r
+                    mis.calc_total_mission_time()
+                    res = mis.total_mission_time / (60)
+                    time_range.append(res)
+                    grid.append((r, p))
+
+
+            range_vals = sorted(set([pt[0] for pt in grid]))
+            perimeter_vals = sorted(set([pt[1] for pt in grid]))
+
+            Z = np.array(time_range).reshape(len(range_vals), len(perimeter_vals)).T
+            X, Y = np.meshgrid(range_vals, perimeter_vals)  # X: range, Y: AR
+
+            plt.figure(figsize=(8, 6))
+            cp = plt.pcolormesh(X, Y, Z, cmap='plasma')
+            plt.colorbar(cp, label='total response time [min]')
+            plt.xlabel('Range [m]')
+            plt.ylabel('Mission perimeter [m]')
+            plt.savefig('DetailedDesign\plots\perimeter_range.png')
+            plt.show()
             
 
-            '''
+            
             #Deployment range based on nr_nests and nr_workers
             uavs_range = range(10, 51)
             workers_range = range(2, 13)
@@ -116,30 +143,37 @@ class Performance:
 
 
             for strat in ['oil_spill', 'wildfire']:
+                uav_worker_table = pd.DataFrame(index=workers_range, columns=uavs_range, dtype=float)
                 for workers in workers_range:
                     for uavs in uavs_range:
                         nests = 1 + max(0, math.ceil((uavs - self.generator_nest_cap) / self.reg_nest_cap))
                         mis = Mission(self.inputs)
                         mis.mission_type = strat
-                        dep_time, _ = mis.performance_calcs(self.range, uavs, nests, workers)
-                        dep_time = dep_time / (60*60)
+                        mis.number_of_UAV = uavs
+                        mis.number_of_workers = workers
+                        mis.number_of_containers = nests
+                        mis.calc_total_mission_time()
+
+                        if workers == workers_range[0] and (uavs == 23 or uavs == 24):
+                            print(vars(mis))  
+                        dep_time = mis.total_mission_time / (60*60)
                         if strat == 'oil_spill':
-                            uav_worker_table.loc[workers, uavs] = self.oil_mass / dep_time
+                            uav_worker_table.loc[workers, uavs] = round(self.oil_mass / dep_time)
                         else:
                             if nests <= workers <= 2 * nests:
-                                uav_worker_table.loc[workers, uavs] = self.mission_perimeter / dep_time
+                                uav_worker_table.loc[workers, uavs] = round(self.mission_perimeter / dep_time)
                             else:
                                 uav_worker_table.loc[workers, uavs] = np.nan
 
                 plt.figure(figsize=(20, 15))
-                sns.heatmap(uav_worker_table, annot=True, fmt=".2f", cmap="RdYlGn", cbar_kws={'label': 'Deployment Rate'})
+                sns.heatmap(uav_worker_table, annot=True, fmt=".2f", cmap="RdYlGn", cbar_kws={'label': 'Deployment Rate'}, annot_kws={"size": 6})
                 plt.title(f"Deployment Rate by Number of Workers and Nests for {strat}")
                 plt.xlabel("Number of UAVs")
                 plt.ylabel("Number of Workers")
                 plt.tight_layout()
                 plt.savefig(f"DetailedDesign\plots\{strat}_worker_nest_heatmap.png")
                 plt.show()   
-                '''
+                
 
 
 
@@ -176,8 +210,8 @@ if __name__ == '__main__':
     from funny_inputs import deployment_funny_inputs
 
     test_inputs_performance = {
-        "number_of_UAVs": 6,
-        "number_of_containers": 2,
+        "number_of_UAVs": 20,
+        "number_of_containers": 3,
         "capacity_gen": 6,
         "capacity_nogen": 10,
         "number_of_workers": 6,
@@ -191,7 +225,7 @@ if __name__ == '__main__':
         "time_deploy": 20.0,
         "time_scan": 60.0,
         "mission_type": "oil_spill",
-        "mission_perimeter": 1000.0,
+        "mission_perimeter": 500.0,
         "oil_mass": 7000.0,
         "R_max": 20000.0,
         "R_min": 1000.0,
@@ -210,27 +244,3 @@ if __name__ == '__main__':
     perf = Performance(test_inputs_performance)
 
     perf.deployment_rates()
-
-
-'''
-17 km
-UAV Mission Time: 2578.333333333333 seconds
-Number of cycles: 1.0
-Time Operation: 42.972222222222214 minutes
-UAV Mission Time: 2578.333333333333 seconds
-total_mission_time 6066.666666666666
-
-18 km
-UAV Mission Time: 2711.6666666666665 seconds
-Number of cycles: 1.0
-Time Operation: 45.19444444444444 minutes
-UAV Mission Time: 2711.6666666666665 seconds
-total_mission_time 6333.333333333333
-
-19 km
-UAV Mission Time: 2845.0 seconds
-Number of cycles: 1.0
-Time Operation: 47.416666666666664 minutes
-UAV Mission Time: 2845.0 seconds
-
-'''

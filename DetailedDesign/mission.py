@@ -238,7 +238,7 @@ class Mission:
         if self.mission_type == "wildfire":
 
             # For wildfire
-            self.nr_runs_fire = self.deployment.perimeter_creation()
+            self.nr_runs_fire = Deployment(self.inputs, 'perimeter', self.mission_perimeter).perimeter_creation()
             self.num_trips = self.nr_runs_fire
 
         elif self.mission_type == "oil_spill":
@@ -264,7 +264,8 @@ class Mission:
         self.calc_UAV_runs()
 
         #self.num_trips = self.num_aerogels
-        num_cycles = np.ceil(self.num_trips / self.number_of_UAV)
+        num_cycles = self.num_trips / self.number_of_UAV
+        self.num_cycles = num_cycles
         self.time_operation = num_cycles * self.time_uav
 
         if self.verbose:
@@ -392,8 +393,8 @@ if __name__ == '__main__':
         "time_scan": 60.0,
         "mission_type": "wildfire",
         "mission_perimeter": 1000.0,
-        "oil_mass": 1000.0,
-        "R_max": 30000.0,
+        "oil_mass": 7000.0,
+        "R_max": 20000.0,
         "R_min": 1000.0,
         #"nr_aerogels": 12,
         # The following are needed for wrapup (used in calc_time_wrapup)
@@ -406,8 +407,17 @@ if __name__ == '__main__':
     }
     deployment_funny_inputs.update(test_inputs_mission)  # Update with deployment inputs
 
-    mission = Mission(deployment_funny_inputs, verbose=True)
-    print(mission.performance_calcs(20000, 20, 3, 6), mission.num_trips)
+    mission = Mission(test_inputs_mission)
+
+    mission.mission_type = 'wildfire'
+    mission.mission_perimeter = 201
+    mission.calc_total_mission_time()
+    print(mission.num_trips)
+    print(round(mission.total_mission_time) / 60 / 60)
+
+    mission.mission_type = 'oil_spill'
+    mission.calc_total_mission_time()
+    print(round(mission.total_mission_time)) 
 
 
     
