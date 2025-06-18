@@ -62,6 +62,41 @@ for _ in range(total_iterations):
 #performance = Performance(outputs, components)
 #outputs = performance.get_all()
 
+import matplotlib.pyplot as plt
+
+uav_counts = list(range(20, 68))
+power_requirements = []
+
+# Calculate power required with 0 UAVs (no charging)
+temp_outputs_zero = outputs.copy()
+temp_outputs_zero['number_of_UAVs'] = 0
+nest_zero = Nest(temp_outputs_zero, components, adjust_n_uavs=False, verbose=False)
+temp_outputs_zero = nest_zero.get_all()
+power_no_uavs = temp_outputs_zero.get("total_nest_power_required", 0) / 1000  # Convert to kW
+
+for n_uavs in uav_counts:
+    temp_outputs = outputs.copy()
+    temp_outputs['number_of_UAVs'] = n_uavs
+
+    # Re-run the nest sizing with the new number of UAVs
+    nest = Nest(temp_outputs, components, adjust_n_uavs=False, verbose=False)
+    temp_outputs = nest.get_all()
+
+    power_requirements.append(temp_outputs.get("total_nest_power_required", 0) / 1000)  # Convert to kW
+
+plt.figure(figsize=(8, 5))
+plt.plot(uav_counts, power_requirements, marker='o', label='Total Nest Power Required')
+plt.axhline(48, color='r', linestyle='--', label='48 kW Cutoff')
+plt.axhline(power_no_uavs, color='g', linestyle='-.', label=f'No UAV Charging ({power_no_uavs:.1f} kW)')
+plt.xlabel('Number of UAVs')
+plt.ylabel('Total Nest Power Required (kW)')
+plt.title('Number of UAVs vs. Total Nest Power Required')
+plt.xlim(10, 80)
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
 
 print("\nFinal outputs after sizing:")
 for key, value in outputs.items():

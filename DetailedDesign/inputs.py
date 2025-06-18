@@ -28,7 +28,7 @@ requirements_inputs = {
     "M_to": 30,  # Maximum Takeoff Mass [kg]
     "MTOW": 30 * constants_inputs["g"],  # Maximum Takeoff Weight [N]
     "R_max": 20000,  # Maximum Range [m]
-    "R_min": 2000,
+    "R_min": 1000,
 }
 inputs.update(requirements_inputs)
 
@@ -37,7 +37,7 @@ inputs.update(requirements_inputs)
 
 mission_inputs = {
     "mission_type": "wildfire",
-    "mission_perimeter": 1000,  # Mission perimeter [m]
+    "mission_perimeter": 5000,  # Mission perimeter [m]
     "oil_mass": 1000,
     "number_of_UAVs": 20,  # Number of UAVs in the swarm
     "number_of_containers": 3,  # Number of containers in the nest
@@ -390,6 +390,12 @@ stab_n_con_inputs = {
 
 inputs.update(stab_n_con_inputs)
 
+
+nest_inputs = {
+    "capacity_gen": 6,  # kWh, capacity of the generator
+    "capacity_nogen": 10,  # kWh, capacity of the battery
+}
+inputs.update(nest_inputs)
 
 # ===========================================
 
