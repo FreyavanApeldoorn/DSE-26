@@ -83,7 +83,7 @@ class Mission:
         self.R_min = inputs["R_min"]
 
 
-        self.deployment = Deployment(inputs, 'perimeter', self.mission_perimeter)
+        # self.deployment = Deployment(inputs, 'perimeter', self.mission_perimeter)
 
         #Aerogel Specifics
         #self.num_aerogels = inputs["nr_aerogels"]
@@ -132,7 +132,7 @@ class Mission:
             + self.time_startup_uav
         )
 
-        print(f"Number of Workers: {self.number_of_workers}")
+        # print(f"Number of Workers: {self.number_of_workers}")
 
         pairs = self.number_of_workers // 2
         
@@ -243,14 +243,16 @@ class Mission:
 
 
         if self.mission_type == "wildfire":
+            print(self.mission_perimeter)
 
             # For wildfire
             self.nr_runs_fire = Deployment(self.inputs, 'perimeter', self.mission_perimeter).perimeter_creation()
+            print(self.nr_runs_fire)
             self.num_trips = self.nr_runs_fire
 
         elif self.mission_type == "oil_spill":
             # For oil
-            aerogel_mass, _, _ =  self.deployment.aerogel_size()
+            aerogel_mass, _, _ =  Deployment(self.inputs, 'perimeter', self.mission_perimeter).aerogel_size()
             self.nr_runs_oil = math.ceil((self.oil_mass / self.aerogel_absorption_factor) / aerogel_mass)
             self.num_trips = self.nr_runs_oil
 
@@ -431,7 +433,7 @@ if __name__ == '__main__':
         "time_deploy": 5*60,
         "time_scan": 60.0,
         "mission_type": "wildfire",
-        "mission_perimeter": 1000.0,
+        "mission_perimeter": 500.0,
         "oil_mass": 7000.0,
         "R_max": 20000.0,
         "R_min": 1000.0,
@@ -442,21 +444,20 @@ if __name__ == '__main__':
         "time_UAV_wrapup_check": 15.0,
         "time_between_UAV": 10.0,
         "time_between_containers": 60.0,
-        "time_final_wrapup": 60.0
+        "time_final_wrapup": 60.0,
     }
-    deployment_funny_inputs.update(test_inputs_mission)  # Update with deployment inputs
+    test_inputs_mission.update(deployment_funny_inputs)  # Update with deployment inputs
 
     mission = Mission(test_inputs_mission)
 
     mission.mission_type = 'wildfire'
-    mission.mission_perimeter = 201
+    # mission.mission_perimeter = 500
     mission.calc_total_mission_time()
-    print(mission.num_trips)
-    print(round(mission.total_mission_time) / 60 / 60)
+    print(round(mission.total_mission_time) / 60)
 
     mission.mission_type = 'oil_spill'
     mission.calc_total_mission_time()
-    print(round(mission.total_mission_time)) 
+    print(round(mission.total_mission_time) / 60) 
 
 
     

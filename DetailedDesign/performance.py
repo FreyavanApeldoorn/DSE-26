@@ -98,7 +98,7 @@ class Performance:
             X, Y = np.meshgrid(range_vals, oil_vals)  # X: range, Y: AR
 
             plt.figure(figsize=(8, 6))
-            cp = plt.pcolormesh(X, Y, Z, cmap='plasma')
+            cp = plt.contourf(X, Y, Z, cmap='plasma')
             plt.colorbar(cp, label='total response time [min]')
             plt.xlabel('Range [m]')
             plt.ylabel('oil mass [kg]')
@@ -115,7 +115,10 @@ class Performance:
                     mis.R_max = r
                     mis.calc_total_mission_time()
                     res = mis.total_mission_time / (60)
+                    print(res)
                     time_range.append(res)
+                    if r == 20000 and p == 500:
+                        print(res)
                     grid.append((r, p))
 
 
@@ -126,7 +129,7 @@ class Performance:
             X, Y = np.meshgrid(range_vals, perimeter_vals)  # X: range, Y: AR
 
             plt.figure(figsize=(8, 6))
-            cp = plt.pcolormesh(X, Y, Z, cmap='plasma')
+            cp = plt.contourf(X, Y, Z, cmap='plasma')
             plt.colorbar(cp, label='total response time [min]')
             plt.xlabel('Range [m]')
             plt.ylabel('Mission perimeter [m]')
@@ -142,6 +145,7 @@ class Performance:
             uav_worker_table = pd.DataFrame(index=workers_range, columns=uavs_range, dtype=float)
 
 
+            
             for strat in ['oil_spill', 'wildfire']:
                 uav_worker_table = pd.DataFrame(index=workers_range, columns=uavs_range, dtype=float)
                 for workers in workers_range:
@@ -157,22 +161,25 @@ class Performance:
                         if workers == workers_range[0] and (uavs == 23 or uavs == 24):
                             print(vars(mis))  
                         dep_time = mis.total_mission_time / (60*60)
+                        print(dep_time * 60)
                         if strat == 'oil_spill':
+                            unit = '[kg/h]'
                             uav_worker_table.loc[workers, uavs] = round(self.oil_mass / dep_time)
                         else:
+                            unit = '[m/h]'
                             if nests <= workers <= 2 * nests:
                                 uav_worker_table.loc[workers, uavs] = round(self.mission_perimeter / dep_time)
                             else:
                                 uav_worker_table.loc[workers, uavs] = np.nan
 
-                plt.figure(figsize=(20, 15))
-                sns.heatmap(uav_worker_table, annot=True, fmt=".2f", cmap="RdYlGn", cbar_kws={'label': 'Deployment Rate'}, annot_kws={"size": 6})
-                plt.title(f"Deployment Rate by Number of Workers and Nests for {strat}")
+                plt.figure(figsize=(8, 6))
+                sns.heatmap(uav_worker_table, annot=False, fmt=".2f", cmap="RdYlGn", cbar_kws={'label': f'Deployment Rate {unit}'}, annot_kws={"size": 6})
                 plt.xlabel("Number of UAVs")
                 plt.ylabel("Number of Workers")
                 plt.tight_layout()
                 plt.savefig(f"DetailedDesign\plots\{strat}_worker_nest_heatmap.png")
                 plt.show()   
+                
                 
 
 
@@ -229,7 +236,7 @@ if __name__ == '__main__':
         "oil_mass": 7000.0,
         "R_max": 20000.0,
         "R_min": 1000.0,
-        #"nr_aerogels": 12,
+        #"nr_aerogels"S: 12,
         # The following are needed for wrapup (used in calc_time_wrapup)
         "time_wing_attachment": 30.0,
         "time_put_back_UAV": 30.0,
