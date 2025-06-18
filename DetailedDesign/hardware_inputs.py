@@ -542,6 +542,20 @@ nest_components = {
         "cables_x": None,
         "cables_y": None,
         "cables_z": None
+    },
+    "rails": {
+        "rails_name": "ISO Container Rails",
+        "rails_mass": 14.9,  # kg, mass of the rails
+        "rails_cost": 160,  # $ Cost of the rails
+
+        "rails_length": 2.2,  # m, length of the rails
+        "rails_width": 0.02,  # m, width of the rails
+        "rails_height": 0.02,  # m, height of the rails
+
+        "rails_x": None,  # m, x-location w.r.t. front of the container
+        "rails_y": None,  # m, y-location w.r.t. front of the container
+        "rails_z": None  # m, z-location w.r.t. front of the container
+
     }
 }
 component_inputs.update(nest_components)

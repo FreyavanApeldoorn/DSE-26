@@ -13,8 +13,8 @@ class Mission:
 
     def __init__(self, inputs: dict[str, float], verbose: bool = False) -> None:
         
-        # self.inputs = inputs
-        # self.outputs = self.inputs.copy() # Copy inputs to outputs
+        self.inputs = inputs
+        self.outputs = self.inputs.copy() # Copy inputs to outputs
         self.verbose = verbose
 
         #Nest
@@ -40,7 +40,7 @@ class Mission:
         # self.time_battery_swapping = inputs["time_battery_swapping"] # Time between swapping batteries [s]: From UAV design
 
         # Launch times
-        self.time_unload_container = 5*60
+        #self.time_unload_container = 5*60
         self.time_open_container = 30
         self.time_startup_nest = 3*60
         self.time_unload_uav = 60
@@ -83,7 +83,7 @@ class Mission:
         self.R_min = inputs["R_min"]
 
 
-        self.deployment = Deployment(inputs, 'perimeter', self.mission_perimeter)
+        self.deployment = Deployment(self.outputs, 'perimeter', self.mission_perimeter)
 
         #Aerogel Specifics
         #self.num_aerogels = inputs["nr_aerogels"]
@@ -120,8 +120,7 @@ class Mission:
 
         # constants
         time_nest_setup = (
-            self.time_unload_container
-            + self.time_open_container
+            self.time_open_container
             + self.time_startup_nest
         )
 
@@ -132,28 +131,34 @@ class Mission:
             + self.time_startup_uav
         )
 
-        print(f"Number of Workers: {self.number_of_workers}")
+        if self.verbose:
+            print(f"Number of Workers: {self.number_of_workers}")
 
         pairs = self.number_of_workers // 2
         
         uavs_launched = 0
         total_time = 0.0
 
+
+        #print(f"\n\n\nDEBUG\n\n\n {type(self.cap_gen)} : {type(self.cap_nogen)} : {type(self.number_of_containers)}\n\n\n")
         # list of nest capacities: first nest is the generator nest with 6 UAVs
         nest_capacities = [self.cap_gen] + [self.cap_nogen] * (self.number_of_containers - 1)
         # (you’d set number_of_containers_minus_one appropriately elsewhere)
 
 
         if self.verbose:
+            print(f"Nest Capacities: {nest_capacities}")
             print(f"Number of Pairs: {pairs}")
             print(f"Number of UAVs: {self.number_of_UAV}")
+            print(f"Time Nest Setup: {time_nest_setup} seconds")
+            print(f"Time UAV Setup: {time_uav_setup} seconds")
 
         for cap in nest_capacities:
             if uavs_launched >= self.number_of_UAV:
                 break
 
             # time to set up this nest
-            total_time += time_nest_setup
+            #total_time += self.time_open_container
 
             # how many UAVs we will actually take from this nest
             remaining = self.number_of_UAV - uavs_launched
@@ -182,29 +187,16 @@ class Mission:
             if uavs_launched < self.number_of_UAV:
                 total_time += self.time_walk_between_containers
 
-        self.time_preparation = total_time
+        self.time_launch = total_time
+        self.time_preparation = total_time + time_nest_setup
 
         if self.verbose:
             print(f"Preparation Time: {self.time_preparation/60} minutes")
-            print(f"UAV Launch Time: {(self.time_preparation - time_nest_setup)/60} minutes")
+            print(f"UAV Launch Time: {(self.time_launch)/60} minutes")
 
 
 
     def uav_mission_time(self) -> float: 
-        """
-        Calculates and stores the total UAV mission time by summing the durations of all mission phases.
-        The method computes the time required for ascent, transition, cruise, scan, descent, deployment, and turnaround phases.
-        It updates the corresponding instance attributes with the calculated times and stores the total mission time in `self.time_uav`.
-        Returns
-        -------
-        float
-            The total UAV mission time in seconds.
-        Notes
-        -----
-        - Assumes that all required instance attributes (e.g., `h_cruise`, `V_climb_v`, `V_descent`, `R_max`, `V_cruise`, etc.)
-        are already set.
-        - The method prints the total mission time if `self.verbose` is True.
-        """
         
         self.time_ascent = self.h_cruise / self.V_climb_v
         self.time_descent = self.h_cruise / self.V_descent
@@ -241,6 +233,7 @@ class Mission:
 
     def calc_UAV_runs(self):
 
+        print("RAN calc_UAV_runs()")
 
         if self.mission_type == "wildfire":
 
@@ -260,21 +253,13 @@ class Mission:
         if self.verbose:
             print(f"Number of trips for mission: {self.num_trips}")
 
+        print(f"Number of trips {self.num_trips}")
+
 
     def calc_time_operation(self) -> float:
-        """
-        Calculates the total operation time required for the UAV mission.
-        This method computes the number of cycles needed to complete the mission based on the number of aerogels and UAVs available. It then calculates the total operation time by multiplying the number of cycles by the time required for a single UAV mission. Optionally, it prints detailed information if verbose mode is enabled.
-        Returns
-        -------
-        float
-            The total operation time required for the mission in seconds.
-        Notes
-        -----
-        - Assumes that `self.uav_mission_time()` sets `self.time_uav`.
-        - The number of cycles is calculated as the ceiling of the ratio between the number of aerogels and the number of UAVs.
-        - The result is stored in `self.time_operation`.
-        """
+
+        print("RAN calc_time_operation()")
+
         self.uav_mission_time()
         self.calc_UAV_runs()
 
@@ -321,47 +306,24 @@ class Mission:
         
 
     def calc_total_mission_time(self) -> float:
-        """
-        Calculates the total mission time by summing preparation, operation, and wrap-up phases.
-        This method first computes the time required for each mission phase by calling their respective methods.
-        It then checks if the UAV mission time is sufficient to cover the preparation time (accounting for nest startup time).
-        If not, it raises a ValueError to indicate overlapping UAV operations.
-        Finally, it sums the times for all phases to determine the total mission time and stores it as an attribute.
-        Raises
-        ------
-        ValueError
-            If the UAV mission time is less than the preparation time minus the nest startup time, indicating overlapping UAV operations.
-        Notes
-        -----
-        - The method assumes that `calc_time_preparation`, `calc_time_operation`, and `calc_time_wrapup` are defined and update the corresponding attributes.
-        - The margin check for `UAV_launch_time` is present but not yet implemented.
-        """
+  
 
         self.calc_time_preparation()
         self.calc_time_operation()
         #self.calc_time_wrapup()
 
-        # if self.time_uav < self.time_preparation - self.time_startup_nest:
-        #     print(self.time_uav/60/60, self.time_preparation/60/60, self.time_startup_nest/60/60)
-        #     self.total_mission_time = np.nan
-        #     # raise ValueError(f"UAV mission time ({self.time_uav}) is less than preparation time, so UAVs will overlap. Check inputs.")
-        # else:
+
         total_mission_time = self.time_preparation + self.time_operation #+ self.time_wrapup
         self.total_mission_time = total_mission_time
 
         if self.verbose:
             print('total_mission_time', total_mission_time)
 
-        # if self.UAV_launch_time > self.time_turnaround + self.margin:
-        #     pass # ADD MARGIN STUFF
-
-    def plot_personnel(self) -> None:
-        pass
 
 
     def performance_calcs(self, r_max: float, nr_UAvs: int, nr_containers: int, nr_workers: int) -> None:
         
-        update = True
+        update = False
 
         if update:
             self.R_max = r_max 
@@ -370,10 +332,8 @@ class Mission:
             self.number_of_workers = nr_workers
 
 
-
         self.calc_total_mission_time()  # recalculate total mission time with new parameters
         
-
 
         #reset all the values in self
         return self.total_mission_time, self.time_operation
@@ -386,6 +346,7 @@ class Mission:
         self.calc_total_mission_time()
 
         self.outputs["trips_for_mission"] = self.num_trips
+        
 
         self.outputs["time_uav_max"] = self.time_uav
         self.outputs["time_uav_min"] = self.time_uav_min
@@ -393,14 +354,14 @@ class Mission:
         self.outputs["time_cruise_min"] = self.time_cruise_min
         self.outputs['time_ascent'] = self.time_ascent
         self.outputs['time_descent'] = self.time_descent
-        self.outputs["time_turnaround"] = self.time_turnaround
+        self.outputs["time_turnaround"] = self.time_min_launch
 
 
 
 
         self.outputs["time_preparation"] = self.time_preparation
         self.outputs["time_operation"] = self.time_operation
-        #self.outputs["time_wrapup"] = self.time_wrapup
+        self.outputs["time_wrapup"] = self.time_preparation #self.time_wrapup
         self.outputs["total_mission_time"] = self.total_mission_time
 
         return self.outputs
@@ -419,7 +380,7 @@ if __name__ == '__main__':
         "number_of_containers": 3,
         "capacity_gen": 6,
         "capacity_nogen": 10,
-        "number_of_workers": 2,
+        "number_of_workers": 4,
         "margin": 60,
         "h_cruise": 120.0,
         "ROC_VTOL": 3.0,
