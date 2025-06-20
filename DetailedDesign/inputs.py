@@ -28,7 +28,7 @@ requirements_inputs = {
     "M_to": 30,  # Maximum Takeoff Mass [kg]
     "MTOW": 30 * constants_inputs["g"],  # Maximum Takeoff Weight [N]
     "R_max": 20000,  # Maximum Range [m]
-    "R_min": 2000,
+    "R_min": 1000,
 }
 inputs.update(requirements_inputs)
 
@@ -37,7 +37,8 @@ inputs.update(requirements_inputs)
 
 mission_inputs = {
     "mission_type": "wildfire",
-    "mission_perimeter": 1000,  # Mission perimeter [m]
+    "mission_perimeter": 5000,  # Mission perimeter [m]
+    "oil_mass": 1000,
     "number_of_UAVs": 20,  # Number of UAVs in the swarm
     "number_of_containers": 3,  # Number of containers in the nest
     "number_of_workers": 2,  # Number of workers per UAV
@@ -195,31 +196,31 @@ inputs.update(structures_inputs)
 # ~~~ Thermal control ~~~ initial inputs for thermal control sizing
 
 thermal_inputs = {
-    "wing_eff_area": 0.75,  # m, effective surface area for conduction
-    "fuselage_eff_area": 2.01,  # 7.04, # m, effective surface area for conduction
+    "wing_eff_area": 1.24,  # m, effective surface area for conduction
+    "fuselage_eff_area": 0.65,  # 7.04, # m, effective surface area for conduction
     "T_amb_onsite": 140.0 + 273.15,  # K, temperature in the onsite deployment zone
     "T_amb_enroute": 35.0 + 273.15,  # K, ambient temperature outside of deployment zone
-    "T_int": 40.0 + 273.15,  # K, temperature inside the fuselage+wing structure
+    "T_int": 45.0 + 273.15,  # K, temperature inside the fuselage+wing structure
     "T_equi_pcm": 48.0
     + 273.15,  # K, temperature at which the PCM starts changing phase
     # "sink_length": 0.3, # m, length of the base of the heat sink parallel to fins axes
-    "sink_height": 0.02,  # m, height of heat sink fins
-    "sink_thickness": 0.001,  # m, thickness of heat sink fins
+    "sink_height": 0.04,  # m, height of heat sink fins
+    "sink_thickness": 0.0005,  # m, thickness of heat sink fins
     "sink_base": 0.0005,  # m, thickness of heat sink base
-    "sink_density": 2710.0,  # kg/m^3
+    "sink_density": 2700.0,  # kg/m^3
     "sink_time_margin": 30,  # s, this is extra downtime for the UAVs on ground to reduce heat sink size
     "thickness_foam_wing": 0.0,  # 0.03, # m, thickness of the foam inbetween the aluminium shell
     "thickness_alu_wing": 0.00078,  # m, thickness of one layer of the aluminium shell structure
     "thickness_foam_fuselage": 0.0,  # 0.03, # m
-    "thickness_alu_fuselage": 0.00026,  # m
+    "thickness_alu_fuselage": 0.00078,  # m
     "conductivity_alu": 0.36,  # 237., # W / (mK)
     "conductivity_foam": 0.0,  # 0.03, # W / (mK)
-    "conductivity_insulation": 0.012,  # W / (mK)
+    "conductivity_insulation": 0.013,  # W / (mK)
     "insulation_density": 30,  # kg/m^3
     "pcm_latent_heat": 197000.0,  # J/kg
     "n_battery": 2,
     "battery_resistance": 0.015,  # Ohm, based on guessing
-    "processor_heat_diss": 40.0,  # W, guesstimate which should eventually come from the chosen processor
+    "processor_heat_diss": 50.0,  # W, guesstimate which should eventually come from the chosen processor
     "winch_eff": 0.65,  # Winch efficiency fraction (0.35=35% efficiency) used to compute the heat generated
 }
 inputs.update(thermal_inputs)
@@ -243,7 +244,8 @@ nest_inputs = {
     "nest_height": 2.39,
     "nest_empty_mass": 100.0,
     "generator_efficiency": 0.85,
-    "diesel_energy_density": 9.94,
+    "biodiesel_energy_density": 9.94,
+    "biodiesel_density": 860.0,  # kg/m^3
 }
 inputs.update(nest_inputs)
 
@@ -271,22 +273,22 @@ stab_n_con_inputs = {
     # ───────────────────────────────────────────────────────────────────────
     # Mass & CG placeholders
     # ───────────────────────────────────────────────────────────────────────
-    "fuselage_structural_mass": 3,  # [kg] fuselage structure mass
+    "fuselage_structural_mass": 3.166,  # [kg] fuselage structure mass
     "fuselage_structural_x_cg": 2.15 / 2,  # [m] fuselage CG location
-    "wing_structural_mass": 2.4 * 2,  # [kg] wing structure mass
+    "wing_structural_mass": (2.24 + 0.255 + 0.047 * 4) * 2,  # [kg] wing structure mass
     "wing_structural_x_cg": 0.42 * 0.25,  # [m] wing CG location (25% MAC)
-    "tailplane_structural_mass": 1.67,  # [kg] tailplane structure mass
+    "tailplane_structural_mass": 1.656,  # [kg] tailplane structure mass
     "tailplane_structural_x_cg": 2.15 - 0.35 * 0.75,  # [m] tailplane CG location,
     # → wildfire
     "wildfire_sensor_mass": 0.92,  # [kg] wildfire sensor mass
-    "wildfire_sensor_x": 0.172,  # [m] wildfire sensor CG location
+    "wildfire_sensor_x": 0.174,  # [m] wildfire sensor CG location
     "wildfire_fuselage_mass": 0.0,  # [kg] wildfire fuselage mass
     "wildfire_fuselage_x": 0.0,  # [m] wildfire fuselage CG location
     "wildfire_wing_mass": 0.0,  # [kg] wildfire wing mass
     "wildfire_wing_x": 0.0,  # [m] wildfire wing CG location
     # → oil spill
     "oil_spill_sensor_mass": 0.905,  # [kg] oil spill sensor mass
-    "oil_spill_sensor_x": 0.172,  # [m] oil spill sensor CG location
+    "oil_spill_sensor_x": 0.174,  # [m] oil spill sensor CG location
     "oil_spill_fuselage_mass": 0.0,  # [kg] oil spill fuselage mass
     "oil_spill_fuselage_x": 0.0,  # [m] oil spill fuselage CG location
     "oil_spill_wing_mass": 0.0,  # [kg] oil spill wing mass
@@ -298,32 +300,28 @@ stab_n_con_inputs = {
     # Payload & sensor modules
     # ───────────────────────────────────────────────────────────────────────
     "payload_mass": 5.0,  # [kg] payload mass (aerogel blanket)
-    "payload_x": 1.08,  # [m] payload CG location (initially set to oil-spill buoy location)
+    "payload_x": 1.15,  # [m] payload CG location (initially set to oil-spill buoy location)
     "buoy_mass": 0.140 * 4,  # [kg] Oil-spill buoy mass (4 buoys)
     "buoy_x": 1.08,  # [m] Buoy CG location (initially set to oil-spill buoy location)
-    "wildfire_sensor_mass": 0.92,  # [kg] Wildfire sensor mass
-    "wildfire_sensor_x": 0.172,  # [m] Wildfire sensor CG location
-    "oil_spill_sensor_mass": 0.905,  # [kg] Oil spill sensor mass
-    "oil_spill_sensor_x": 0.172,  # [m] Oil spill sensor CG location
     # ───────────────────────────────────────────────────────────────────────
     # Fuselage-mounted avionics & structure
     # ───────────────────────────────────────────────────────────────────────
     "gymbal_connection_mass": 0.070,  # [kg] mass of the gymbal connection
-    "gymbal_connection_x": 0.172,  # [m] CG location of the gymbal connection
+    "gymbal_connection_x": 0.174,  # [m] CG location of the gymbal connection
     "flight_controller_mass": 0.032,  # [kg] mass of the flight controller
-    "flight_controller_x": 0.567,  # [m] CG location of the flight controller
+    "flight_controller_x": 0.415,  # [m] CG location of the flight controller
     "OBC_mass": 0.7,  # [kg] mass of the on-board computer
-    "OBC_x": 0.659,  # [m] CG location of the on-board computer
+    "OBC_x": 0.223,  # [m] CG location of the on-board computer
     "GPS_mass": 0.012,  # [kg] mass of the GPS module
-    "GPS_x": 0.113,  # [m] CG location of the GPS module
+    "GPS_x": 0.321,  # [m] CG location of the GPS module
     "Mesh_network_module_mass": 0.0365,  # [kg] mass of the mesh network module
-    "Mesh_network_module_x": 0.372,  # [m] CG location of the mesh network module
-    "SATCOM_module_mass": 0.036,  # [kg] mass of the SATCOM module
-    "SATCOM_module_x": 0.4605,  # [m] CG location of the SATCOM module
+    "Mesh_network_module_x": 0.080,  # [m] CG location of the mesh network module
+    "SATCOM_module_mass": 0.033,  # [kg] mass of the SATCOM module
+    "SATCOM_module_x": 0.036,  # [m] CG location of the SATCOM module
     "Winch_motor_mass": 1.17,  # [kg] mass of the winch motor
-    "Winch_motor_x": 1.015,  # [m] CG location of the winch motor
+    "Winch_motor_x": 0.537,  # [m] CG location of the winch motor
     "CUAV_airlink_mass": 0.052,  # [kg] mass of the CUAV airlink module
-    "CUAV_airlink_x": 0.280,  # [m] CG location of the CUAV airlink module
+    "CUAV_airlink_x": 0.138,  # [m] CG location of the CUAV airlink module
     # ───────────────────────────────────────────────────────────────────────
     # Propulsion & energy-storage
     # ───────────────────────────────────────────────────────────────────────
@@ -344,14 +342,14 @@ stab_n_con_inputs = {
     "battery_x": 0.173,  # [m] x-location of the battery w.r.t leading edge wing
     "PDB_mass": 0.156,  # [kg] mass of the power distribution board
     "PDB_x": 0.173,  # [m] x-location of the power distribution board w.r.t leading edge wing
-    "thermal_control_mass": 2.5,  # [kg] mass of the thermal control system
+    "thermal_control_mass": 1.75,  # [kg] mass of the thermal control system
     "thermal_control_x": 0.173,  # [m] x-location of the thermal control system w.r.t leading edge wing
     # ───────────────────────────────────────────────────────────────────────
     # Longitudinal stability & tailplane
     # ───────────────────────────────────────────────────────────────────────
     "l_fus": 2.15,  # [m] fuselage length
     "fuselage_diameter": 0.4,  # [m] fuselage diameter
-    "lh": 0.65,  # [m] wing AC → tail AC
+    "lh": 0.831,  # [m] wing AC → tail AC
     "mac": 0.42,  # [m] mean aerodynamic chord
     "x_ac_bar_wing": 0.25,  # [-] wing AC from LE (25% MAC)
     "CL_alpha_Ah": 0.08 * 180 / np.pi,  # [1/rad] finite wing lift-curve slope
@@ -362,7 +360,7 @@ stab_n_con_inputs = {
     "Cm_ac_wing": -0.13,  # moment coeff. at wing AC
     "Cm_cg": 0.455,
     "AR_h": 3.5,  # tail aspect ratio
-    "CL_A_h": 0.55,  # C_L aircraft-tail at cruise
+    "CL_A_h": 0.55,  # C_L aircraft minus tail at cruise
     # ───────────────────────────────────────────────────────────────────────
     # Lateral/directional & vertical tail
     # ───────────────────────────────────────────────────────────────────────
@@ -394,6 +392,12 @@ stab_n_con_inputs = {
 
 inputs.update(stab_n_con_inputs)
 
+
+nest_inputs = {
+    "capacity_gen": 6,  # kWh, capacity of the generator
+    "capacity_nogen": 10,  # kWh, capacity of the battery
+}
+inputs.update(nest_inputs)
 
 # ===========================================
 

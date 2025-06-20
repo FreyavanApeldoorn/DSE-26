@@ -545,7 +545,7 @@ class StabCon:
             )
 
             # CG expressed as fraction of MAC behind LE-MAC
-            x_cg_bar = (x_cg - x_lemac) / self.mac
+            x_cg_bar = ((x_cg - x_lemac) / self.mac)
 
             results[config] = {"x_lemac": x_lemac, "x_cg": x_cg, "x_cg_bar": x_cg_bar}
 
@@ -596,7 +596,7 @@ class StabCon:
     #  Horizontal-tail sizing (scissor plot)
     # ─────────────────────────────────────────────────────────────────────────────
     def scissor_plot_chat(
-        self, n_pts: int = 200, static_margin: float = 0.05
+        self, n_pts: int = 200, static_margin: float = 0.1
     ) -> dict[str, tp.Any]:
         """
         Build data for a full scissor plot that is compatible with the new CG and
@@ -637,6 +637,7 @@ class StabCon:
 
         ctrl_den = (CL_h / CL_Ah) * (self.lh / self.mac) * self.Vh_V
         sh_s_control = (x_cg_bar + (Cm_ac / CL_Ah - self.x_ac_bar_wing)) / ctrl_den
+        sh_s_control_with_margin = (x_cg_bar + (Cm_ac / CL_Ah - self.x_ac_bar_wing)- static_margin) / ctrl_den
 
         # 4. Fetch the *actual* CG tracks so the user can plot them together
         cg_tracks: dict[str, np.ndarray] = {}
@@ -650,6 +651,7 @@ class StabCon:
             "sh_s_stability": sh_s_stability,
             "sh_s_stability_no_margin": sh_s_stability_no_margin,
             "sh_s_control": sh_s_control,
+            "sh_s_control_with_margin": sh_s_control_with_margin,
             "cg_tracks": cg_tracks,
         }
 
@@ -718,9 +720,7 @@ if __name__ == "__main__":  # pragma: no cover
         print(f"  Fuselage CG x : {res['fuselage_x_cg']:.3f}  m")
         print(f"  Wing mass     : {res['wing_mass']:.3f}  kg")
         print(f"  Wing CG   x   : {res['wing_x_cg']:.3f}  m")
-        print(
-            f"Total (non-structural) mass : {res['fuselage_mass'] + res['wing_mass']:.3f}  kg"
-        )
+        print(f"  Total mass    : {res['fuselage_mass'] + res['wing_mass']:.3f}  kg")
 
     # ─────────────────────────────────────────────────────────────────────────────
     # 2. Loading diagram (uses calculate_uav_cg_chat internally)
@@ -733,6 +733,12 @@ if __name__ == "__main__":  # pragma: no cover
         x_vals = data["x_cg_bar"]  # non-dimensional CG position
         y_vals = data["x_lemac"] / stabcon.l_fus  # LEMAC position / fuselage length
         plt.plot(x_vals, y_vals, label=f"{cfg} config")
+
+    # Add horizontal dashed lines at desired y-values
+    y1 = 0.53  # example value
+    y2 = 0.27  # example value
+    plt.axhline(y=y1, linestyle='--', label=f'y = {y1}')
+    plt.axhline(y=y2, linestyle='--', label=f'y = {y2}')
 
     plt.xlabel("Non-dimensional CG position, $(x_{cg}-x_{LE})/\\bar c$")
     plt.ylabel("LEMAC / fuselage length, $x_{LE}/l_{fus}$")
@@ -750,7 +756,7 @@ if __name__ == "__main__":  # pragma: no cover
         sc_data["x_cg_bar"],
         sc_data["sh_s_stability"],
         "k--",
-        label="Stability + 5% Static Margin",
+        label="Stability + 10% Static Margin",
     )
     plt.plot(
         sc_data["x_cg_bar"],
@@ -759,6 +765,7 @@ if __name__ == "__main__":  # pragma: no cover
         label="Stability",
     )
     plt.plot(sc_data["x_cg_bar"], sc_data["sh_s_control"], "k-", label="Control")
+    plt.plot(sc_data["x_cg_bar"], sc_data["sh_s_control_with_margin"], "k-.", label="Control + 10% Static Margin")
 
     # Overlay the CG tracks for each payload case
     # for cfg, track in sc_data["cg_tracks"].items():

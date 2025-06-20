@@ -94,8 +94,9 @@ class Thermal:
     # ~~~ Intermediate Functions ~~~
 
     def create_R_value(self, insulation_thickness: float) -> float:
+        # Convection
         R_convection = 1 / self.h_air_forced
-        # Thermal resistance per unit effective surface area
+        # Thermal resistance per unit effective surface area (Conduction)
         R_total_wing = (1 * (self.thickness_alu_wing / self.conductivity_alu)) + (insulation_thickness / self.conductivity_insulation) + R_convection # + (self.thickness_foam_wing / self.conductivity_foam) # K/W
         R_total_fuselage = (1 * self.thickness_alu_fuselage / self.conductivity_alu) + (insulation_thickness / self.conductivity_insulation) + R_convection # (self.thickness_foam_fuselage / self.conductivity_foam) # K/W
         
@@ -211,7 +212,7 @@ class Thermal:
         all_heat['deploy']['processor_heat'], all_heat['deploy']['processor_Q'] = self.processor_heat_dissipated(self.time_deploy)
         all_heat['deploy']['winch_heat'], all_heat['deploy']['winch_Q'] = self.winch_heat_dissipated()
         all_heat['deploy']['phase_heat'], all_heat['deploy']['phase_Q'] = self.phase_heat_dissipated(self.power_required_hover, self.time_deploy, phase='deploy')
-
+        
         return all_heat
     
     def heat_dissipated_sink(self, sink_length: float, sink_width: float) -> float: 
@@ -233,7 +234,7 @@ class Thermal:
         V_air_over_sink = self.V_cruise - self.wind_speed
         Re = (V_air_over_sink * sink_length) / self.nu # Reynold number
         Nusselt = 0.0296 * Re**0.8 * self.Prandtl**(1/3) # Nusselt number for turbulent air over flat plate
-
+        print('Nuss:', Nusselt)
         # Convection coefficient per area 
         # convection_coeff1 = 1.42 * ((self.T_equi_pcm - self.T_amb_enroute) / sink_length)**0.25 # W/(m^2 K), for area1 
         # convection_coeff2 = 1.31 * (self.k_air / fin_spacing_opt) # W/(m^2 K), for area2
@@ -275,7 +276,7 @@ class Thermal:
 
         # Heat and heat energy entering due to outside temperature
         heat_env_onsite, Q_env_onsite = self.Q_env_leak(time_onsite, self.T_amb_onsite, insulation_thickness) # J
-        # heat_env_approach, Q_env_approach = self.Q_env_leak(time_approach, self.T_amb_enroute) # W, J, same as return if time_ascent = time_descent
+        # heat_env_approach, Q_env_approach = self.Q_env_leak(time_approach, self.T_amb_enroute, insulation_thickness) # W, J, same as return if time_ascent = time_descent
         heat_env_return, Q_env_return = self.Q_env_leak(time_return, self.T_amb_enroute, insulation_thickness=insulation_thickness) # W, J 
 
         # Heat and heat energy entering due to internal components 
@@ -292,6 +293,11 @@ class Thermal:
         # total_heat_return = heat_int_return + heat_env_return + (total_Q_onsite / time_return)
         heat_dissipated_req_sink = total_Q_return / (time_return + self.time_turnaround_min + self.sink_time_margin)
 
+        # Return time margin
+        '''Adds an additional margin allowing the UAV to continue to dissipate heat on its second round approach phase'''
+        # return_time_margin = self.time_ascent + self.time_cruise_min
+        # heat_dissipated_req_sink = (total_Q_return + Q_int_approach + Q_env_approach) / (time_return + self.time_turnaround_min + return_time_margin)
+
         # Heat sink 
         fin_spacing_opt, n_fin, total_heat_dissipated_sink = self.heat_dissipated_sink(sink_length, sink_width)
         # sink_width = (n_fin - 1) * fin_spacing_opt + n_fin * self.sink_thickness # m, total heat sink width
@@ -305,6 +311,7 @@ class Thermal:
         total_mass = insulation_mass + pcm_mass + sink_mass
 
         # Test prints
+        print('battery_deploy_heat:', self.battery_heat_dissipated(self.power_required_cruise, self.time_cruise_max))
         print('pcm_mass:', pcm_mass, '\n sink_mass:', sink_mass, '\n insulation_mass:', insulation_mass)
         # print('sink_width:', sink_width, '\n sink_length:', sink_length, '\n sink_height:', self.sink_height, '\n: sink_base', self.sink_base, '\n n_fin:', n_fin, '\n: fin_spacing_opt', fin_spacing_opt)
         # print('time_onsite:', time_onsite, '\ntime_return:', time_return, '\ntime_turnaround_min:', self.time_turnaround_min,'\nQ_int_onsite:' , Q_int_onsite, '\nQ_env_onsite:', Q_env_onsite, '\nQ_int_return:', Q_int_return, '\nQ_env_return:', Q_env_return, '\ntotal_heat_dissipated_sink:', total_heat_dissipated_sink, '\nheat_env_onsite:', heat_env_onsite )
@@ -327,12 +334,32 @@ class Thermal:
         Optimize the thermal subsystem by minimizing the total mass of the PCM, heat sink, and insulation.
         '''
         x0 = [0.100, 0.500, 0.0500] # initial: sink_length (m), sink_width (m), insulation_thickness (m)
-        bounds = [(0.1, 0.4), (0.001, 1.), (0.001, 0.03)]  # sink_length (m), sink_width (m)), insulation_thickness (m)
+        bounds = [(0.1, 0.45), (0.01, 1.), (0.001, 0.03)]  # sink_length (m), sink_width (m)), insulation_thickness (m)
         constraints = {'type': 'ineq', 'fun': self.constraint}
         
         total_mass_result =  minimize(self.objective, x0=x0, bounds=bounds, constraints=constraints, method="SLSQP")
         
         return total_mass_result
+    
+    def create_motor_insulation(self):
+        motor_radius = 0.087 * 0.5 # m
+        motor_height = 0.028 # m
+        motor_surface_area = 2 * np.pi * motor_radius**2 + 2 * np.pi * motor_radius * motor_height
+
+        T_motor = 58 + 273.15 # K
+        
+        motor_insul_thickness = 0.01 # m 
+        R_motor_insul = motor_insul_thickness / self.conductivity_insulation
+
+        heat_power_motor = (self.T_amb_onsite - T_motor) * motor_surface_area * (1 / R_motor_insul)
+        heat_energy_motor = heat_power_motor * (self.time_scan + self.time_descent + self.time_deploy + self.time_ascent)
+
+
+
+        motor_pcm_mass = heat_energy_motor / self.pcm_latent_heat 
+        
+        return motor_pcm_mass
+
 
     # ~~~ Output functions ~~~ 
 
@@ -372,7 +399,7 @@ if __name__ == '__main__':
     # print('\n Winch', thermal.winch_heat_dissipated())
     # print(thermal.total_heat_storage())
     print(thermal.optimize())
-
+    print('motor_pcm_mass:', thermal.create_motor_insulation())
 
 
     # ~~~ OLD snippets ~~~

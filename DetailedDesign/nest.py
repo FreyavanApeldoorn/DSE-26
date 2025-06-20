@@ -6,33 +6,44 @@ This is the file for the nest. It contains a single class.
 
 class Nest:
 
-    def __init__(self, inputs: dict[str, float], nest_components, verbose: bool = False) -> None:
+    def __init__(self, inputs: dict[str, float], components, adjust_n_uavs=False, verbose: bool = False) -> None:
 
         self.verbose = verbose
         self.inputs = inputs
         self.outputs = self.inputs.copy()
+        self.hardware = components
+
+        self.adjust_n_uavs = adjust_n_uavs  # whether to adjust the number of UAVs based on the nest capacity
+
         
         # Mission parameters
         self.n_drones = inputs["number_of_UAVs"]
+        #print(f"Number of drones: {self.n_drones}")
         self.number_of_trips = inputs["trips_for_mission"]
+        #print(f"Number of trips for mission: {self.number_of_trips}")
 
         self.mission_energy = inputs["required_capacity_wh"]
-        self.nest_energy = self.mission_energy * self.number_of_trips  # minimum power the nest must be able to provide
+        #self.required_nest_energy = self.mission_energy * self.number_of_trips  # minimum power the nest must be able to provide
 
+        self.time_preparation = inputs["time_preparation"]  # time required for the nest to prepare for the mission in seconds
+        self.time_wrapup = inputs["time_wrapup"]  # time required for the nest to wrap up after the mission in seconds
+        self.time_uav = inputs["time_uav_max"]  # time required for the UAV to complete one trip in seconds
+        self.total_mission_time = inputs["total_mission_time"]  # total time required for the mission in seconds
 
         # UAV Dimensions 
-        self.uav_span = inputs["wing_span"]
+        self.FW_span = inputs["wing_span"]
         self.uav_wing_area = inputs["wing_area"]
-        self.FW_height = 0.3 # inputs["FW_height"]  # NEEDS TO BE UPDATED
-        self.FW_width = 2.25 # inputs["FW_width"]  # NEEDS TO BE UPDATED
-        self.uav_chord = self.uav_wing_area / self.uav_span if self.uav_span != 0 else 0 
+        self.FW_chord = inputs["mac"] #self.uav_wing_area / self.uav_span if self.uav_span != 0 else 0 
+        self.FW_thickness = inputs["thickness_to_chord_ratio"] * inputs["mac"]
+
+        self.uav_folded_length = 2.156 # 2155.529mm
+        self.uav_folded_width = 1.724 # 1724mm
+        #self.uav_folded_height = 0.893 # 892.943mm
+        self.uav_folded_height = 0.491 # 490.307mm - staggering
 
         self.uav_mass = inputs["M_to"]
 
-        # Aerogel dimensions
-        self.aerogel_width = inputs["aerogel_width"]  # width of the aerogel
-        self.aerogel_diameter = inputs["aerogel_diameter"]  # diameter of the aerogel
-
+       
 
         # Generator parameters
         #self.generator_efficiency = inputs["generator_efficiency"] 
@@ -46,96 +57,46 @@ class Nest:
         #self.internal_fuel_tank_volume = inputs["generator_internal_fuel_tank"]
 
 
-        self.generator_efficiency = nest_components["generator"]["generator_efficiency"]
-        self.generator_length = nest_components["generator"]["generator_length"]
-        self.generator_width = nest_components["generator"]["generator_width"]
-        self.generator_height = nest_components["generator"]["generator_height"]
-        self.generator_power_output = nest_components["generator"]["generator_power_output"]
-        self.generator_power_factor = nest_components["generator"]["generator_power_factor"]
-        self.generator_mass = nest_components["generator"]["generator_mass"]
-        self.generator_fuel_tank_volume = nest_components["generator"]["generator_fuel_tank"]
+        self.generator_efficiency = components["generator"]["generator_efficiency"]
+        self.generator_length = components["generator"]["generator_length"]
+        self.generator_width = components["generator"]["generator_width"]
+        self.generator_height = components["generator"]["generator_height"]
+        self.generator_power_output = components["generator"]["generator_power_output"]
+        self.generator_power_factor = components["generator"]["generator_power_factor"]
+        self.generator_mass = components["generator"]["generator_mass"]
+        self.generator_fuel_tank_volume = components["generator"]["generator_fuel_tank"]
 
-        self.generator_x = nest_components["generator"]["generator_x"]
-        self.generator_y = nest_components["generator"]["generator_y"]
-        self.generator_z = nest_components["generator"]["generator_z"]
+        self.generator_x = components["generator"]["generator_x"]
+        self.generator_y = components["generator"]["generator_y"]
+        self.generator_z = components["generator"]["generator_z"]
 
-        # Misc parameters
-
-
-        # Container
-        #self.nest_length = inputs["nest_length"]
-        #self.nest_width = inputs["nest_width"]
-        #self.nest_height = inputs["nest_height"]
-        #self.nest_mass = inputs["nest_empty_mass"]
-
-        self.nest_length = nest_components["container"]["container_length"]
-        self.nest_width = nest_components["container"]["container_width"]
-        self.nest_height = nest_components["container"]["container_height"]
-        self.container_mass = nest_components["container"]["container_tare_mass"]
+        self.nest_length = components["container"]["container_length"]
+        self.nest_width = components["container"]["container_width"]
+        self.nest_height = components["container"]["container_height"]
+        self.container_mass = components["container"]["container_tare_mass"]
+        self.max_payload_mass = components["container"]["container_max_payload"]  # Maximum payload mass the container can carry
 
 
         self.available_volume_per_container = self.nest_length * self.nest_width * self.nest_height
 
+        self.nest_components = ["container", "heating_system", "ventilation_system", "thermal_sensor",
+                           "generator", "PDU", "UPS", "battery_charger",
+                           "RF_antenna", "4G_antenna", "Satellite_antenna",
+                           "mesh_base", "router", "Sattelite_modem",
+                           "switch", "firewall", "computer"]
 
-    def uav_dimensions(self):
 
-        """
+    # def uav_dimensions(self):
+    #     pass
         
-        """
 
-        uav_span = self.uav_span
-        uav_width_FW = self.FW_width
-        uav_heigh_FW = self.FW_height
-        v_UAV_FW = uav_span * uav_width_FW * uav_heigh_FW  # m^3
-
-        fuselage_length_margin = 0   # == MOVE TO INPUTS
-        delta_fuselage_length = 0.5   # == MOVE TO INPUTS
-        fuselage_width_margin = 0.5   # == MOVE TO INPUTS
-        uav_fuselage_length = self.aerogel_width * (1 + fuselage_length_margin) + delta_fuselage_length  # m   ! this part might need to be adjusted based on the actual fuselage design
-        uav_fuselage_width = self.aerogel_diameter * (1 + fuselage_width_margin)  # m
-        v_UAV_fuselage = uav_fuselage_length * uav_fuselage_width * uav_fuselage_width
-
-        self.uav_volume = v_UAV_FW + v_UAV_fuselage  # m^3
-
-
-    def generator_sizing(self):
-        
-        """
-        
-        Choose:
-        - Generator length, width, height (chosen to be an ISO container)
-        - Generator efficiency
-        - 
-        """
+    def generator_sizing(self):  # AKA: energy sizing
 
         # Generator volume:
         self.generator_volume = self.generator_length * self.generator_width * self.generator_height    # calculating the volume of the generator in m^3
 
-        # Fuel tank: 
-        fuel_tank_margin = 0.1 # margin added for the fuel tank volume, to account for the space taken by the fuel tank structure and fittings
-        self.external_fuel_tank_volume = self.generator_width * (self.nest_width * (1 - fuel_tank_margin)) * ((self.nest_height - self.generator_height) * (1 - fuel_tank_margin))
-        self.external_fuel_tank_volume = 0 # Excluding the external fuel tank for now, as it is not needed for the mission
 
-        diesel_volumetric_energy_density = self.diesel_energy_density * self.diesel_density  # in Wh/m^3, converting from Wh/kg to Wh/m^3 
         
-        self.total_fuel_tank_volume = self.generator_fuel_tank_volume + self.external_fuel_tank_volume
-        self.total_fuel_capacity = (self.total_fuel_tank_volume) * diesel_volumetric_energy_density  # in Wh, total energy capacity of the fuel tank
-        self.total_available_energy = self.total_fuel_capacity * self.generator_efficiency
-
-        percentage_energy_achieved = self.total_available_energy / self.mission_energy
-
-        if percentage_energy_achieved >= 1:
-            self.refills_for_mission = 0
-        else:
-            self.refills_for_mission = np.ceil(1 / percentage_energy_achieved)
-
-        self.nest_trips_capacity = self.total_available_energy / self.mission_energy
-
-        # Remaining length with generator addition:
-        l_op = self.nest_length - self.generator_width   # Assuming the generator is placed with its length along the nest's width
-        self.l_minus_gen = l_op 
-
-
         if self.verbose:
             print(f"Generator volume: {self.generator_volume:.2f} m^3")
             print(f"Internal fuel tank volume: {self.generator_fuel_tank_volume:.2f} m^3")
@@ -147,58 +108,82 @@ class Nest:
             print(f"Percentage of mission energy achieved: {percentage_energy_achieved*100:.2f}%")
             print(f"Refills required for mission: {self.refills_for_mission}")
             print(f"Nest trips capacity: {self.nest_trips_capacity:.2f}")
-            print(f"Remaining length after generator: {self.l_minus_gen:.2f} m")
+            #print(f"Remaining length after generator: {self.l_minus_gen:.2f} m")
 
 
 
-    def misc_sizing(self):
+    # def misc_sizing(self):
 
 
-        # Assigning fractions for electronics and equipment
-        v_locker = 0.5*0.5
-        VF_electronics = 0.05
-        VF_equipment = 0.05
-        MF_electronics = 0.05
-        MF_equipment = 0.05
-
-        self.v_electronics = VF_electronics * self.available_volume_per_container 
-        self.v_equipment = VF_equipment * self.available_volume_per_container
-
-        self.v_locker = v_locker
+    #     # Assigning fractions for electronics and equipment
+    #     v_locker = 0.5*0.5
+    #     VF_electronics = 0.05
+    #     VF_equipment = 0.05
+    #     MF_electronics = 0.05
+    #     MF_equipment = 0.05
 
 
-        area_human = self.nest_height * 0.6  # m^2
-        v_operating_space = area_human * self.l_minus_gen
-        self.v_operating_space_gen = v_operating_space
-        self.v_operating_space_nogen = area_human * self.nest_length
+    #     self.area_human = self.nest_height * 0.6  # m^2
+    #     self.v_electronics = VF_electronics * self.available_volume_per_container 
+    #     self.v_equipment = VF_equipment * self.available_volume_per_container
+    #     self.v_locker = v_locker
+
+    def power_sizing(self):
+        
+        power_generator = self.generator_power_output * self.generator_power_factor  # in W
+        
+        no_charge_power = 0
+        total_power = 0
+
+        for component in self.nest_components:
+            if component in self.hardware:
+            # Special case for battery_charger: multiply by number of UAVs
+                if component == "battery_charger":
+                    for key, value in self.hardware[component].items():
+                        if key.endswith("_power"):
+                            total_power += value * self.n_drones
+                else:
+                    for key, value in self.hardware[component].items():
+                        if key.endswith("_power"):
+                            total_power += value
+                            no_charge_power += value  # power required by the nest components without charging the UAVs
+
+        self.total_power = total_power  # in W, total power required by the nest components
+
+        
+    
+        # Check if the generastor can provide enough power
+        if power_generator < total_power:
+            raise ValueError(f"Generator power output ({power_generator:.2f} W) is less than total power required by nest components ({total_power:.2f} W). Increase generator capacity or reduce power requirements.")
 
         if self.verbose:
-            print(f"Volume of electronics: {self.v_electronics:.2f} m^3")
-            print(f"Volume of equipment: {self.v_equipment:.2f} m^3")
-            print(f"Volume of locker: {self.v_locker:.2f} m^3")
-            print(f"Volume of operating space with generator: {self.v_operating_space_gen:.2f} m^3")
-            print(f"Volume of operating space without generator: {self.v_operating_space_nogen:.2f} m^3")
+            print(f"Generator power output: {power_generator:.2f} W")
+            print(f"Total power required by nest components: {total_power:.2f} W")
 
+        eff_charge = 0.92
+        eff_bat = 0.90
+        self.energy_per_trip = (no_charge_power * (self.time_uav / 3600) + (self.mission_energy/(eff_charge * eff_bat))) #/ efficiency  # in Wh, energy required per trip including charging the UAVs
+        
+        include_external_fuel_tank = False  # whether to include an external fuel tank or not
+        # Fuel tank: 
+        if include_external_fuel_tank:
+            fuel_tank_margin = 0.1 # margin added for the fuel tank volume, to account for the space taken by the fuel tank structure and fittings
+            self.external_fuel_tank_volume = self.generator_width * (self.nest_width * (1 - fuel_tank_margin)) * ((self.nest_height - self.generator_height) * (1 - fuel_tank_margin))
+        else:
+            self.external_fuel_tank_volume = 0 # Excluding the external fuel tank for now, as it is not needed for the mission
 
+        diesel_volumetric_energy_density = self.diesel_energy_density * self.diesel_density  # in Wh/m^3, converting from Wh/kg to Wh/m^3 
 
-    def uavs_battery_sizing(self):
+        self.total_fuel_tank_volume = self.generator_fuel_tank_volume + self.external_fuel_tank_volume
+        self.total_fuel_capacity = (self.total_fuel_tank_volume) * diesel_volumetric_energy_density  # in Wh, total energy capacity of the fuel tank
+        self.total_available_energy =  self.total_fuel_capacity * self.generator_efficiency
 
+        self.nest_trips_capacity = self.total_available_energy // self.energy_per_trip
+        self.nest_cycle_capacity = self.nest_trips_capacity // self.n_drones
 
-        # UAVs volume:
-        VF_UAV_margin = 0.1   # fraction of UAV volume for margin
-        uav_volume = (self.uav_volume) * (1 + VF_UAV_margin) # UAV volume in m^3
-
-
-        # UAV batteries volume:
-        VF_UAV_battery = 0.3   # fraction of UAV volume for battery
-        battery_size = VF_UAV_battery * uav_volume # battery size in m^3
-
-        self.v_uav_bat = uav_volume + battery_size
-
-        if self.verbose:
-            print(f"Volume of UAVs: {uav_volume:.2f} m^3")
-            print(f"Volume of batteries: {battery_size:.2f} m^3")
-            print(f"Total volume of UAVs and batteries: {self.v_uav_bat:.2f} m^3")
+        total_required_energy = no_charge_power * (self.total_mission_time / 3600) + self.mission_energy * self.number_of_trips
+        self.refills_for_mission = int(np.ceil(total_required_energy / self.total_available_energy)) - 1
+        self.refills_for_mission = max(self.refills_for_mission, 0)
 
 
     def volume_sizing(self):
@@ -213,105 +198,88 @@ class Nest:
 
 
         """
-        # Calculate the total volume available for one nest
-        available_volume_per_nest = self.nest_length * self.nest_width * self.nest_height
+        self.generator_volume = self.generator_length * self.generator_width * self.generator_height    # calculating the volume of the generator in m^3
 
-        self.uav_dimensions()  
-        self.uavs_battery_sizing()
-        self.generator_sizing()        
-        self.misc_sizing()
-        
+        # Remaining length with generator addition:
+        l_remaining = self.nest_length - self.generator_length  # in m, remaining length after adding the generator
 
-        v_op_gen = available_volume_per_nest - self.generator_volume - self.v_locker - self.v_operating_space_gen
-        v_op_nogen = available_volume_per_nest - self.v_locker - self.v_operating_space_nogen
-        
+        self.uav_storage_volume_gen = l_remaining * self.nest_width * self.nest_height  # in m^3, volume available for storing UAVs and other components
+        self.uav_storage_volume_nogen = self.nest_length * self.nest_width * self.nest_height  # in m^3, volume available for storing UAVs and other components without the generator
 
+        margin = 0.2
 
-
-        # if self.verbose:
-        #     print(f"v_op_gen: {v_op_gen:.2f} m^3")
-        #     print(f"v_op_nogen: {v_op_nogen:.2f} m^3")
+        n_uavs_gennest = l_remaining // (self.uav_folded_height * (1 + margin) )
+        n_uavs_nogennest = self.nest_length // (self.uav_folded_height * (1 + margin) )
+        self.n_uavs_gennest = int(n_uavs_gennest)  
+        self.n_uavs_nogennest = int(n_uavs_nogennest)
 
 
-        v_tot_uav_bat = self.v_uav_bat * self.n_drones
-
-        if v_op_gen > v_tot_uav_bat:
-            n_containers = 1
-            n_cap_nest_gen = int(v_op_gen // self.v_uav_bat)
-            empty_slots = n_cap_nest_gen - self.n_drones
-
+        if n_uavs_gennest < self.n_drones: # if generator nest cannot accommodate all UAVs
+            n_uavs_remaining = self.n_drones - n_uavs_gennest
+            n_extra_nests = np.ceil(n_uavs_remaining / n_uavs_nogennest)  # number of extra nests required to accommodate the remaining UAVs
+            self.n_total_uavs = n_extra_nests * n_uavs_nogennest + n_uavs_gennest  # total number of UAVs that can be accommodated in the nests
+            self.n_containers = int(n_extra_nests + 1)  # total number of containers required (1 for the generator nest and the rest for the extra nests)
         else:
-            n_cap_nest_gen = int(v_op_gen // self.v_uav_bat)  # Number of whole drones (with battery) that fit in v_op
-            n_remaining = int(self.n_drones - n_cap_nest_gen)
+            n_extra_nests = 0
+            self.n_total_uavs = n_uavs_gennest # total number of UAVs that can be stored in the generator nest
+            self.n_containers = int(1)
 
-            # print(f"number of remaining drones: {n_remaining}")
-
-            # n_cap_nest_nogen = int(v_op_nogen // self.v_uav_bat)  # Number of drones in overflow container
-            # n_nest_nogen = n_remaining // n_cap_nest_nogen  # Number of overflow containers needed
-
-            # empty_slots = (n_cap_nest_nogen * n_nest_nogen) - n_remaining
-
-            # if self.verbose
-            #     print(f"Number of drones that fit in generator nest: {n_cap_nest_gen}")
-            #     print(f"Number of drones remaining: {n_remaining}")
-            #     print(f"Number of drones that fit in non-generator nest: {n_cap_nest_nogen}")
-            #     print(f"Number of overflow nests needed: {n_nest_nogen}")
-            #     print(f"Empty slots in last overflow nest: {empty_slots}")
-
-            # n_containers = 1 + n_nest_nogen
-            n_cap_nest_nogen = int(v_op_nogen // self.v_uav_bat)  # Number of drones in overflow container
-            n_nest_nogen = int(np.ceil(n_remaining / n_cap_nest_nogen))  # Number of overflow containers needed
-
-            # Number of drones in the last overflow nest
-            drones_in_last_nest = n_remaining % n_cap_nest_nogen
-            if drones_in_last_nest == 0:
-                empty_slots = 0
-            else:
-                empty_slots = n_cap_nest_nogen - drones_in_last_nest
-
-            if self.verbose:
-                print(f"Number of drones that fit in generator nest: {n_cap_nest_gen}")
-                print(f"Number of drones remaining: {n_remaining}")
-                print(f"Number of drones that fit in non-generator nest: {n_cap_nest_nogen}")
-                print(f"Number of overflow nests needed: {n_nest_nogen}")
-                print(f"Empty slots in last overflow nest: {empty_slots}")
-
-            n_containers = 1 + n_nest_nogen
-
-
-        self.n_nests = n_containers
-        self.n_extra = empty_slots
-        self.n_drones = self.n_drones + empty_slots
-
-        self.nests_volume = self.n_nests * available_volume_per_nest
 
         if self.verbose:
-            print(f"Number of nests needed: {self.n_nests}")
-            print(f"Number of extra slots in the last nest: {self.n_extra}")
-            print(f"Volume available per nest: {available_volume_per_nest:.2f} m^3")
-            print(f"Volume of generator: {self.generator_volume:.2f} m^3")
-            print(f"Volume of electronics and equipment (locker): {self.v_locker:.2f} m^3")
-            print(f"Volume of operating space with generator: {self.v_operating_space_gen:.2f} m^3")
-            print(f"Volume of operating space without generator: {self.v_operating_space_nogen:.2f} m^3")
-            print(f"Volume of UAVs and batteries: {v_tot_uav_bat:.2f} m^3")
+            print(f"Number of uavs in generator nest: {n_uavs_gennest}")
+            print(f"Number of uavs in extra nests: {n_uavs_nogennest}")
+
+
 
 
     def mass_sizing(self):
 
-        pass
+        total_mass = 0
 
-        # Calculate the mass of the nest
-        masses = [
-            self.container_mass,
-        ]
+        nest_components = ["container", "heating_system", "ventilation_system", "thermal_sensor",
+                           "generator", "PDU", "UPS", "battery_charger",
+                           "RF_antenna", "4G_antenna", "Satellite_antenna",
+                           "mesh_base", "router", "Sattelite_modem",
+                           "switch", "firewall", "computer"]
 
 
-    def power_sizing(self):
-        pass
+        for component in nest_components:
+            if component in self.hardware:
+            # Special case for battery_charger: multiply by number of UAVs
+                if component == "battery_charger":
+                    for key, value in self.hardware[component].items():
+                        if key.endswith("_mass"):
+                            total_mass += value * self.n_drones
+                else:
+                    for key, value in self.hardware[component].items():
+                        if key.endswith("_mass"):
+                            total_mass += value
+
+
+        # Cross-linked (XLPE) foam density in kg/m^3 (typical value, can be adjusted)
+        xlpe_foam_density = 33  # kg/m^3
+
+        # Mass of foam
+        foam_mass_gen = self.uav_storage_volume_gen * xlpe_foam_density
+        foam_mass_nogen = self.uav_storage_volume_nogen * xlpe_foam_density
+
+        rail_mass_gen = self.hardware['rails']["rails_mass"] * self.n_uavs_gennest
+        rail_mass_nogen = self.hardware['rails']["rails_mass"] * self.n_uavs_nogennest
+
         
-        power_generator = self.generator_power_output * self.generator_power_factor  # in W
+        self.total_mass_gen = total_mass + self.uav_mass * self.n_uavs_gennest + foam_mass_gen + rail_mass_gen
+        self.total_mass_nogennest = self.uav_mass * self.n_uavs_nogennest + self.hardware["container"]["container_tare_mass"] + foam_mass_nogen + rail_mass_nogen
 
-        max_power_required = ... 
+        # check if the total mass exceeds the maximum payload mass of the container
+        if self.total_mass_gen > self.max_payload_mass or self.total_mass_nogennest > self.max_payload_mass:
+            raise ValueError(f"Total mass of nest components exceeds maximum payload mass of the container ({self.max_payload_mass:.2f} kg). Reduce the number of components or increase the container's payload capacity.")
+
+        if self.verbose:
+            #print(f"Total mass of nest components: {self.total_mass:.2f} kg")
+            print(f"Total mass of generator nest: {self.total_mass_gen:.2f} kg")
+            print(f"Total mass of non-generator nests: {self.total_mass_nogennest:.2f} kg")
+
+
 
     def deployment_time():
         pass
@@ -321,77 +289,57 @@ class Nest:
 
     def get_all(self) -> dict[str, float]:
 
+        
+        
+        self.power_sizing()
         self.volume_sizing()
+        self.mass_sizing()
 
-        self.outputs["number_of_nests"] = self.n_nests
+        #self.outputs["number_of_nests"] = self.n_nests
         #self.outputs["number_of_UAVs"] = self.n_drones
 
-        self.outputs["nests_volume"] = self.nests_volume
-        self.outputs["volume_fueltank"] = self.total_fuel_tank_volume
-        self.outputs["refills_for_mission"] = self.refills_for_mission
+        #self.outputs["nests_volume"] = self.nests_volume
+        #self.outputs["volume_fueltank"] = self.total_fuel_tank_volume
+        #self.outputs["refills_for_mission"] = self.refills_for_mission
         
         #self.outputs["Nest_mass"] = ...
+
+        self.outputs["number_of_containers"] = self.n_containers
+        self.outputs["capacity_gen"] = self.n_uavs_gennest
+        self.outputs["capacity_nogen"] = self.n_uavs_nogennest
+
+        if self.adjust_n_uavs:
+            self.outputs["number_of_UAVs"] = self.n_total_uavs
+
+        self.outputs["nest_trips_capacity"] = self.nest_trips_capacity
+        self.outputs["nest_cycles_capacity"] = self.nest_cycle_capacity
+        self.outputs["fuel_refills_for_mission"] = self.refills_for_mission
+
+
+        self.outputs["total_nest_power_required"] = self.total_power
+        self.outputs["total_nest_mass_gen"] = self.total_mass_gen
+        self.outputs["total_nest_mass_nogennest"] = self.total_mass_nogennest
 
         return self.outputs
     
 if __name__ == '__main__':
     # Example usage
 
-    from hardware_inputs import nest_components
+    from inputs import initial_inputs
+    from hardware_inputs import components
+    from hardware import Hardware
 
-    misc_elemenets = {
-        "mop_": 0.5 
-    }
+    initial_inputs["number_of_UAVs"] = 20  # Example number of UAVs
+    initial_inputs["trips_for_mission"] = 3  # Example number of trips for the mission
+    initial_inputs["required_capacity_wh"] = 761.0912836715547  # Example required capacity in Wh
 
-    inputs = {
-        # Mission parameters
-        "number_of_UAVs": 20,
-        "trips_for_mission": 10,
-        "required_capacity_wh": 1000,  # Total energy required for the mission in Wh
+    hardware = Hardware(initial_inputs, components)
+    hardware_outputs = hardware.get_all()
 
-        # UAV Dimensions
-        "wing_span": 3.0,
-        "wing_area": 1.8,
-        "FW_height": 0.3,
-        "FW_width": 2.25,
-        "M_to": 30.0,  # Maximum takeoff mass of the UAV in kg
-
-        # Aerogel dimensions 
-        "aerogel_width": 1.5,  # width of the aerogel in m
-        "aerogel_diameter": 0.2,  # diameter of the aerogel in m
-
-        # NEST PARAMETERS ======================================================
-
-        # Generator parameters
-        "generator_efficiency": 0.3,
-        "biodiesel_energy_density": 9.94,  # in Wh/kg
-        "biodiesel_density": 0.88,  # in kg/liter
-        #- https://www.cat.com/en_MX/products/new/power-systems/electric-power/diesel-generator-sets/106402.html
-        "generator_length": 2.278,  # [m] length of the generator
-        "generator_width": 0.9,  # [m] width of the generator
-        "generator_height": 1.322,  # [m] height of the generator
-        "generator_power": 65*1000,  # [VA] assumed power output of the generator
-        "generator_power_factor": 0.8,  # power factor of the generator
-        "generator_mass": 1031 ,  # [kg] mass of the generator
-        "generator_internal_fuel_tank": 103, # [L] internal fuel tank capacity of the generator
-        "generator_cost": None,
-        "operating_temperature": 55, # operating temperature of the generator in Celsius 
-
-        # Misc parameters
-        "nest_locker_length": 0.5,  # length of the locker in m
-        "next_locker_width": 0.5,  # width of the locker in m
-
-
-        # Nest parameters
-        "nest_empty_mass": 100.0,  
-        "nest_length": 5.9,  # length of the nest in m
-        "nest_width": 2.35,  # width of the nest in m
-        "nest_height": 2.39  # height of the nest in m
-
-    }
-
-    nest = Nest(inputs, nest_components, verbose=True)
+    nest = Nest(hardware_outputs, components, verbose=True)
     outputs = nest.get_all()
+    print("\n\nFinal outputs after nest sizing:")
+    print("========================================")
     for key, value in outputs.items():
         print(f"{key}: {value}")
     

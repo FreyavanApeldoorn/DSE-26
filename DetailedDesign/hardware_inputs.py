@@ -261,11 +261,12 @@ battery = {
     #"battery_name": "",
     "battery_specific_energy": 275,  # Wh/kg, specific energy of the battery
     "battery_cost": None, 
-    "battery_maximum_peak_current": 100,  # A, maximum current of the battery
+    "battery_maximum_peak_current": 17*2*3,  # A, maximum current of the battery, 3C continious discharge rate
     "battery_capacity": 17*2,  # Ah, capacity of the battery
-    "battery_voltage": 22.2,  # V, voltage of the battery
+    "battery_voltage": 52,  # V, voltage of the battery
+    "battery_DOD_fraction": 0.8,  # Depth of discharge fraction of the battery
     
-    "battery_mass": 2.8*4,  # kg, mass of the battery
+    "battery_mass": 3.619*2,  # kg, mass of the battery
     "battery_length": 0.2,  # m, length of the battery
     "battery_width": 0.1,  # m, width of the battery
     "battery_height": 0.05,  # m, height of the battery
@@ -309,178 +310,251 @@ component_inputs.update(structure)
 nest_components = {
     "container": {
         "container_name": "ISO Container",
-        "container_tare_mass": 2250, # kg, tare mass of the container
+        "container_tare_mass": 2250,  # kg, tare mass of the container
         "container_max_payload": 28350,  # kg, maximum payload of the container
-        "container_cost": 2250,  # Cost of the container, if available
+        "container_cost": 5200,  # € Cost of the container
 
-        "container_length": 6.06,  # m, length of the container
-        "container_width": 2.44,  # m, width of the container
-        "container_height": 2.59,  # m, height of the container
-        "container_door_height": 2.28,  # m, height of the container door'
+        "container_length": 5.90,  # m, inner length of the container
+        "container_width": 2.35,  # m, inner width of the container
+        "container_height": 2.39,  # m, inner height of the container
+        "container_door_height": 2.28,  # m, height of the container door
         "container_door_width": 2.335  # m, width of the container door    
+    },
+    "ventilation_system": {
+        "ventilation_system_name": "VEVOR Exhaust Fan",
+        "ventilation_system_mass": 3.66,  # kg
+        "ventilation_system_power": 40,  # W
+        "ventilation_system_cost": 99.99,  # €
 
-        # https://cboxcontainers.nl/en/products/18/20ft-shipping-storage-container-new-quality/buy?srsltid=AfmBOopZXrURUbtfCdl9pfyDBGAyZVzbZAWWjGdkKIF_sBslERpoMJNV
+        "ventilation_system_length": 0.380,  # m
+        "ventilation_system_width": 0.380,  # m
+        "ventilation_system_height": 0.190,  # m
+        "ventilation_system_x": None,
+        "ventilation_system_y": None,
+        "ventilation_system_z": None
+    },
+    "heating_system": {
+        "heating_system_name": "Dyna-Glo 4800W Heater",
+        "heating_system_mass": 13 * 0.453592,  # kg
+        "heating_system_power": 4800,  # W
+        "heating_system_cost": 230,  # $
+
+        "heating_system_length": 0.267,  # m
+        "heating_system_width": 0.245,  # m
+        "heating_system_height": 0.281,  # m
+
+        "heating_system_x": None,
+        "heating_system_y": None,
+        "heating_system_z": None
+    },
+    "thermal_sensor": {
+        "thermal_sensor_name": "TEMPer1F USB Temperature Sensor",
+        "thermal_sensor_mass": 0.015,  # kg
+        "thermal_sensor_power": 0.1,  # W
+        "thermal_sensor_cost": 10,  # $
+
+        "thermal_sensor_length": 0.025,  # m
+        "thermal_sensor_width": 0.025,  # m
+        "thermal_sensor_height": 0.025,  # m
+
+        "thermal_sensor_x": None,
+        "thermal_sensor_y": None,
+        "thermal_sensor_z": None
     },
     "battery_charger": {
         "battery_charger_name": "Tattu TA1000",
-        "battery_charger_mass": 1.7,  # kg, mass of the battery charger
-        "battery_charger_power": 500,  # W, power consumption of the battery charger
-        "battery_charger_cost": 260,  # Cost of the battery charger, if available ($)
+        "battery_charger_mass": 1.7,  # kg
+        "battery_charger_power": 500,  # W
+        "battery_charger_cost": 260,  # $
 
-        "battery_charger_length": 0.186,  # m, length of the battery charger
-        "battery_charger_width": 0.174,  # m, width of the battery charger
-        "battery_charger_height": 0.095,  # m, height of the battery charger
-        # Positioning:
-        "battery_charger_x": None,  # m, x-location w.r.t. doors
-        "battery_charger_y": None,  # m, y-location w.r.t. doors
-        "battery_charger_z": None  # m, z-location w.r.t. doors
+        "battery_charger_length": 0.186,  # m
+        "battery_charger_width": 0.174,  # m
+        "battery_charger_height": 0.095,  # m
+        "battery_charger_x": None,
+        "battery_charger_y": None,
+        "battery_charger_z": None
     },
     "generator": {
         "generator_name": "GENPOWERUSA GPR-J50-60T4iF-002",
-        "generator_mass": 1514,
-        "generator_fuel_tank": 340, #L , fuel tank capacity of the generator 
+        "generator_mass": 1514,  # kg
+        "generator_fuel_tank": 662,  # L
         
-        "generator_power_output": 60_000,  # W, power output of the generator
-        "generator_power_factor": 0.8,  # Fraction of power output that is available for the payload
-        "generator_efficiency": 0.3,  # Efficiency of the generator
+        "generator_power_output": 60000,  # W
+        "generator_power_factor": 0.8,
+        "generator_efficiency": 0.3,
         
-
-        "generator_cost": 53_500,  # Cost of the generator, if available
-        "generator_length": 2.440,  # m, length of the generator
-        "generator_width": 0.9,  # m, width of the generator
-        "generator_height": 1.332,  # m, height of the generator
-        # Positioning:
-        "generator_x": None,  # m, x-location w.r.t. doors
-        "generator_y": None,  # m, y-location w.r.t. doors
-        "generator_z": None  # m, z-location w.r.t. doors
+        "generator_cost": 53500,  # $
+        "generator_length": 2.440,  # m
+        "generator_width": 0.971,  # m
+        "generator_height": 1.856,  # m
+        "generator_x": None,
+        "generator_y": None,
+        "generator_z": None
     },
-    "fuel_tank": { # Fuel tank not implemented yet!
-        "fuel_tank_name": "",
-        "fuel_tank_mass": None,
-        "fuel_tank_capacity": None,  # L, fuel capacity of the tank
-        "fuel_tank_cost": None,  # Cost of the fuel tank, if available
-        "fuel_tank_length": None,  # m, length of the fuel tank
-        "fuel_tank_width": None,  # m, width of the fuel tank
-        "fuel_tank_height": None,  # m, height of the fuel tank
-        # Positioning:
-        "fuel_tank_x": None,  # m, x-location w.r.t. doors
-        "fuel_tank_y": None,  # m, y-location w.r.t. doors
-        "fuel_tank_z": None  # m, z-location w.r.t. doors
+    "PDU": {
+        "PDU_name": "Tripp Lite PDUMH15ATNET",
+        "PDU_mass": 4.99,  # kg
+        "PDU_power_capacity": 1440,  # W
+        "PDU_cost": 183,  # €
+
+        "PDU_length": 0.4445,  # m
+        "PDU_width": 0.1143,  # m
+        "PDU_height": 0.0445,  # m
+        "PDU_x": None,
+        "PDU_y": None,
+        "PDU_z": None
     },
-    "fuel_pump": { # Fuel pump not implemented yet!
-        "fuel_pump_name": "",
-        "fuel_pump_mass": None,  # kg, mass of the fuel pump
-        "fuel_pump_power": None,  # W, power consumption of the fuel pump
-        "fuel_pump_cost": None,  # Cost of the fuel pump, if available
+    "UPS": {
+        "UPS_name": "APC Smart-UPS C 1500VA",
+        "UPS_mass": 24.09,  # kg
+        "UPS_power": 900,  # W output
+        "UPS_cost": 820,  # $
 
-        "fuel_pump_length": None,  # m, length of the fuel pump
-        "fuel_pump_width": None,  # m, width of the fuel pump
-        "fuel_pump_height": None,  # m, height of the fuel pump
-        # Positioning:
-        "fuel_pump_x": None,  # m, x-location w.r.t. doors
-        "fuel_pump_y": None,  # m, y-location w.r.t. doors
-        "fuel_pump_z": None  # m, z-location w.r.t. doors
-    },
-    "heating_system": {
-        "heating_system_name": "Stelpro ASCH48T",
-        "heating_system_mass": 13*0.453592,  # kg, mass of the heating system
-        "heating_system_power": 4800,  # W, power consumption of the heating system
-        "heating_system_cost": 230,  # Cost of the heating system, if available
-
-        "heating_system_length": 9.63*0.0254,  # m, length of the heating system
-        "heating_system_width": 10.53*0.0254,  # m, width of the heating system
-        "heating_system_height": 11.06*0.0254,  # m, height of the heating system
-
-        # Positioning:
-        "heating_system_x": None,  # m, x-location w.r.t. doors
-        "heating_system_y": None,  # m, y-location w.r.t. doors
-        "heating_system_z": None  # m, z-location w.r.t. doors
+        "UPS_length": 0.439,  # m
+        "UPS_width": 0.171,  # m
+        "UPS_height": 0.219,  # m
+        "UPS_x": None,
+        "UPS_y": None,
+        "UPS_z": None
     },
     "computer": {
         "computer_name": "Lambda Scalar MGX AMD",
-        "computer_mass": 30.6,  # kg, mass of the computer
-        "computer_power": 8000,  # W, power consumption of the computer
-        "computer_cost": 104_000,  # Cost of the computer, if available
+        "computer_mass": 30.6,  # kg
+        "computer_power": 8000,  # W
+        "computer_cost": 103749,  # $
 
-        "computer_length": 0.737,  # m, length of the computer
-        "computer_width": 0.437,  # m, width of the computer
-        "computer_height": 0.2225,  # m, height of the computer
-        # Positioning:
-        "computer_x": None,  # m, x-location w.r.t. doors
-        "computer_y": None,  # m, y-location w.r.t. doors
-        "computer_z": None  # m, z-location w.r.t. doors
+        "computer_length": 0.737,  # m
+        "computer_width": 0.437,  # m
+        "computer_height": 0.2225,  # m
+        "computer_x": None,
+        "computer_y": None,
+        "computer_z": None
+    },
+    "switch": {
+        "switch_name": "UniFi Switch 8 150W",
+        "switch_mass": 1.7,  # kg
+        "switch_power": 150,  # W max
+        "switch_cost": 199,  # $
+
+        "switch_length": 0.204,  # m
+        "switch_width": 0.235,  # m
+        "switch_height": 0.043,  # m
+        "switch_x": None,
+        "switch_y": None,
+        "switch_z": None
+    },
+    "firewall": {
+        "firewall_name": "MikroTik CCR1009-7G-1C-1S+",
+        "firewall_mass": 4.54,  # kg
+        "firewall_power": 39,  # W
+        "firewall_cost": 495,  # $
+
+        "firewall_length": 0.443,  # m
+        "firewall_width": 0.175,  # m
+        "firewall_height": 0.044,  # m
+        "firewall_x": None,
+        "firewall_y": None,
+        "firewall_z": None
     },
     "RF_antenna": {
         "RF_antenna_name": "OmniLOG® PRO H",
-        "RF_antenna_mass": 0.6,  # kg, mass of the RF communication system
-        "RF_antenna_power": 100,  # W, power consumption of the RF communication system
-        "RF_antenna_cost": 400,  # Cost of the RF communication system, if available
+        "RF_antenna_mass": 0.6,  # kg
+        "RF_antenna_power": 100,  # W
+        "RF_antenna_cost": 398,  # €
 
-        "RF_antenna_length": 0.084,  # m, length of the RF communication system
-        "RF_antenna_width": 0.084,  # m, width of the RF communication system
-        "RF_antenna_height": 0.096,  # m, height of the RF communication system
-        # Positioning:
-        "RF_antenna_x": None,  # m, x-location w.r.t. doors
-        "RF_antenna_y": None,  # m, y-location w.r.t. doors
-        "RF_antenna_z": None  # m, z-location w.r.t. doors
+        "RF_antenna_length": 0.084,  # m
+        "RF_antenna_width": 0.084,  # m
+        "RF_antenna_height": 0.096,  # m
+        "RF_antenna_x": None,
+        "RF_antenna_y": None,
+        "RF_antenna_z": None
+    },
+    "mesh_base": {
+        "mesh_base_name": "Doodle Labs EK-2450-11N3",
+        "mesh_base_mass": 0.026,  # kg
+        "mesh_base_power": 8,  # W peak
+        "mesh_base_cost": 207.50,  # $
+
+        "mesh_base_length": 0.047,  # m
+        "mesh_base_width": 0.028,  # m
+        "mesh_base_height": 0.0065,  # m
+        "mesh_base_x": None,
+        "mesh_base_y": None,
+        "mesh_base_z": None
     },
     "4G_antenna": {
-        "4G_antenna_name": "Panorama B4BE 5G/4G/3G/2G antenne",
-        "4G_antenna_mass": 0.39,  # kg, mass of the 4G communication system
-        "4G_antenna_power": None,  # W, power consumption of the 4G communication system
-        "4G_antenna_cost": None,  # Cost of the 4G communication system, if available
+        "4G_antenna_name": "Panorama B4BE",
+        "4G_antenna_mass": 0.39,  # kg
+        "4G_antenna_power": 30,  # W
+        "4G_antenna_cost": 45.91,  # €
 
-        "4G_antenna_length": 0.048,  # m, length of the 4G communication system
-        "4G_antenna_width": 0.048,  # m, width of the 4G communication system
-        "4G_antenna_height": 0.164,  # m, height of the 4G communication system
-        # Positioning:
-        "4G_antenna_x": None,  # m, x-location w.r.t. doors
-        "4G_antenna_y": None,  # m, y-location w.r.t. doors
-        "4G_antenna_z": None  # m, z-location w.r.t. doors
+        "4G_antenna_length": 0.048,  # m
+        "4G_antenna_width": 0.048,  # m
+        "4G_antenna_height": 0.164,  # m
+        "4G_antenna_x": None,
+        "4G_antenna_y": None,
+        "4G_antenna_z": None
+    },
+    "router": {
+        "router_name": "TELTONIKA RUTX11",
+        "router_mass": 0.456,  # kg
+        "router_power": 16,  # W
+        "router_cost": 350.00,  # €
+
+        "router_length": 0.115,  # m
+        "router_width": 0.095,  # m
+        "router_height": 0.044,  # m
+
+        "router_x": None,
+        "router_y": None,
+        "router_z": None
     },
     "Satellite_antenna": {
         "Satellite_antenna_name": "Selfsat H30D",
-        "Satellite_antenna_mass": 1.1,  # kg, mass of the satellite communication system
-        "Satellite_antenna_power": 0,  # W, power consumption of the satellite communication system
-        "Satellite_antenna_cost": 0,  # Cost of the satellite communication system, if available
+        "Satellite_antenna_mass": 1.1,  # kg
+        "Satellite_antenna_power": 2.85,  # W
+        "Satellite_antenna_cost": 94,  # €
 
-        "Satellite_antenna_length": 0.547,  # m, length of the satellite communication system
-        "Satellite_antenna_width": 0.277,  # m, width of the satellite communication system
-        "Satellite_antenna_height": 0.058,  # m, height of the satellite communication system
-        # Positioning:
-        "Satellite_antenna_x": None,  # m, x-location w.r.t. doors
-        "Satellite_antenna_y": None,  # m, y-location w.r.t. doors
-        "Satellite_antenna_z": None  # m, z-location w.r.t. doors
+        "Satellite_antenna_length": 0.547,  # m
+        "Satellite_antenna_width": 0.277,  # m
+        "Satellite_antenna_height": 0.058,  # m
+        "Satellite_antenna_x": None,
+        "Satellite_antenna_y": None,
+        "Satellite_antenna_z": None
     },
-    "ventilation_system": {
-        "ventilation_system_name": "VEVOR Afzuigventilator",
-        "ventilation_system_mass": 3.66,  # kg, mass of the ventilation system
-        "ventilation_system_power": 40,  # W, power consumption of the ventilation system
-        "ventilation_system_cost": 100,  # Cost of the ventilation system, if available
+    "Satellite_modem": {
+        "Cobham_EXPLORER_323_name": "Cobham EXPLORER 323",
+        "Cobham_EXPLORER_323_mass": 3.5,  # kg
+        "Cobham_EXPLORER_323_power": 35,  # W
+        "Cobham_EXPLORER_323_cost": 3800,  # €
+        "Cobham_EXPLORER_323_length": 0.321,  # m (diameter)
+        "Cobham_EXPLORER_323_width": 0.321,   # m (diameter)
+        "Cobham_EXPLORER_323_height": 0.097,  # m
+        "Cobham_EXPLORER_323_x": None,
+        "Cobham_EXPLORER_323_y": None,
+        "Cobham_EXPLORER_323_z": None
+    },
+    "cables": {
+        "cables_name": "RF & Coax Cables",
+        "cables_mass": 0.1,  # kg total
+        "cables_length": None,  # varied
+        "cables_cost": 125,  # $
+        "cables_x": None,
+        "cables_y": None,
+        "cables_z": None
+    },
+    "rails": {
+        "rails_name": "ISO Container Rails",
+        "rails_mass": 14.9,  # kg, mass of the rails
+        "rails_cost": 160,  # $ Cost of the rails
 
-        "ventilation_system_length": 0.380,  # m, length of the ventilation system
-        "ventilation_system_width": 0.380,  # m, width of the ventilation system
-        "ventilation_system_height": 0.190,  # m, height of the ventilation system
-        # Positioning:
-        "ventilation_system_x": None,  # m, x-location w.r.t. doors
-        "ventilation_system_y": None,  # m, y-location w.r.t. doors
-        "ventilation_system_z": None  # m, z-location w.r.t. doors
-    },
-    "lighting_system": {
-        "lighting_system_name": "",
-        "lighting_system_mass": None,  # kg, mass of the lighting system
-        "lighting_system_power": None,  # W, power consumption of the lighting system
-        "lighting_system_cost": None,  # Cost of the lighting system, if available
+        "rails_length": 2.2,  # m, length of the rails
+        "rails_width": 0.02,  # m, width of the rails
+        "rails_height": 0.02,  # m, height of the rails
 
-        "lighting_system_length": None,  # m, length of the lighting system
-        "lighting_system_width": None,  # m, width of the lighting system
-        "lighting_system_height": None,  # m, height of the lighting system
-        # Positioning:
-        "lighting_system_x": None,  # m, x-location w.r.t. doors
-        "lighting_system_y": None,  # m, y-location w.r.t. doors
-        "lighting_system_z": None  # m, z-location w.r.t. doors
-    },
-    "tools": {
+        "rails_x": None,  # m, x-location w.r.t. front of the container
+        "rails_y": None,  # m, y-location w.r.t. front of the container
+        "rails_z": None  # m, z-location w.r.t. front of the container
 
     }
 }

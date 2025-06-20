@@ -104,8 +104,12 @@ class Propulsion:
 
     def power_required_hover(self): 
         vtol_power , S_prop, prop_disk_loading, total_thrust = self.power_required_vtol()
-        P_hov = np.sqrt(2/(self.rho*S_prop*4))*(self.mtow)**(3/2)/self.eff_prop
+        #P_hov = np.sqrt(2/(self.rho*S_prop*4))*(self.mtow)**(3/2)/self.eff_prop
+        P_hov = self.mtow**(3/2) / np.sqrt(2 * self.rho * S_prop * self.n_prop_vtol) / self.eff_prop
+        
         self.P_hov = P_hov
+
+        #print("HOVER POWER", self.P_hov)
     
     def power_transition(self, vtol_power):
         
