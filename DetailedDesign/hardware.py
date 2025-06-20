@@ -160,7 +160,8 @@ class Hardware:
             self.Mesh_network_module_power + 
             self.SATCOM_module_power + 
             self.OBC_power + 
-            self.winch_motor_power_operation
+            self.winch_motor_power_operation 
+            
         )
         total_amperage_deploy = (
             self.wildfire_sensor_power / self.wildfire_sensor_voltage + 
@@ -190,7 +191,9 @@ class Hardware:
         self.SATCOM_module_power + 
         self.OBC_power +
         self.LTE_module_power +
-        self.winch_motor_power_idle  # Assuming winch motor is idle during cruise
+        self.winch_motor_power_idle + 
+        10 * 12 + # servo motors running at 12V and 2.4 A
+        30/52  # camera for sensing
         )
         total_amperage_cruise = (
             self.GPS_power / self.GPS_voltage + 
@@ -199,7 +202,8 @@ class Hardware:
             self.SATCOM_module_power / self.SATCOM_module_voltage + 
             self.OBC_power / self.OBC_voltage + 
             self.LTE_module_power / self.LTE_module_voltage +
-            self.winch_motor_power_idle / self.winch_motor_voltage
+            self.winch_motor_power_idle / self.winch_motor_voltage + 
+            2.4 
         )
         # Check if the battery can handle the total amperage during the cruise phase
         if total_amperage_cruise > self.battery_maximum_peak_current:

@@ -78,7 +78,7 @@ class Mission:
         self.mission_type = inputs['mission_type']
         self.mission_perimeter = inputs["mission_perimeter"] #We define, mission perimeter [m] 
         self.oil_mass = inputs["oil_mass"]
-        self.aerogel_absorption_factor = 50 #g/g https://www.sciencedirect.com/science/article/pii/S2213343722002299, https://www.sciencedirect.com/science/article/pii/S1385894715002326#:~:text=50%20°C.-,Abstract,their%20high%20oil%20absorption%20capacities.
+        self.aerogel_absorption_factor = 14 #g/g 
         self.R_max = inputs["R_max"] # Maximum range [m]: mission definition
         self.R_min = inputs["R_min"]
 
@@ -203,6 +203,7 @@ class Mission:
         self.time_cruise = self.R_max / (self.V_cruise - self.wind_speed) # Slowest-case scenario, wind against the UAV
         self.time_cruise_min = self.R_min / (self.V_cruise + self.wind_speed) # Fastest-case scenario, wind with the UAV
 
+
         if self.verbose:
             print(f"Time Ascent: {self.time_ascent} seconds")
             print(f"Time Descent: {self.time_descent} seconds")
@@ -233,19 +234,18 @@ class Mission:
 
     def calc_UAV_runs(self):
 
-        print("RAN calc_UAV_runs()")
 
         if self.mission_type == "wildfire":
-
             # For wildfire
             self.nr_runs_fire = Deployment(self.inputs, 'perimeter', self.mission_perimeter).perimeter_creation()
             self.num_trips = self.nr_runs_fire
 
         elif self.mission_type == "oil_spill":
             # For oil
-            aerogel_mass, _, _ =  self.deployment.aerogel_size()
+            aerogel_mass, _, _ =  Deployment(self.inputs, 'perimeter', self.mission_perimeter).aerogel_size()
             self.nr_runs_oil = math.ceil((self.oil_mass / self.aerogel_absorption_factor) / aerogel_mass)
             self.num_trips = self.nr_runs_oil
+
 
         else:
             raise ValueError(f"Unsupported mission type: {self.mission_type}")
@@ -253,12 +253,10 @@ class Mission:
         if self.verbose:
             print(f"Number of trips for mission: {self.num_trips}")
 
-        print(f"Number of trips {self.num_trips}")
-
 
     def calc_time_operation(self) -> float:
 
-        print("RAN calc_time_operation()")
+        #print("RAN calc_time_operation()")
 
         self.uav_mission_time()
         self.calc_UAV_runs()
@@ -338,6 +336,8 @@ class Mission:
 
         #reset all the values in self
         return self.total_mission_time, self.time_operation
+    
+
 
 
     # ~~~ Output functions ~~~ 
@@ -379,7 +379,7 @@ if __name__ == '__main__':
     test_inputs_mission = {
         "number_of_UAVs": 20,
         "number_of_containers": 3,
-        "capacity_gen": 6,
+        "capacity_gen": 5,
         "capacity_nogen": 10,
         "number_of_workers": 4,
         "margin": 60,
@@ -392,7 +392,7 @@ if __name__ == '__main__':
         "time_deploy": 5*60,
         "time_scan": 60.0,
         "mission_type": "wildfire",
-        "mission_perimeter": 1000.0,
+        "mission_perimeter": 500.0,
         "oil_mass": 7000.0,
         "R_max": 20000.0,
         "R_min": 1000.0,
@@ -403,21 +403,20 @@ if __name__ == '__main__':
         "time_UAV_wrapup_check": 15.0,
         "time_between_UAV": 10.0,
         "time_between_containers": 60.0,
-        "time_final_wrapup": 60.0
+        "time_final_wrapup": 60.0,
     }
-    deployment_funny_inputs.update(test_inputs_mission)  # Update with deployment inputs
+    test_inputs_mission.update(deployment_funny_inputs)  # Update with deployment inputs
 
-    mission = Mission(test_inputs_mission)
+    mission = Mission(test_inputs_mission, verbose=True)
 
     mission.mission_type = 'wildfire'
-    mission.mission_perimeter = 201
+    # mission.mission_perimeter = 500
     mission.calc_total_mission_time()
-    print(mission.num_trips)
-    print(round(mission.total_mission_time) / 60 / 60)
+    print('AAA', round(mission.total_mission_time))
 
     mission.mission_type = 'oil_spill'
     mission.calc_total_mission_time()
-    print(round(mission.total_mission_time)) 
+    print('AAA', round(mission.total_mission_time)) 
 
 
     
