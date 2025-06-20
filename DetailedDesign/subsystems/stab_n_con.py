@@ -206,43 +206,7 @@ class StabCon:
         Returns the required C_E/C_h and a dict of margin checks.
         All angles in rad.
         """
-        ce_ch = self.ce_cht_init
-        while ce_ch <= 0.45 + tol:
-            tau = self._tau_from_ca_over_c(ce_ch)
-
-            # tail CL available with max up & down deflections
-            cl_tail_up = self.CL_alpha_h * (self.alpha_h + tau * self.delta_e_max_up)
-            cl_tail_down = self.CL_alpha_h * (
-                self.alpha_h + tau * self.delta_e_max_down
-            )
-
-            # required to trim at fwd & aft CG
-            cl_req_fwd = (
-                (self.mac / (self.x_ac_h - self.most_forward_cg))
-                * (1 / self.Vh_V)
-                * (1 / self.Sh_S)
-                * (
-                    self.CL_A_h * ((self.x_ac - self.most_forward_cg) / self.mac)
-                    + self.Cm_ac_wing
-                )
-            )
-            cl_req_aft = (
-                (self.mac / (self.x_ac_h - self.most_aft_cg))
-                * (1 / self.Sh_S)
-                * (
-                    self.CL_A_h * ((self.x_ac - self.most_aft_cg) / self.mac)
-                    + self.Cm_ac_wing
-                )
-            )
-
-            ok = cl_tail_up >= cl_req_fwd and cl_tail_down <= cl_req_aft
-            if ok:
-                self.ce_c = ce_ch
-                return ce_ch, {"trim": ok}
-
-            ce_ch += d_ce
-
-        raise RuntimeError("Elevator chord ratio exceeded 0.45 without meeting trim.")
+        ce_ch
 
     # ~~~ VTOL sizing ~~~
 
