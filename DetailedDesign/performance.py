@@ -158,15 +158,16 @@ class Performance:
                         mis.number_of_containers = nests
                         mis.calc_total_mission_time()
 
-                        if workers == workers_range[0] and (uavs == 23 or uavs == 24):
-                            print(vars(mis))  
                         dep_time = mis.total_mission_time / (60*60)
-                        print(dep_time * 60)
                         if strat == 'oil_spill':
                             unit = '[kg/h]'
                             uav_worker_table.loc[workers, uavs] = round(self.oil_mass / dep_time)
+                            if uavs == 20 and workers == 6:
+                                print('oil', round(self.oil_mass / dep_time))
                         else:
                             unit = '[m/h]'
+                            if uavs == 20 and workers == 6:
+                                print('fire', round(self.mission_perimeter / dep_time))
                             if nests <= workers <= 2 * nests:
                                 uav_worker_table.loc[workers, uavs] = round(self.mission_perimeter / dep_time)
                             else:
@@ -219,7 +220,7 @@ if __name__ == '__main__':
     test_inputs_performance = {
         "number_of_UAVs": 20,
         "number_of_containers": 3,
-        "capacity_gen": 6,
+        "capacity_gen": 5,
         "capacity_nogen": 10,
         "number_of_workers": 6,
         "margin": 60,

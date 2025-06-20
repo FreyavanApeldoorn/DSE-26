@@ -82,9 +82,9 @@ deployment_funny_inputs = {
     "epm_duration": 8.0,  # s, maximum OFF-mode duration
     "power_required_winch": 96.0,  # W, follows from PSDK protocol of DJI (24V/4A)
     "deployment_accuracy": 0.5,  # m, guesstimate
-    "firebreak_width": 3,  # m
+    "firebreak_width":3,  # m
     "fuselage_size": 1.5,  # m, guesstimate
-    "mission_perimeter": 100, # m
+    # "mission_perimeter": 100, # m
     "nr_aerogels": 30,
 }
 

@@ -627,6 +627,46 @@ class Structures:
             if abs(buckling_stress) > abs(yield_strength) * safety_factor: 
                 break 
         return rib_placement
+    
+
+    def FEM_sensitivity_plots(self):
+        n = [3.5, 3.6, 3.7, 3.8, 3.9, 4.0]
+        von_mises = [32206000, 33125000, 34075000, 34963000, 35882000, 36801000]
+        normal = [35804000, 36826000, 37822000, 38869000, 39891000, 40913000]
+        shear = [5056800, 5199700, 5348900, 5488300, 5632500, 5776800]
+        deformation = [0.019065, 0.01961, 0.020173, 0.02069, 0.021243, 0.021787]
+
+        fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+
+        # Plot Von Mises
+        axs[0, 0].plot(n, von_mises, marker='o')
+        axs[0, 0].set_title("Von Mises Stress")
+        axs[0, 0].set_xlabel("n")
+        axs[0, 0].set_ylabel("Von Mises [Pa]")
+
+        # Plot Normal
+        axs[0, 1].plot(n, normal, marker='o', color='orange')
+        axs[0, 1].set_title("Normal Stress")
+        axs[0, 1].set_xlabel("n")
+        axs[0, 1].set_ylabel("Normal [Pa]")
+
+        # Plot Shear
+        axs[1, 0].plot(n, shear, marker='o', color='green')
+        axs[1, 0].set_title("Shear Stress")
+        axs[1, 0].set_xlabel("n")
+        axs[1, 0].set_ylabel("Shear [Pa]")
+
+        # Plot Deformation
+        axs[1, 1].plot(n, deformation, marker='o', color='red')
+        axs[1, 1].set_title("Deformation")
+        axs[1, 1].set_xlabel("n")
+        axs[1, 1].set_ylabel("Deformation [m]")
+
+        # Layout adjustment
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        plt.savefig('DetailedDesign\subsystems\Plots\Sensitivity_wing_stuctures.png')
+        plt.show()
+
 
     # ~~~ Output functions ~~~
 
@@ -657,10 +697,11 @@ class Structures:
 
 if __name__ == "__main__":  # pragma: no cover
     a = Structures(fi)
-    #print(a.determine_VTOL_boom_thickness())
-    a.NVM_VTOL()
-    a.NVM_cruise()
-    a.NVM_propeller_boom()
+    # #print(a.determine_VTOL_boom_thickness())
+    # a.NVM_VTOL()
+    # a.NVM_cruise()
+    # a.NVM_propeller_boom()
     # a.sandwich()
-    print(a.VTOL_boom_mass)
+    #print(a.VTOL_boom_mass)
     # print(a.determine_fuselage_thickness())
+    a.FEM_sensitivity_plots()
