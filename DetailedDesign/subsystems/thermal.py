@@ -1,6 +1,7 @@
 import sys
 import os
 import numpy as np
+from matplotlib import pyplot as plt
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 # sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..', '..')))
@@ -361,14 +362,24 @@ class Thermal:
         return motor_pcm_mass
     
     def sensitivity_analysis(self) -> float:
+
         t_range = range(100, 161)
         m_range = []
         for t in t_range:
             self.T_amb_onsite = t + 273.15 # Convert to Kelvin
             m = self.optimize()
-            m_range.append(m)
+            m_range.append(m.fun)
         
-        f  # Append the optimized mass for each temperature
+        fig, ax = plt.subplots(figsize=(8, 6))
+
+        ax.plot(t_range, m_range, marker='o')
+        ax.set_title("Mass vs. On-site Temperature")
+        ax.set_xlabel("Ambient Temperature [°C]")
+        ax.set_ylabel("Optimized Mass [kg]")
+
+        plt.tight_layout()
+        plt.savefig('DetailedDesign/subsystems/Plots/Mass_vs_Temperature.png')
+        plt.show()
 
 
 
@@ -411,6 +422,8 @@ if __name__ == '__main__':
     # print(thermal.total_heat_storage())
     print(thermal.optimize())
     print('motor_pcm_mass:', thermal.create_motor_insulation())
+
+    thermal.sensitivity_analysis()
 
 
     # ~~~ OLD snippets ~~~
