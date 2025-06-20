@@ -359,6 +359,17 @@ class Thermal:
         motor_pcm_mass = heat_energy_motor / self.pcm_latent_heat 
         
         return motor_pcm_mass
+    
+    def sensitivity_analysis(self) -> float:
+        t_range = range(100, 161)
+        m_range = []
+        for t in t_range:
+            self.T_amb_onsite = t + 273.15 # Convert to Kelvin
+            m = self.optimize()
+            m_range.append(m)
+        
+        f  # Append the optimized mass for each temperature
+
 
 
     # ~~~ Output functions ~~~ 
