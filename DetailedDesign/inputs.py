@@ -269,13 +269,13 @@ stab_n_con_inputs = {
     "wing_root_chord": 0.458,  # [m] root chord (estimate)
     "wing_tip_chord": 0.39,  # [m] tip chord (estimate)
     "bi": 0.875,  # [m] inboard aileron start
-    "bo": 0.91,  # [m] outboard aileron end
+    "bo": 0.88,  # [m] outboard aileron end
     # ───────────────────────────────────────────────────────────────────────
     # Mass & CG placeholders
     # ───────────────────────────────────────────────────────────────────────
     "fuselage_structural_mass": 3.166,  # [kg] fuselage structure mass
     "fuselage_structural_x_cg": 2.15 / 2,  # [m] fuselage CG location
-    "wing_structural_mass": (2.24 + 0.255 + 0.047*4) * 2,  # [kg] wing structure mass
+    "wing_structural_mass": (2.24 + 0.255 + 0.047 * 4) * 2,  # [kg] wing structure mass
     "wing_structural_x_cg": 0.42 * 0.25,  # [m] wing CG location (25% MAC)
     "tailplane_structural_mass": 1.656,  # [kg] tailplane structure mass
     "tailplane_structural_x_cg": 2.15 - 0.35 * 0.75,  # [m] tailplane CG location,
@@ -301,7 +301,7 @@ stab_n_con_inputs = {
     # ───────────────────────────────────────────────────────────────────────
     "payload_mass": 5.0,  # [kg] payload mass (aerogel blanket)
     "payload_x": 1.15,  # [m] payload CG location (initially set to oil-spill buoy location)
-    "buoy_mass": 0.140*4,  # [kg] Oil-spill buoy mass (4 buoys)
+    "buoy_mass": 0.140 * 4,  # [kg] Oil-spill buoy mass (4 buoys)
     "buoy_x": 1.08,  # [m] Buoy CG location (initially set to oil-spill buoy location)
     # ───────────────────────────────────────────────────────────────────────
     # Fuselage-mounted avionics & structure
@@ -356,7 +356,9 @@ stab_n_con_inputs = {
     "CL_alpha_h": 0.06 * 180 / np.pi,  # [1/rad] tail lift-curve slope
     "d_epsilon_d_alpha": 0.3,  # downwash gradient [rad/rad]
     "Vh_V": 0.9**2,  # tail/wing velocity ratio
-    "Cm_ac_wing": -0.017,  # moment coeff. at wing AC
+    "Sh_S": 0.173,  # tail surface area / wing surface area
+    "Cm_ac_wing": -0.13,  # moment coeff. at wing AC
+    "Cm_cg": 0.455,
     "AR_h": 3.5,  # tail aspect ratio
     "CL_A_h": 0.55,  # C_L aircraft minus tail at cruise
     # ───────────────────────────────────────────────────────────────────────

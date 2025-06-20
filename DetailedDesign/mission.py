@@ -2,7 +2,7 @@ import numpy as np
 import math 
 
 
-from deployment import Deployment
+from DetailedDesign.deployment import Deployment
 
 
 '''

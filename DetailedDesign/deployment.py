@@ -290,6 +290,6 @@ if __name__ == '__main__': # pragma: no cover
     from funny_inputs import funny_inputs
     #from test.test_inputs import deployment_test_inputs
     from inputs import initial_inputs
-    initial_inputs["payload_mass"] = 10 
+    initial_inputs["payload_mass"] = 5 
     dep = Deployment(initial_inputs, strategy='perimeter', amt=initial_inputs['mission_perimeter'])
     print(dep.get_all())
