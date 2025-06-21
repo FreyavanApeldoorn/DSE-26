@@ -175,6 +175,11 @@ class Performance:
 
                 plt.figure(figsize=(8, 6))
                 sns.heatmap(uav_worker_table, annot=False, fmt=".2f", cmap="RdYlGn", cbar_kws={'label': f'Deployment Rate {unit}'}, annot_kws={"size": 6})
+                ax = plt.gca()
+                for spine in ax.spines.values():
+                    spine.set_visible(True)
+                    spine.set_edgecolor('black')
+                    spine.set_linewidth(1.5)
                 plt.xlabel("Number of UAVs")
                 plt.ylabel("Number of Workers")
                 plt.tight_layout()
